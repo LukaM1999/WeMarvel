@@ -3,12 +3,78 @@ import App from './App.vue'
 import { registerLicense } from '@syncfusion/ej2-base'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+import {createRouter, createWebHistory} from 'vue-router'
+import { createStore } from 'vuex'
+import createPersistedState from 'vuex-persistedstate'
+import {jwtInterceptor} from "@/_helpers/jwtInterceptor";
+import LandingPage from "@/components/LandingPage";
+import Characters from "@/components/Characters";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
+const routes = [
+    {
+        path: '/',
+        component: LandingPage,
+        children:[
+            {
+                path: '/welcome',
+                component: Characters
+            }
+        ]
+    },
+]
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes
+})
+
+export const store = createStore({
+    plugins: [createPersistedState()],
+    state: {
+        user: null,
+        token: null,
+        firebaseToken: null,
+        scrollPosition: 0,
+    },
+    mutations: {
+        setToken(state, token) {
+            state.token = token
+        },
+        setUser(state, user) {
+            state.user = user
+        },
+        setFirebaseToken(state, token) {
+            state.firebaseToken = token
+        },
+        setScrollPosition(state, position) {
+            state.scrollPosition = position
+        }
+    },
+    getters: {
+        token(state) {
+            return state.token
+        },
+        user(state) {
+            return state.user
+        },
+        firebaseToken(state) {
+            return state.firebaseToken
+        },
+        scrollPosition(state) {
+            return state.scrollPosition
+        }
+    }
+})
+
+jwtInterceptor()
+
 const app = createApp(App)
-app.mount('#app')
 app.use(VueAxios, axios)
+app.use(router)
+app.use(store)
+app.mount('#app')
 
 app.config.globalProperties.$filters = {
     date(value) {

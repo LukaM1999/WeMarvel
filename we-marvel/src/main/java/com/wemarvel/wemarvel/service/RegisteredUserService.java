@@ -5,9 +5,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface RegisteredUserService extends UserDetailsService {
 
-    RegisteredUser registerUser(String username, String password);
+    RegisteredUser registerUser(String email);
 
-    RegisteredUser getUserByUsername(String username);
+    RegisteredUser getUserByEmail(String email);
 
     RegisteredUser updateUser(RegisteredUser user);
 

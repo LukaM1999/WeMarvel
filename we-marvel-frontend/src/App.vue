@@ -1,15 +1,10 @@
 <template>
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <router-view></router-view>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
 }
 </script>
 
@@ -21,7 +16,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 
 .grid-container {
@@ -67,4 +61,77 @@ export default {
 .e-list-header .grid-item .e-input-value {
   color: white;
 }
+
+#toolbar {
+  position: sticky;
+  top: 0;
+  background-color: #e54e4e;
+  color: #fff;
+  z-index: 10000;
+  box-shadow: black -7px -6px 14px 5px;
+  transition: top 0.3s;
+}
+
+.e-toolbar .e-toolbar-items {
+  background: #e54e4e;
+}
+
+.e-toolbar .e-tbar-btn {
+  background: #e54e4e;
+  color: #fff;
+}
+
+.e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn.e-btn {
+  height: 100%;
+  margin: 0;
+}
+
+.e-toolbar .e-toolbar-items .e-toolbar-item .e-tbar-btn-text {
+  color: #fff;
+  font-weight: bold;
+}
+
+.e-toolbar .e-toolbar-items .e-toolbar-item:not(.e-separator) {
+  padding: 0 3.5px;
+}
+
+.e-fixed {
+  position: fixed;
+}
+
+.e-dialog .e-btn .e-btn-icon.e-icon-dlg-close {
+  color: #fff;
+}
+
+.e-dialog .e-btn.e-dlg-closeicon-btn:hover {
+  background-color: black;
+}
+
+.e-dialog .e-dlg-header-content {
+  background: #e54e4e;
+  text-align: -webkit-center;
+}
+
+.e-dialog .e-dlg-header {
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+}
+
+.e-dialog .e-dlg-header-content + .e-dlg-content {
+  padding-top: 18px;
+}
+
+.e-dialog .e-btn.e-dlg-closeicon-btn:hover span {
+  color: #fff;
+}
+
+label.e-float-text {
+  text-align: left;
+}
+
+span .e-input-group-icon .e-password:after {
+  content: '\e345';
+}
+
 </style>

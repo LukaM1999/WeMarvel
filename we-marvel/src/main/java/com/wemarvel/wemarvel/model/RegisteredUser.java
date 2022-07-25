@@ -23,11 +23,12 @@ public class RegisteredUser implements UserDetails {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "username")
-    private String username;
     @Column
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String password;
+    @Getter
+    @Setter
+    private String email;
+    @Column
+    private String username;
     @Column
     @Getter
     @Setter
@@ -36,10 +37,6 @@ public class RegisteredUser implements UserDetails {
     @Getter
     @Setter
     private String lastName;
-    @Column
-    @Getter
-    @Setter
-    private String email;
     @Column
     @Getter
     @Setter
@@ -59,9 +56,6 @@ public class RegisteredUser implements UserDetails {
 
     @Column(name = "enabled")
     private boolean enabled;
-
-    @Column(name = "last_password_reset_date")
-    private Timestamp lastPasswordResetDate;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="roleName")
@@ -97,7 +91,7 @@ public class RegisteredUser implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.password;
+        return "";
     }
 
     @Override
@@ -105,33 +99,14 @@ public class RegisteredUser implements UserDetails {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public void setPassword(String password) {
-        Timestamp now = new Timestamp(new Date().getTime());
-        this.setLastPasswordResetDate(now);
-        this.password = BCrypt.hashpw(password, BCrypt.gensalt());
-    }
-
     public RegisteredUser() {
         super();
     }
 
-    public RegisteredUser(String username, String password) {
-        this.username = username;
-        this.password = BCrypt.hashpw(password, BCrypt.gensalt());
+    public RegisteredUser(String email) {
+        this.email = email;
         this.role = new Role("USER");
         this.enabled = true;
-    }
-
-    public Timestamp getLastPasswordResetDate() {
-        return lastPasswordResetDate;
-    }
-
-    public void setLastPasswordResetDate(Timestamp lastPasswordResetDate) {
-        this.lastPasswordResetDate = lastPasswordResetDate;
     }
 
     @JsonIgnore

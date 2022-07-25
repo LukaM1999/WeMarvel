@@ -13,12 +13,20 @@
     "@syncfusion/ej2-vue-buttons": "^20.2.38",
     "@syncfusion/ej2-vue-dropdowns": "^20.2.39",
     "@syncfusion/ej2-vue-grids": "^20.2.38",
+    "@syncfusion/ej2-vue-inputs": "^20.2.38",
     "@syncfusion/ej2-vue-lists": "^20.2.38",
+    "@syncfusion/ej2-vue-navigations": "^20.2.39",
+    "@syncfusion/ej2-vue-popups": "^20.2.39",
     "axios": "^0.27.2",
+    "boxicons": "^2.1.2",
     "core-js": "^3.6.5",
+    "firebase": "^9.9.1",
     "vue": "^3.2.37",
     "vue-axios": "^3.4.1",
-    "vue-class-component": "^8.0.0-rc.1"
+    "vue-class-component": "^8.0.0-rc.1",
+    "vue-router": "^4.1.2",
+    "vuex": "^4.0.2",
+    "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.15",
