@@ -1,6 +1,7 @@
 package com.wemarvel.wemarvel.service.impl;
 
 import com.wemarvel.wemarvel.model.MarvelCharacter;
+import com.wemarvel.wemarvel.model.dto.CharacterDTO;
 import com.wemarvel.wemarvel.repository.CharacterRepository;
 import com.wemarvel.wemarvel.service.CharacterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +42,17 @@ public class CharacterServiceImpl implements CharacterService {
     @Override
     public int getCharactersCount(String name) {
         return characterRepository.countAllByNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public List<CharacterDTO> getCharactersByAverageRating(int limit, int offset) {
+        Page<CharacterDTO> characters = characterRepository.findAllByAverageRating(PageRequest.of(offset, limit));
+        return characters.getContent();
+    }
+
+    @Override
+    public List<CharacterDTO> getCharactersByRatingCount(int limit, int offset) {
+        Page<CharacterDTO> characters = characterRepository.findAllByRatingCount(PageRequest.of(offset, limit));
+        return characters.getContent();
     }
 }

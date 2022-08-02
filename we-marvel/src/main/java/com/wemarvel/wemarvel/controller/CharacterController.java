@@ -1,6 +1,7 @@
 package com.wemarvel.wemarvel.controller;
 
 import com.wemarvel.wemarvel.model.MarvelCharacter;
+import com.wemarvel.wemarvel.model.dto.CharacterDTO;
 import com.wemarvel.wemarvel.service.CharacterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,5 +34,23 @@ public class CharacterController {
     @GetMapping("/count")
     public int getCharactersCount(@PathParam("name") Optional<String> name) {
         return characterService.getCharactersCount(name.orElse(""));
+    }
+
+    @GetMapping("/top-rated")
+    public List<CharacterDTO> getCharactersByAverageRating(@PathParam("limit") int limit,
+                                                           @PathParam("offset") int offset) {
+        if(limit > 0 && offset >= 0) {
+            return characterService.getCharactersByAverageRating(limit, offset);
+        }
+        return characterService.getCharactersByAverageRating(50, 0);
+    }
+
+    @GetMapping("/popular")
+    public List<CharacterDTO> getCharactersByRatingCount(@PathParam("limit") int limit,
+                                                             @PathParam("offset") int offset) {
+        if(limit > 0 && offset >= 0) {
+            return characterService.getCharactersByRatingCount(limit, offset);
+        }
+        return characterService.getCharactersByRatingCount(50, 0);
     }
 }

@@ -75,6 +75,8 @@ security:
     - /public/**
     - /characters
     - /characters/count
+    - /characters/top-rated
+    - /characters/popular
     - /user
   exposed-headers:
     - X-Xsrf-Token

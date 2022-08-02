@@ -1,0 +1,1 @@
+pg_dump -d we-marvel -h localhost -p 5432 -U postgres -w -a -x --column-inserts --no-comments -f 

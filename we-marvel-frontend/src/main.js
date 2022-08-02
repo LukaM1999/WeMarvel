@@ -9,6 +9,7 @@ import createPersistedState from 'vuex-persistedstate'
 import {jwtInterceptor} from "@/_helpers/jwtInterceptor";
 import LandingPage from "@/components/LandingPage";
 import Characters from "@/components/Characters";
+import TopRatedCharacters from "@/components/TopRatedCharacters";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -16,10 +17,15 @@ const routes = [
     {
         path: '/',
         component: LandingPage,
+        redirect: '/welcome',
         children:[
             {
                 path: '/welcome',
                 component: Characters
+            },
+            {
+                path: '/characters/top-rated',
+                component: TopRatedCharacters
             }
         ]
     },

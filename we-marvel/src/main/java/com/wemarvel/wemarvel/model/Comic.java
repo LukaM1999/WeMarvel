@@ -56,4 +56,9 @@ public class Comic {
     @Getter
     @Setter
     private Double issueNumber;
+
+    @Getter
+    @Setter
+    @Column(columnDefinition = "Decimal(4, 2) default '0.0'")
+    private double averageRating;
 }

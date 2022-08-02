@@ -2,25 +2,19 @@
   <div id="signInDialogTarget">
     <ejs-toolbar id="toolbar" width="100%" height="60px">
       <e-items>
-        <e-item text="Cut"></e-item>
-        <e-item text="Copy"></e-item>
-        <e-item type="Separator"></e-item>
-        <e-item text="Bold"></e-item>
-        <e-item text="Underline"></e-item>
-        <e-item text="Italic"></e-item>
-        <e-item text="Color-Picker"></e-item>
-        <e-item type="Separator"></e-item>
-        <e-item text="A-Z Sort"></e-item>
-        <e-item text="Z-A Sort"></e-item>
-        <e-item text="Clear"></e-item>
-        <e-item :template="'signInTemplate'" align="Right">
+        <e-item :template="'menuTemplate'" align="Center">
+          <template v-slot:menuTemplate="{}">
+            <ejs-menu :items="menuItems" @select="menuItemSelected"></ejs-menu>
+          </template>
+        </e-item>
+        <e-item v-if="!signedInUser" :template="'signInTemplate'" align="Right">
           <template v-slot:signInTemplate="{}">
             <ejs-button @click="openSignIn" class="e-control e-lib e-warning">Sign in</ejs-button>
           </template>
         </e-item>
-        <e-item :template="'profileTemplate'" align="Right">
+        <e-item v-if="signedInUser" :template="'profileTemplate'" align="Right">
           <template v-slot:profileTemplate="{}">
-            <ejs-menu :items="menuItems" @select="menuItemSelected"></ejs-menu>
+            <ejs-menu :items="profileMenuItems" @select="profileMenuItemSelected"></ejs-menu>
           </template>
         </e-item>
       </e-items>
@@ -60,7 +54,7 @@ import { DialogComponent} from '@syncfusion/ej2-vue-popups';
 import {TextBoxComponent} from '@syncfusion/ej2-vue-inputs';
 import {auth} from "@/firebaseConfig";
 import {signInWithEmailAndPassword, onIdTokenChanged, createUserWithEmailAndPassword,
-  sendEmailVerification, signOut, deleteUser} from "firebase/auth";
+  sendEmailVerification, signOut, deleteUser, getAuth} from "firebase/auth";
 import axios from "axios";
 
 export default {
@@ -79,6 +73,7 @@ export default {
       isTypePassword: true,
       email: '',
       password: '',
+      signedInUser: null,
       signInDialogButtons: [
         {
           buttonModel: {content: 'Sign in', isPrimary: true},
@@ -91,16 +86,30 @@ export default {
       ],
       menuItems: [
         {
-          text: 'Profile',
+          text: 'Comics',
           items: [
-            {
-              text: 'Sign out',
-              click: this.signOut
-            },
-            {
-              text: 'Verify email',
-              click: this.verifyEmail
-            }
+            { text: 'Search', url: `${process.env.VUE_APP_FRONTEND}/comics/search` },
+            { text: 'Most popular', url: `${process.env.VUE_APP_FRONTEND}/comics/popular` },
+            { text: 'Top rated', url: `${process.env.VUE_APP_FRONTEND}/comics/top-rated` },
+          ]
+        },
+        {
+          text: 'Characters',
+          items: [
+            { text: 'Search', url: `${process.env.VUE_APP_FRONTEND}/characters/search` },
+            { text: 'Most popular', url: `${process.env.VUE_APP_FRONTEND}/characters/popular` },
+            { text: 'Top rated', url: `${process.env.VUE_APP_FRONTEND}/characters/top-rated` },
+          ]
+        },
+      ],
+      profileMenuItems: [
+        {
+          text: 'Profile',
+          iconCss: 'e-icons e-profile',
+          items: [
+            {text: 'View', iconCss: 'e-icons e-view'},
+            {separator: true},
+            {text: 'Sign out', iconCss: 'e-icons e-signout'},
           ]
         }
       ]
@@ -124,13 +133,15 @@ export default {
       dialog.style.left = ''
       dialog.style.maxHeight = '100%';
       dialog.style.top = '';
-      console.log(dialog);
     });
+    let self = this
     onIdTokenChanged(auth, async (user) => {
       user?.getIdToken().then(token => {
         store.commit('setToken', token);
       });
+      self.signedInUser = user;
     });
+    this.signedInUser = getAuth().currentUser
   },
   methods: {
     openSignIn() {
@@ -153,6 +164,7 @@ export default {
           store.commit('setToken', token);
         });
         this.$refs.signInDialog.hide();
+        this.signedInUser = userCredentials.user;
       }).catch(error => {
         alert(error.message)
       })
@@ -172,13 +184,15 @@ export default {
       })
     },
     signOut(){
+      let self = this;
       signOut(auth).then(() => {
         store.commit('setToken', null);
+        self.signedInUser = null;
       }).catch(error => {
         alert(error.message)
       })
     },
-    menuItemSelected(e){
+    profileMenuItemSelected(e){
       if(e.item.text === 'Sign out'){
         this.signOut();
       }

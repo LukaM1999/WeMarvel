@@ -14,10 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.xml.bind.DatatypeConverter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -27,6 +32,9 @@ import java.time.format.DateTimeFormatter;
 public class InitDataTask {
 
     protected final Log LOGGER = LogFactory.getLog(getClass());
+
+    private final String removeSchemaScript = "powershell -Command \"(gc fileName | select -Skip 18) -replace 'INTO public.', " +
+            "'INTO ' -replace ([regex]::Escape('SET.*$')), '' | Out-File -encoding ASCII fileName\"";
 
     @Autowired
     private CharacterRepository characterRepository;
@@ -41,6 +49,28 @@ public class InitDataTask {
         //initComics();
         //updateLatestMarvelCharacters();
         //updateLatestComics();
+    }
+
+    @PreDestroy
+    public void destroy() {
+        LOGGER.info("Dumping data");
+        try {
+            File dumpFile = ResourceUtils.getFile("classpath:dump-data.sh");
+            String dumpScript = new String(Files.readAllBytes(dumpFile.toPath()));
+            int replaceStart = dumpFile.getAbsolutePath().indexOf("target");
+            String dataDumpPath = dumpFile.getAbsolutePath().substring(0, replaceStart) +
+                    "src\\main\\resources\\data-postgres.sql";
+            dumpScript = dumpScript + dataDumpPath;
+            LOGGER.info("Dump script: " + dumpScript);
+            Process dumpProcess = Runtime.getRuntime().exec(dumpScript);
+            dumpProcess.waitFor();
+            LOGGER.info("Removing schema name from dumped data");
+            Process removeSchemaProcess = Runtime.getRuntime().exec(removeSchemaScript.replace("fileName", dataDumpPath));
+            int exitStatus = removeSchemaProcess.waitFor();
+            LOGGER.info("Schema name removal exited with status code: " + exitStatus);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void updateLatestMarvelCharacters(){
@@ -72,7 +102,7 @@ public class InitDataTask {
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
                 characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                        resourceURI, modified));
+                        resourceURI, modified, 0.0));
             }
             total = total - 100;
             int offset = 100;
@@ -100,7 +130,7 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                            resourceURI, modified));
+                            resourceURI, modified, 0.0));
                 }
                 total = total - 100;
                 offset = offset + 100;
@@ -143,7 +173,7 @@ public class InitDataTask {
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
                 comicRepository.save(new Comic(id, title, description, variantDescription, thumbnail, resourceURI,
-                        modified, format, pageCount, issueNumber));
+                        modified, format, pageCount, issueNumber, 0.0));
             }
             total = total - 100;
             int offset = 100;
@@ -175,7 +205,7 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     comicRepository.save(new Comic(id, title, description, variantDescription, thumbnail, resourceURI,
-                            modified, format, pageCount, issueNumber));
+                            modified, format, pageCount, issueNumber, 0.0));
                 }
                 total = total - 100;
                 offset = offset + 100;
@@ -213,7 +243,7 @@ public class InitDataTask {
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
                 characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                        resourceURI, modified));
+                        resourceURI, modified, 0.0));
             }
             total = total - 100;
             int offset = 100;
@@ -240,7 +270,7 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                            resourceURI, modified));
+                            resourceURI, modified, 0.0));
                 }
                 total = total - 100;
                 offset = offset + 100;
@@ -282,7 +312,7 @@ public class InitDataTask {
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
                 comicRepository.save(new Comic(id, title, description, variantDescription, thumbnail, resourceURI,
-                        modified, format, pageCount, issueNumber));
+                        modified, format, pageCount, issueNumber, 0.0));
             }
             total = total - 100;
             int offset = 100;
@@ -313,7 +343,7 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     comicRepository.save(new Comic(id, title, description, variantDescription, thumbnail, resourceURI,
-                            modified, format, pageCount, issueNumber));
+                            modified, format, pageCount, issueNumber, 0.0));
                 }
                 total = total - 100;
                 offset = offset + 100;
