@@ -136,12 +136,14 @@ export default {
     });
     let self = this
     onIdTokenChanged(auth, async (user) => {
-      user?.getIdToken().then(token => {
+      user?.getIdToken(true).then(token => {
         store.commit('setToken', token);
       });
       self.signedInUser = user;
+      store.commit('setUser', user);
     });
     this.signedInUser = getAuth().currentUser
+    store.commit('setUser', this.signedInUser);
   },
   methods: {
     openSignIn() {
@@ -187,6 +189,7 @@ export default {
       let self = this;
       signOut(auth).then(() => {
         store.commit('setToken', null);
+        store.commit('setUser', null);
         self.signedInUser = null;
       }).catch(error => {
         alert(error.message)

@@ -10,6 +10,7 @@ export default {
 
 <style lang="scss">
 @import "public/styles/material.scss";
+@import "../public/styles/bootstrap-grid.min.css";
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -211,6 +212,29 @@ div :has(div .e-menu-wrapper) {
 
 .e-menu-wrapper ul {
   font-weight: bold;
+}
+
+td {
+  padding: 10px 2px 10px 4px;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #d9d9d9;
+  cursor: pointer;
+}
+
+.e-grid .e-headercell {
+  background-color: #e54e4e;
+  color: #fff;
+}
+
+.e-grid .e-headercelldiv {
+  font-weight: bold;
+  font-size: 20px;
 }
 
 </style>
