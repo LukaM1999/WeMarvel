@@ -32,6 +32,12 @@
         </div>
         <div class="e-control e-lib e-primary">
           <div class="e-input-group e-float-input">
+            <input type="text" v-model="username" required />
+            <label class="e-float-text e-label">Username</label>
+          </div>
+        </div>
+        <div class="e-control e-lib e-primary">
+          <div class="e-input-group e-float-input">
             <input :type="isTypePassword ? 'password' : 'text'"
                    v-model="password" required />
             <label class="e-float-text e-label">Password</label>
@@ -53,8 +59,8 @@ import { store } from '@/main'
 import { DialogComponent} from '@syncfusion/ej2-vue-popups';
 import {TextBoxComponent} from '@syncfusion/ej2-vue-inputs';
 import {auth} from "@/firebaseConfig";
-import {signInWithEmailAndPassword, onIdTokenChanged, createUserWithEmailAndPassword,
-  sendEmailVerification, signOut, deleteUser, getAuth} from "firebase/auth";
+import {signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  sendEmailVerification, signOut, deleteUser, updateProfile} from "firebase/auth";
 import axios from "axios";
 
 export default {
@@ -72,6 +78,7 @@ export default {
       isShowIcon: true,
       isTypePassword: true,
       email: '',
+      username: '',
       password: '',
       signedInUser: null,
       signInDialogButtons: [
@@ -101,6 +108,14 @@ export default {
             { text: 'Top rated', url: `${process.env.VUE_APP_FRONTEND}/characters/top-rated` },
           ]
         },
+        {
+          text: 'Community',
+          items: [
+            { text: 'Forum', url: `${process.env.VUE_APP_FRONTEND}/forum` },
+            { text: 'Clubs', url: `${process.env.VUE_APP_FRONTEND}/clubs` },
+            { text: 'Users', url: `${process.env.VUE_APP_FRONTEND}/users` },
+          ]
+        }
       ],
       profileMenuItems: [
         {
@@ -134,16 +149,7 @@ export default {
       dialog.style.maxHeight = '100%';
       dialog.style.top = '';
     });
-    let self = this
-    onIdTokenChanged(auth, async (user) => {
-      user?.getIdToken(true).then(token => {
-        store.commit('setToken', token);
-      });
-      self.signedInUser = user;
-      store.commit('setUser', user);
-    });
-    this.signedInUser = getAuth().currentUser
-    store.commit('setUser', this.signedInUser);
+    this.signedInUser = store.getters.user;
   },
   methods: {
     openSignIn() {
@@ -173,7 +179,10 @@ export default {
     },
     signUp(){
       createUserWithEmailAndPassword(auth, this.email, this.password).then(async (userCredentials) => {
-        await axios.post(`${process.env.VUE_APP_BACKEND}/user`, {email: this.email}).catch(error => {
+        await axios.post(`${process.env.VUE_APP_BACKEND}/user`, {email: this.email, username: this.username}).catch(error => {
+          deleteUser(userCredentials.user);
+        });
+        await updateProfile(userCredentials.user, {displayName: this.username}).catch(error => {
           deleteUser(userCredentials.user);
         });
         await sendEmailVerification(userCredentials.user)
@@ -181,6 +190,7 @@ export default {
           store.commit('setToken', token);
         });
         this.$refs.signInDialog.hide();
+        this.signedInUser = auth.currentUser;
       }).catch(error => {
         alert(error.message)
       })

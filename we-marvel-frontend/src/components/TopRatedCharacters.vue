@@ -2,7 +2,7 @@
   <ejs-grid :key="tableKey" ref="grid" :dataSource="characters" :allowPaging="true"
             :pageSettings="pageSettings" :rowTemplate="'rowTemplate'">
     <e-columns>
-      <e-column filed="rank" headerText="Rank" width="40" textAlign="Center"></e-column>
+      <e-column field="rank" headerText="Rank" width="40" textAlign="Center"></e-column>
       <e-column field='name' headerText='Name' textAlign='Center' width=100></e-column>
       <e-column field='averageRating' headerText='Average rating' textAlign="Center" width=40></e-column>
     </e-columns>
@@ -80,6 +80,7 @@ export default {
         c.thumbnail = c.thumbnail.substring(0, lastDot) + "/portrait_medium" + c.thumbnail.substring(lastDot);
       }
       this.characters = characters;
+      console.log(this.characters);
     },
   },
   provide: {

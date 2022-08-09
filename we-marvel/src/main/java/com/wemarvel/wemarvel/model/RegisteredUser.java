@@ -27,7 +27,7 @@ public class RegisteredUser implements UserDetails {
     @Getter
     @Setter
     private String email;
-    @Column
+    @Column(unique = true)
     private String username;
     @Column
     @Getter
@@ -56,6 +56,11 @@ public class RegisteredUser implements UserDetails {
 
     @Column(name = "enabled")
     private boolean enabled;
+
+    @Getter
+    @Setter
+    @Column(columnDefinition = "Boolean default false")
+    private boolean deleted;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="roleName")
@@ -103,8 +108,9 @@ public class RegisteredUser implements UserDetails {
         super();
     }
 
-    public RegisteredUser(String email) {
+    public RegisteredUser(String email, String username) {
         this.email = email;
+        this.username = username;
         this.role = new Role("USER");
         this.enabled = true;
     }

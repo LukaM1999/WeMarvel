@@ -5,10 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,16 +22,35 @@ public class Post {
     private Long id;
 
     @Getter
-    private Long userId;
+    private String ownerUsername;
 
     @Getter
-    private Long marvelEntityId;
-
-    @Getter
-    @Setter
-    private String title;
+    private Long topicId;
 
     @Getter
     @Setter
-    private LocalDate createdAt;
+    @Column(length = 20000)
+    private String content;
+
+    @Getter
+    @Setter
+    private LocalDateTime createdAt;
+
+    @Getter
+    @Setter
+    private LocalDateTime modifiedAt;
+
+    @Getter
+    @Setter
+    private String modifiedByUsername;
+
+    @Getter
+    @Setter
+    @Column(columnDefinition = "BigInt default 0")
+    private int modifications;
+
+    @Getter
+    @Setter
+    @Column(columnDefinition = "Boolean default false")
+    private boolean deleted;
 }

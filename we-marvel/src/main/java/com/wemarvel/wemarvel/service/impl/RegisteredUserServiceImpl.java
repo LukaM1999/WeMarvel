@@ -15,11 +15,12 @@ public class RegisteredUserServiceImpl implements RegisteredUserService {
     private RegisteredUserRepository userRepository;
 
     @Override
-    public RegisteredUser registerUser(String email) {
-        if(userRepository.getByEmail(email) != null) {
+    public RegisteredUser registerUser(String email, String username) {
+        if(userRepository.getByEmail(email) != null ||
+                userRepository.getByUsername(username) != null) {
             throw new IllegalArgumentException("User already exists");
         }
-        RegisteredUser user = new RegisteredUser(email);
+        RegisteredUser user = new RegisteredUser(email, username);
         return userRepository.save(user);
     }
 
@@ -29,12 +30,17 @@ public class RegisteredUserServiceImpl implements RegisteredUserService {
     }
 
     @Override
+    public RegisteredUser getUserByUsername(String username) {
+        return userRepository.getByUsername(username);
+    }
+
+    @Override
     public RegisteredUser updateUser(RegisteredUser user) {
         return userRepository.save(user);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.getByEmail(username);
+        return userRepository.getByUsername(username);
     }
 }

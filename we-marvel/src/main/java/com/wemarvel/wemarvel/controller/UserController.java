@@ -29,7 +29,7 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("User could not be created");
         }
-        RegisteredUser user = registeredUserService.registerUser(registration.getEmail());
+        RegisteredUser user = registeredUserService.registerUser(registration.getEmail(), registration.getUsername());
         return ResponseEntity.created(new URI("/user/" + user.getEmail())).build();
     }
 }

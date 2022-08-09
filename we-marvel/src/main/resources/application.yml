@@ -78,5 +78,6 @@ security:
     - /characters/top-rated
     - /characters/popular
     - /user
+    - /forum/**
   exposed-headers:
     - X-Xsrf-Token

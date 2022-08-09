@@ -55,8 +55,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 }
             }
         } catch (FirebaseAuthException e) {
-            e.printStackTrace();
-            log.error("Firebase Exception: " + e.getLocalizedMessage());
+            log.warn("Firebase warning: " + e.getLocalizedMessage());
         }
         if(decodedToken == null) return;
         RegisteredUser user = registeredUserService.getUserByEmail(decodedToken.getEmail());

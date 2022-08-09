@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "marvel_entity_id"})})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"owner_username", "marvel_entity_id"})})
 public class Review {
 
     @Id
@@ -21,8 +21,8 @@ public class Review {
 
     @Getter
     @Setter
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "owner_username", nullable = false)
+    private String ownerUsername;
 
     @Getter
     @Setter
