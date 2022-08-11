@@ -13,6 +13,8 @@ import TopRatedCharacters from "@/components/TopRatedCharacters";
 import ForumOverview from "@/components/ForumOverview";
 import Topic from "@/components/Topic";
 import Profile from "@/components/Profile";
+import {onAuthStateChanged} from "firebase/auth";
+import {auth} from "@/firebaseConfig";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -40,13 +42,13 @@ const routes = [
             {
                 path: '/forum/topic/:id',
                 name: 'topic',
-                component: Topic
+                component: Topic,
             },
             {
                 path: '/profile/:username',
                 name: 'profile',
                 component: Profile
-            }
+            },
         ]
     },
 ]
@@ -101,6 +103,13 @@ app.use(VueAxios, axios)
 app.use(router)
 app.use(store)
 app.mount('#app')
+
+onAuthStateChanged(auth, (user) => {
+    user?.getIdToken().then(token => {
+        store.commit('setToken', token);
+    });
+    store.commit('setUser', user);
+})
 
 app.config.globalProperties.$filters = {
     date(value) {

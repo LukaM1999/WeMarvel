@@ -1,14 +1,12 @@
 package com.wemarvel.wemarvel.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -17,7 +15,8 @@ import java.time.LocalDateTime;
 public class Post {
 
     @Id
-    @GeneratedValue
+    @SequenceGenerator(name = "postIdGen", sequenceName = "postIdSeq", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "postIdGen")
     @Getter
     private Long id;
 
@@ -29,15 +28,21 @@ public class Post {
 
     @Getter
     @Setter
+    private Long quotedPostId;
+
+    @Getter
+    @Setter
     @Column(length = 20000)
     private String content;
 
     @Getter
     @Setter
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime createdAt;
 
     @Getter
     @Setter
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime modifiedAt;
 
     @Getter

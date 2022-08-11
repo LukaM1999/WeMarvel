@@ -2,10 +2,7 @@ package com.wemarvel.wemarvel.model;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -14,7 +11,8 @@ import java.time.LocalDateTime;
 public class Topic {
 
     @Id
-    @GeneratedValue
+    @SequenceGenerator(name = "topicIdGen", sequenceName = "topicIdSeq", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "topicIdGen")
     @Getter
     private Long id;
 

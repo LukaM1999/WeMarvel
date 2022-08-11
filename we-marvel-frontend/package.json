@@ -17,6 +17,7 @@
     "@syncfusion/ej2-vue-lists": "^20.2.38",
     "@syncfusion/ej2-vue-navigations": "^20.2.39",
     "@syncfusion/ej2-vue-popups": "^20.2.39",
+    "@syncfusion/ej2-vue-richtexteditor": "^20.2.43",
     "axios": "^0.27.2",
     "boxicons": "^2.1.2",
     "core-js": "^3.6.5",

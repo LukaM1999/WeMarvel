@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,7 +13,8 @@ import javax.persistence.Id;
 public class Board {
 
     @Id
-    @GeneratedValue
+    @SequenceGenerator(name = "boardIdGen", sequenceName = "boardIdSeq", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "boardIdGen")
     @Getter
     private Long id;
 

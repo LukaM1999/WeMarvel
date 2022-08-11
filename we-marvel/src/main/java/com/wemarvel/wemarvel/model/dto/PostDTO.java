@@ -25,6 +25,9 @@ public class PostDTO {
     private String topicTitle;
     @Getter
     @Setter
+    private Long quotedPostId;
+    @Getter
+    @Setter
     @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime createdAt;
     @Getter
@@ -48,12 +51,14 @@ public class PostDTO {
     private ProfileDTO owner;
 
     public PostDTO(Long id, String ownerUsername, Long topicId, String topicTitle,
+                   Long quotedPostId,
                    LocalDateTime createdAt, String content, LocalDateTime modifiedAt,
                    String modifiedByUsername, int modifications, boolean deleted) {
         this.id = id;
         this.ownerUsername = ownerUsername;
         this.topicId = topicId;
         this.topicTitle = topicTitle;
+        this.quotedPostId = quotedPostId;
         this.createdAt = createdAt;
         this.content = content;
         this.modifiedAt = modifiedAt;

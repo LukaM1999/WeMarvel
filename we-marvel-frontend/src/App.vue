@@ -10,12 +10,12 @@ import {store} from "@/main";
 export default {
   name: 'App',
   mounted() {
-    onAuthStateChanged(auth, (user) => {
-      user?.getIdToken().then(token => {
-        store.commit('setToken', token);
-      });
-      store.commit('setUser', user);
-    })
+    // onAuthStateChanged(auth, (user) => {
+    //   user?.getIdToken().then(token => {
+    //     store.commit('setToken', token);
+    //   });
+    //   store.commit('setUser', user);
+    // })
   }
 }
 </script>
@@ -23,6 +23,7 @@ export default {
 <style lang="scss">
 @import "public/styles/material.scss";
 @import "../public/styles/bootstrap-grid.min.css";
+@import "../public/styles/bootstrap-utilities.min.css";
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -50,7 +51,8 @@ export default {
 }
 
 .e-listview .e-list-item{
-  border-bottom: 1px solid rgba(0,0,0,0.1);
+  //border-bottom: 1px solid rgba(0,0,0,0.1);
+  cursor: auto;
 }
 
 .e-listview li:last-child {
@@ -251,6 +253,29 @@ tr:hover {
 
 .e-grid .e-content {
   overflow-x: hidden;
+}
+
+.custom-link {
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.custom-link:hover {
+  text-decoration: underline;
+}
+
+.e-hover {
+  background-color: unset!important;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.quoted-post{
+  border: 1px solid #e5e5e5;
+  margin: 2%;
+  padding: 2%;
 }
 
 </style>

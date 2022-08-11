@@ -32,12 +32,12 @@
                   <div class="row">
                     <div class="col">
                       <a class="custom-link"
-                         :href="`${frontend}/forum/topic/${data.firstTopicId}`"
+                         :href="`/forum/topic/${data.firstTopicId}`"
                          @click.prevent="openRecentTopic(data.firstTopicId)">
                         {{ data.firstTopicTitle }}
                       </a>
                       <div class="topic-details">
-                        <i>{{ data.firstTopicDate }}, by <a class="custom-link" :href="`${frontend}/profile/${data.firstTopicUsername}`"
+                        <i>{{ data.firstTopicDate }}, by <a class="custom-link" :href="`/profile/${data.firstTopicUsername}`"
                                                              @click.prevent="openProfile(data.firstTopicUsername)">
                           {{data.firstTopicUsername}}</a></i>
                       </div>
@@ -45,9 +45,9 @@
                   </div>
                   <div v-if="data.secondTopicId" class="row">
                     <div class="col">
-                      <a class="custom-link" :href="`${frontend}/forum/topic/${data.secondTopicId}`" @click.prevent="openRecentTopic(data.secondTopicId)">{{ data.secondTopicTitle }}</a>
+                      <a class="custom-link" :href="`/forum/topic/${data.secondTopicId}`" @click.prevent="openRecentTopic(data.secondTopicId)">{{ data.secondTopicTitle }}</a>
                       <div class="topic-details">
-                        <i>{{ data.secondTopicDate }}, by <a class="custom-link" :href="`${frontend}/profile/${data.secondTopicUsername}`"
+                        <i>{{ data.secondTopicDate }}, by <a class="custom-link" :href="`/profile/${data.secondTopicUsername}`"
                                                              @click.prevent="openProfile(data.secondTopicUsername)">
                           {{data.secondTopicUsername}}</a></i>
                       </div>
@@ -91,7 +91,6 @@ export default {
     return {
       boards: [],
       tableKey: 0,
-      frontend: process.env.VUE_APP_FRONTEND,
     }
   },
   async mounted() {
@@ -148,17 +147,4 @@ tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-.custom-link {
-  font-weight: bold;
-  text-decoration: none;
-}
-
-.custom-link:hover {
-  text-decoration: underline;
-  /*color: rgba(81, 140, 202, 0.8);*/
-}
-
-.custom-link:visited {
-  /*color: rgba(81, 140, 202, 0.8);*/
-}
 </style>

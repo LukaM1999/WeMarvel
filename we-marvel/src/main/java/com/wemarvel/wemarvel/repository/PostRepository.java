@@ -10,11 +10,11 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.PostDTO(p.id, u.username, p.topicId, t.title, " +
-            "p.createdAt, p.content, p.modifiedAt, p.modifiedByUsername, p.modifications, p.deleted) " +
+            "p.quotedPostId, p.createdAt, p.content, p.modifiedAt, p.modifiedByUsername, p.modifications, p.deleted) " +
             "FROM Post p " +
             "LEFT JOIN RegisteredUser u ON p.ownerUsername = u.username " +
             "LEFT JOIN Topic t ON p.topicId = t.id " +
             "WHERE p.topicId = ?1 " +
-            "ORDER BY p.createdAt DESC")
+            "ORDER BY p.createdAt ASC")
     List<PostDTO> getPostsByTopicId(Long topicId);
 }

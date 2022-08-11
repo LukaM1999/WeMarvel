@@ -33,12 +33,12 @@ public class FirebaseConfig {
             assert inputStream != null;
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(inputStream))
+                    .setStorageBucket("wemarvel-f6594.appspot.com")
                     .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
             }
-            System.out.println("Firebase Initialize");
 
         } catch (IOException e) {
             e.printStackTrace();
