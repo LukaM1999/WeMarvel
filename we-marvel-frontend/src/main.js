@@ -115,7 +115,8 @@ app.config.globalProperties.$filters = {
     date(value) {
         return new Date(value[0], value[1], value[2]).toLocaleDateString()
     },
-    dateTime(value) {
-        return new Date(value[0], value[1], value[2], value[3], value[4]).toLocaleString()
+    capitalize(value){
+        if(!value) return;
+        return value.charAt(0).toUpperCase() + value.slice(1)
     }
 }

@@ -53,4 +53,14 @@ public class PostServiceImpl implements PostService {
         post.setDeleted(true);
         postRepository.save(post);
     }
+
+    @Override
+    public Post updatePost(Long postId, String content, String modifiedBy) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setContent(content);
+        post.setModifiedAt(LocalDateTime.now());
+        post.setModifiedByUsername(modifiedBy);
+        post.setModifications(post.getModifications() + 1);
+        return postRepository.save(post);
+    }
 }

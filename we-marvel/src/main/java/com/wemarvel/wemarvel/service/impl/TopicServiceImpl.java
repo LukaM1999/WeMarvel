@@ -50,4 +50,9 @@ public class TopicServiceImpl implements TopicService {
         }
         return topicDTO;
     }
+
+    @Override
+    public String getTopicName(Long topicId) {
+        return topicRepository.getTopicName(topicId);
+    }
 }

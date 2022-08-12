@@ -1,20 +1,40 @@
 <template>
   <div id="topicContainer">
     <h1>{{ topic?.title }}</h1>
-    <button @click="showNewPostForm = !showNewPostForm" class="btn btn-primary">New post</button>
-    <div v-if="showNewPostForm" class="row mb-5">
+    <ejs-button @click="togglePostForm" class="mb-3">{{showNewPostForm ? 'Cancel' : 'New post'}}</ejs-button>
+    <div id="quoteContent" class="row mt-5 justify-content-center" v-if="quotedPost">
+      <h3>Quoted post</h3>
+      <div class="col-8 quoted-post">
+        <a class="custom-link mt-2 e-bold"
+           :href="`/profile/${quotedPost.ownerUsername}`"
+           @click.prevent="openProfile(quotedPost.ownerUsername)">
+          {{ quotedPost.ownerUsername }} said:</a>
+        <div class="row">
+          <div class="col">
+            <span v-html="quotedPost.content"></span>
+          </div>
+        </div>
+        <div v-if="quotedPost.quotedPostId" class="quoted-post">
+          <QuotedPost :quoted-post="getPostById(quotedPost.quotedPostId)"
+                      :posts="topic.posts" :level="1"/>
+        </div>
+      </div>
+    </div>
+    <div id="newPostContainer" v-if="showNewPostForm" class="row mb-5">
       <div class="col">
-        <h3>New post</h3>
-        <RichTextEditor @value-changed="updateRteValue"/>
-        <ejs-button @click="createNewPost"
+        <h3>{{postToEdit ? 'Edit post' : 'New post'}}</h3>
+        <RichTextEditor :initialValue="rteValue" @value-changed="updateRteValue"/>
+        <ejs-button  v-if="!postToEdit" @click="createNewPost" class="mt-4"
                     :content="'Create post'"></ejs-button>
+        <ejs-button  v-if="postToEdit" @click="saveEditedPost" class="mt-4"
+                     :content="'Edit post'"></ejs-button>
       </div>
     </div>
     <ejs-listview :key="listKey" ref="postList" :cssClass="'e-list-template'"
                   :dataSource="topic.posts"
                   :template="'template'">
       <template v-slot:template="{data}">
-        <div :id="'post' + data.id" class="mb-5">
+        <div :id="'post' + data.id" :class="[data.number === topic.posts.length ? '' : 'mb-5 border-bottom-gray']">
           <div class="row post-header">
             <div class="col d-flex justify-content-start ms-3">
               <h3>{{ data.createdAt }}</h3>
@@ -24,7 +44,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-3 pt-2 ms-3 profile-info">
+            <div class="col-3 ms-3 pt-2 profile-info">
               <a class="custom-link e-bold" :href="`/profile/${data.ownerUsername}`"
                  @click.prevent="openProfile(data.ownerUsername)">{{ data.ownerUsername }}</a>
             </div>
@@ -33,18 +53,29 @@
                 <div class="col">
                   <div v-if="data.quotedPostId && !data.deleted" class="quoted-post">
                     <QuotedPost v-if="!getPostById(data.quotedPostId).deleted" :posts="this.topic.posts"
-                                :quoted-post="getPostById(data.quotedPostId)"/>
+                                :quoted-post="getPostById(data.quotedPostId)" :level="1"/>
                     <p v-else>[This post has been deleted]</p>
                   </div>
                   <span :id="'postContent' + data.id" v-if="!data.deleted" v-html="data.content"></span>
                   <p v-else>[This post has been deleted]</p>
                 </div>
               </div>
-              <div class="row me-2 mt-4">
+              <div class="row me-2 mt-4 mb-4">
+                <div v-if="data.modifiedByUsername" class="col justify-content-start d-flex">
+                  <i>Last modified {{data.modifiedAt}}, by {{data.modifiedByUsername}} {{data.modifications > 1 ? '| Times modified: ' + data.modifications : '' }}</i>
+                </div>
                 <div class="col justify-content-end d-flex">
+                  <ejs-button v-if="!data.deleted"
+                              class="me-3" @click.stop="quotePost(data)"
+                              :content="'Quote'"
+                              :iconCss="'e-icons e-reply'" :iconPosition="'Right'"/>
                   <ejs-button v-if="!data.deleted && isAuthorized(data.ownerUsername)"
-                              class="e-primary" @click="deletePost(data)"
-                              :content="'Delete post'"
+                              class="e-primary me-3" @click.stop="editPost(data)"
+                              :content="'Edit'"
+                              :iconCss="'e-icons e-edit'" :iconPosition="'Right'"/>
+                  <ejs-button v-if="!data.deleted && isAuthorized(data.ownerUsername)"
+                              class="e-primary" @click.stop="deletePost(data)"
+                              :content="'Delete'"
                               :iconCss="'e-icons e-delete-1'" :iconPosition="'Right'"/>
                 </div>
               </div>
@@ -57,11 +88,6 @@
     <ejs-pager ref="pager" :totalRecordsCount="topic.posts.length" :pageSize="20"
                :pageCount="5"></ejs-pager>
 
-<!--    <ejs-dialog target="#topicContainer" width="50%" style="position: fixed"-->
-<!--                cssClass="e-fixed" isModal="true" ref="newPostDialog" header="New post"-->
-<!--                :content="getRteTemplate" :showCloseIcon="true" :visible="false"-->
-<!--                :buttons="newPostButtons">-->
-<!--    </ejs-dialog>-->
   </div>
 </template>
 
@@ -86,10 +112,11 @@ export default {
   data() {
     return {
       topic: { posts: [] },
-      frontend: process.env.VUE_APP_FRONTEND,
       showNewPostForm: false,
       rteValue: '',
       listKey: 0,
+      quotedPost: null,
+      postToEdit: null,
     };
   },
   async mounted() {
@@ -106,14 +133,22 @@ export default {
     openProfile(username){
       this.$router.push({name: 'profile', params: {username: username}});
     },
+    togglePostForm(){
+      this.quotedPost = null;
+      this.postToEdit = null;
+      this.rteValue = '';
+      this.showNewPostForm = !this.showNewPostForm;
+    },
     async createNewPost(){
       const {data} = await axios.post(`${process.env.VUE_APP_BACKEND}/forum/post`, {
         ownerUsername: auth.currentUser.displayName,
         topicId: this.topic.id,
         content: this.rteValue,
+        quotedPostId: this.quotedPost?.id,
       });
       data.topicTitle = this.topic.title;
       data.number = this.topic.posts.length + 1;
+      data.quotedPostId = this.quotedPost?.id;
       this.topic.posts.push(data);
       this.$refs.postList.updated();
       this.$refs.pager.refresh();
@@ -124,10 +159,10 @@ export default {
         document.getElementsByClassName('e-last')[0]?.click();
         document.getElementById('post' + data.id).scrollIntoView({behavior: 'smooth'});
       });
+      this.quotedPost = null;
     },
     updateRteValue(value){
       this.rteValue = value;
-      console.log('rteValue', this.rteValue);
     },
     getPostById(id){
       return this.topic.posts.find(post => post.id === id);
@@ -150,6 +185,42 @@ export default {
       this.$refs.pager.refresh();
       this.listKey += 1;
     },
+    quotePost(post){
+      this.quotedPost = post;
+      this.showNewPostForm = true;
+      window.scroll({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+    },
+    editPost(post){
+      this.rteValue = document.getElementById('postContent' + post.id).innerHTML;
+      this.postToEdit = post;
+      this.showNewPostForm = true;
+      window.scroll({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+    },
+    async saveEditedPost(){
+      const {data} = await axios.patch(`${process.env.VUE_APP_BACKEND}/forum/post/${this.postToEdit.id}`, {
+        content: this.rteValue,
+        modifiedByUsername: auth.currentUser.displayName,
+      });
+      this.postToEdit.content = data.content;
+      this.postToEdit.modifiedByUsername = data.modifiedByUsername;
+      this.postToEdit.modifiedAt = data.modifiedAt;
+      this.postToEdit.modifications = data.modifications;
+      this.$refs.postList.updated();
+      this.$refs.pager.refresh();
+      this.listKey += 1;
+      this.showNewPostForm = false;
+      this.rteValue = '';
+      document.getElementById('post' + this.postToEdit.id)?.scrollIntoView({behavior: 'smooth'});
+      this.postToEdit = null;
+    }
   },
 }
 </script>
@@ -166,8 +237,12 @@ export default {
   border-right: 1px solid #e5e5e5;
 }
 
-.e-icons.e-delete-1:before{
+.e-icons.e-delete-1:before, .e-icons .e-edit:before {
   color: white;
+}
+
+.e-listview .e-icons {
+  color: unset;
 }
 
 </style>

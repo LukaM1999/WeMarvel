@@ -4,6 +4,7 @@
       <ejs-richtexteditor id="rte" ref="rteInstance"
                           showCharCount="true" maxLength="20000"
                           enableResize="true"
+                          :value="initialValue"
                           :toolbarSettings="toolbarSettings"
                           v-model="rteValue"
                           :insertImageSettings="insertImageSettings"
@@ -57,8 +58,17 @@ export default {
   provide: {
     richtexteditor: [HtmlEditor, Toolbar, Link, Image, Table, QuickToolbar, Count, Resize],
   },
+  props: {
+    initialValue: {
+      type: String,
+      required: false,
+      default: "",
+    },
+  },
   mounted() {
-    console.log(this.topic);
+    this.rteValue = this.initialValue;
+    console.log(this.rteValue);
+    this.$refs.rteInstance.updated();
   },
   methods: {
     actionBegin(args) {

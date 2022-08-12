@@ -3,20 +3,9 @@
 </template>
 
 <script>
-import {onAuthStateChanged} from "firebase/auth";
-import {auth} from "@/firebaseConfig";
-import {store} from "@/main";
 
 export default {
   name: 'App',
-  mounted() {
-    // onAuthStateChanged(auth, (user) => {
-    //   user?.getIdToken().then(token => {
-    //     store.commit('setToken', token);
-    //   });
-    //   store.commit('setUser', user);
-    // })
-  }
 }
 </script>
 
@@ -276,6 +265,10 @@ tr:hover {
   border: 1px solid #e5e5e5;
   margin: 2%;
   padding: 2%;
+}
+
+.border-bottom-gray {
+  border-bottom: 1px solid #e5e5e5;
 }
 
 </style>

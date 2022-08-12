@@ -52,4 +52,14 @@ public class ForumController {
     public void deletePost(@PathVariable Long postId) {
         postService.deletePost(postId);
     }
+
+    @GetMapping("/topic/{topicId}/name")
+    public String getTopicName(@PathVariable Long topicId) {
+        return topicService.getTopicName(topicId);
+    }
+
+    @PatchMapping("/post/{postId}")
+    public Post updatePost(@PathVariable Long postId, @RequestBody PostDTO post) {
+        return postService.updatePost(postId, post.getContent(), post.getModifiedByUsername());
+    }
 }

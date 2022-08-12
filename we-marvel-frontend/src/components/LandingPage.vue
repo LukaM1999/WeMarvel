@@ -48,12 +48,21 @@
         </div>
       </template>
     </ejs-dialog>
-    <router-view style="margin-top: 60px"></router-view>
+    <e-breadcrumb ref="breadcrumb" :url="breadcrumbUrl" :key="breadcrumbKey"
+                  @created="breadcrumbCreated"
+                  enableNavigation="false" style="margin-top: 30px"></e-breadcrumb>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import {ToolbarComponent, ItemDirective, ItemsDirective, MenuComponent, MenuItem, MenuItemDirective} from '@syncfusion/ej2-vue-navigations'
+import {
+  ToolbarComponent,
+  ItemDirective,
+  ItemsDirective,
+  MenuComponent,
+  BreadcrumbComponent
+} from '@syncfusion/ej2-vue-navigations'
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import { store } from '@/main'
 import { DialogComponent} from '@syncfusion/ej2-vue-popups';
@@ -62,7 +71,6 @@ import {auth} from "@/firebaseConfig";
 import {signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendEmailVerification, signOut, deleteUser, updateProfile} from "firebase/auth";
 import axios from "axios";
-
 export default {
   name: "LandingPage",
   components: {
@@ -72,9 +80,12 @@ export default {
     'ejs-button': ButtonComponent,
     'ejs-dialog': DialogComponent,
     'ejs-menu': MenuComponent,
+    'e-breadcrumb': BreadcrumbComponent,
   },
   data() {
     return {
+      breadcrumbKey: 0,
+      breadcrumbUrl: '',
       isShowIcon: true,
       isTypePassword: true,
       email: '',
@@ -152,6 +163,21 @@ export default {
     this.signedInUser = store.getters.user;
   },
   methods: {
+    async breadcrumbCreated(){
+      for(let [i, item] of this.$refs.breadcrumb.ej2Instances.properties.items.entries()){
+        if(item.text === '/' || i === 0) continue;
+        item.text = this.$filters.capitalize(item.text);
+        if (Number.isInteger(parseInt(item.text))) {
+          const prevText = this.$refs.breadcrumb.ej2Instances.properties.items[i - 1].text.toLowerCase();
+          if(prevText === 'topic'){
+            await axios.get(`${process.env.VUE_APP_BACKEND}/forum/${prevText}/${item.text}/name`)
+              .then(({data}) => {
+                item.text = data;
+              })
+          }
+        }
+      }
+    },
     openSignIn() {
       this.$refs.signInDialog.show();
       const dialogOverlay = document.getElementsByClassName("e-dlg-overlay")[0];
@@ -211,6 +237,15 @@ export default {
       }
     },
   },
+  watch: {
+    $route: {
+      deep: true,
+      handler(newVal, oldVal) {
+        this.breadcrumbUrl = newVal.path;
+        this.breadcrumbKey++;
+      }
+    }
+  }
 }
 </script>
 <style scoped lang="scss">

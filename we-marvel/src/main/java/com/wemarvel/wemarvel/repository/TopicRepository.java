@@ -25,4 +25,7 @@ public interface TopicRepository extends PagingAndSortingRepository<Topic, Long>
             "LEFT JOIN Board b ON t.boardId = b.id " +
             "WHERE t.id = ?1")
     TopicDTO getTopicWithUser(Long topicId);
+
+    @Query("SELECT t.title from Topic t WHERE t.id = ?1")
+    String getTopicName(Long topicId);
 }
