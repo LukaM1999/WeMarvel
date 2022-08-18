@@ -58,4 +58,10 @@ public class Post {
     @Setter
     @Column(columnDefinition = "Boolean default false")
     private boolean deleted;
+
+    public Post(String ownerUsername, Long topicId, String content){
+        this.ownerUsername = ownerUsername;
+        this.topicId = topicId;
+        this.content = content;
+    }
 }

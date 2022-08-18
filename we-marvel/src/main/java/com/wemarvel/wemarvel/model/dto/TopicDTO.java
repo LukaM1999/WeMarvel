@@ -44,6 +44,19 @@ public class TopicDTO {
     @Getter
     @Setter
     private List<PostDTO> posts = new ArrayList<>();
+    @Getter
+    @Setter
+    private Long postCount;
+    @Getter
+    @Setter
+    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
+    private LocalDateTime lastPostDate;
+    @Getter
+    @Setter
+    private boolean watched;
+    @Getter
+    @Setter
+    private String firstPostContent;
 
     public TopicDTO(Long id, String ownerUsername, Long boardId, String boardTitle,
                     Long marvelEntityId, LocalDateTime createdAt,
@@ -57,5 +70,15 @@ public class TopicDTO {
         this.title = title;
         this.sticky = sticky;
         this.locked = locked;
+    }
+
+    public TopicDTO(Long id, String title, Long posts, LocalDateTime lastPostDate,
+                    LocalDateTime createdAt, String ownerUsername) {
+        this.id = id;
+        this.title = title;
+        this.postCount = posts;
+        this.lastPostDate = lastPostDate;
+        this.createdAt = createdAt;
+        this.ownerUsername = ownerUsername;
     }
 }

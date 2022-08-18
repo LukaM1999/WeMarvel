@@ -1,15 +1,16 @@
 package com.wemarvel.wemarvel.controller;
 
-import com.wemarvel.wemarvel.model.Board;
 import com.wemarvel.wemarvel.model.Post;
+import com.wemarvel.wemarvel.model.WatchedTopic;
 import com.wemarvel.wemarvel.model.dto.BoardDTO;
+import com.wemarvel.wemarvel.model.dto.BoardTopicsDTO;
 import com.wemarvel.wemarvel.model.dto.PostDTO;
 import com.wemarvel.wemarvel.model.dto.TopicDTO;
 import com.wemarvel.wemarvel.service.BoardService;
 import com.wemarvel.wemarvel.service.PostService;
 import com.wemarvel.wemarvel.service.TopicService;
+import com.wemarvel.wemarvel.service.WatchedTopicService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +28,9 @@ public class ForumController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private WatchedTopicService watchedTopicService;
 
     @GetMapping("/boards")
     public List<BoardDTO> getAllBoards() {
@@ -58,8 +62,34 @@ public class ForumController {
         return topicService.getTopicName(topicId);
     }
 
+    @GetMapping("/board/{boardId}/name")
+    public String getBoardName(@PathVariable Long boardId) {
+        return boardService.getBoardName(boardId);
+    }
+
     @PatchMapping("/post/{postId}")
     public Post updatePost(@PathVariable Long postId, @RequestBody PostDTO post) {
         return postService.updatePost(postId, post.getContent(), post.getModifiedByUsername());
     }
+
+    @GetMapping("/board/{boardId}")
+    public BoardTopicsDTO getBoardWithTopics(@PathVariable Long boardId) {
+        return boardService.getBoardWithTopics(boardId);
+    }
+
+    @PostMapping("/topic/{topicId}/watch")
+    public WatchedTopic watchTopic(@PathVariable Long topicId) {
+        return watchedTopicService.watchTopic(topicId);
+    }
+
+    @PostMapping("/board/{boardId}/topic")
+    public TopicDTO createTopic(@RequestBody TopicDTO topicDTO) {
+        return topicService.createTopic(topicDTO);
+    }
+
+    @GetMapping("/watchedTopic")
+    public List<WatchedTopic> getWatchedTopics() {
+        return watchedTopicService.getWatchedTopics();
+    }
+
 }

@@ -16,7 +16,8 @@
                   <div class="row title-row gy-1">
                     <div class="col">
                       <h2>
-                        {{ data.title }}
+                       <a class="custom-link" :href="`/forum/board/${data.id}`"
+                          @click.prevent="openBoard(data.id)">{{ data.title }}</a>
                       </h2>
                     </div>
                   </div>
@@ -33,7 +34,7 @@
                     <div class="col">
                       <a class="custom-link"
                          :href="`/forum/topic/${data.firstTopicId}`"
-                         @click.prevent="openRecentTopic(data.firstTopicId)">
+                         @click.prevent="openRecentTopic(data.firstTopicId, data.id)">
                         {{ data.firstTopicTitle }}
                       </a>
                       <div class="topic-details">
@@ -45,7 +46,8 @@
                   </div>
                   <div v-if="data.secondTopicId" class="row">
                     <div class="col">
-                      <a class="custom-link" :href="`/forum/topic/${data.secondTopicId}`" @click.prevent="openRecentTopic(data.secondTopicId)">{{ data.secondTopicTitle }}</a>
+                      <a class="custom-link" :href="`/forum/topic/${data.secondTopicId}`"
+                         @click.prevent="openRecentTopic(data.secondTopicId, data.id)">{{ data.secondTopicTitle }}</a>
                       <div class="topic-details">
                         <i>{{ data.secondTopicDate }}, by <a class="custom-link" :href="`/profile/${data.secondTopicUsername}`"
                                                              @click.prevent="openProfile(data.secondTopicUsername)">
@@ -101,13 +103,15 @@ export default {
       const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/forum/boards`);
       this.boards = data;
       this.boards = [...data];
-      console.log(this.boards)
     },
-    openRecentTopic(topicId){
-      this.$router.push({name: 'topic', params: {id: topicId}});
+    openRecentTopic(topicId, boardId){
+      this.$router.push({name: 'topic', params: {id: topicId, boardId: boardId}});
     },
     openProfile(username){
       this.$router.push({name: 'profile', params: {username: username}});
+    },
+    openBoard(boardId){
+      this.$router.push({name: 'board', params: {id: boardId}});
     }
   },
 }

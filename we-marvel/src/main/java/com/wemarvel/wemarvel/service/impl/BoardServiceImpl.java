@@ -4,6 +4,7 @@ import com.wemarvel.wemarvel.model.Board;
 import com.wemarvel.wemarvel.model.RegisteredUser;
 import com.wemarvel.wemarvel.model.Topic;
 import com.wemarvel.wemarvel.model.dto.BoardDTO;
+import com.wemarvel.wemarvel.model.dto.BoardTopicsDTO;
 import com.wemarvel.wemarvel.repository.BoardRepository;
 import com.wemarvel.wemarvel.service.BoardService;
 import com.wemarvel.wemarvel.service.RegisteredUserService;
@@ -55,5 +56,22 @@ public class BoardServiceImpl implements BoardService {
             boardDTOs.add(boardDTO);
         }
         return boardDTOs;
+    }
+
+    @Override
+    public BoardTopicsDTO getBoardWithTopics(Long id){
+        BoardTopicsDTO boardTopicsDTO = new BoardTopicsDTO();
+        Board board = boardRepository.findById(id).orElse(null);
+        if (board == null) throw new IllegalArgumentException("Board not found");
+        boardTopicsDTO.setId(board.getId());
+        boardTopicsDTO.setTitle(board.getTitle());
+        boardTopicsDTO.setDescription(board.getDescription());
+        boardTopicsDTO.setTopics(topicService.getBoardTopics(id));
+        return boardTopicsDTO;
+    }
+
+    @Override
+    public String getBoardName(Long boardId) {
+       return boardRepository.getBoardName(boardId);
     }
 }

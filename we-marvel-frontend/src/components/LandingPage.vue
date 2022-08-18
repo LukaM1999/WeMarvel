@@ -12,6 +12,63 @@
             <ejs-button @click="openSignIn" class="e-control e-lib e-warning">Sign in</ejs-button>
           </template>
         </e-item>
+        <e-item v-if="signedInUser" :template="'notificationsTemplate'" align="Right">
+          <template v-slot:notificationsTemplate="{}">
+            <div id="notifications" title="View notifications" class="row h-100 align-items-center">
+              <ejs-tooltip isSticky="true" position="TopLeft" :content="'tooltipTemplate'"
+                           opensOn="Click" width="30%">
+                <template v-slot:tooltipTemplate="{}">
+                  <ejs-listview id="notificationsList" :dataSource="notifications"
+                                :headerTemplate="'notificationsHeaderTemplate'"
+                                :template="'notificationsTemplate'"
+                                :showHeader="true"
+                                :height="notifications.length > 0 ? 400 : 100"
+                                width="100%">
+                    <template v-slot:notificationsHeaderTemplate="{}">
+                      <div class="row justify-content-start">
+                        <div class="col">
+                          <div class="e-list-header-text">
+                            <span class="e-list-header-text-content">Notifications</span>
+                          </div>
+                        </div>
+                        <div v-if="notifications.length > 0" class="col d-flex justify-content-end">
+                          <span title="Mark all as read" class="e-icons e-check-box" @click="markAllAsRead"></span>
+                        </div>
+                      </div>
+                    </template>
+                    <template v-slot:notificationsTemplate="{data}">
+                      <div class="row">
+                        <div class="col d-flex justify-content-start">
+                          <b v-if="data.type === 'new_topic_post'">New post</b>
+                        </div>
+                        <div class="col d-flex justify-content-end">
+                          <i>{{data.receivedAt}}</i>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col justify-content-start">
+                          <a class="custom-link" :href="`/profile/${data.posterUsername}`"
+                                                            @click.prevent="openProfile(data.posterUsername)">
+                            {{data.posterUsername}}</a>
+                        </div>
+                        <div class="col justify-content-end">
+                          <a class="custom-link" :href="`/forum/board/${data.boardId}/topic/${data.topicId}`"
+                                                             @click.prevent="openTopic(data)">
+                            {{data.topicTitle}}</a>
+                        </div>
+                      </div>
+                    </template>
+                  </ejs-listview>
+                </template>
+                <div class="col">
+                  <i class="e-icons e-comments e-large"></i>
+                  <i v-if="notifications.length > 0" class="e-badge e-badge-info e-badge-notification e-badge-circle">
+                    {{notifications.length}}</i>
+                </div>
+              </ejs-tooltip>
+            </div>
+          </template>
+        </e-item>
         <e-item v-if="signedInUser" :template="'profileTemplate'" align="Right">
           <template v-slot:profileTemplate="{}">
             <ejs-menu :items="profileMenuItems" @select="profileMenuItemSelected"></ejs-menu>
@@ -51,7 +108,9 @@
     <e-breadcrumb ref="breadcrumb" :url="breadcrumbUrl" :key="breadcrumbKey"
                   @created="breadcrumbCreated"
                   enableNavigation="false" style="margin-top: 30px"></e-breadcrumb>
-    <router-view></router-view>
+    <div id="container">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
@@ -65,12 +124,16 @@ import {
 } from '@syncfusion/ej2-vue-navigations'
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import { store } from '@/main'
-import { DialogComponent} from '@syncfusion/ej2-vue-popups';
+import {DialogComponent, TooltipComponent} from '@syncfusion/ej2-vue-popups';
 import {TextBoxComponent} from '@syncfusion/ej2-vue-inputs';
 import {auth} from "@/firebaseConfig";
 import {signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendEmailVerification, signOut, deleteUser, updateProfile} from "firebase/auth";
 import axios from "axios";
+import Pusher from "pusher-js";
+import {topicsChannel} from "@/App";
+import {ListViewComponent, Virtualization} from "@syncfusion/ej2-vue-lists";
+
 export default {
   name: "LandingPage",
   components: {
@@ -81,6 +144,14 @@ export default {
     'ejs-dialog': DialogComponent,
     'ejs-menu': MenuComponent,
     'e-breadcrumb': BreadcrumbComponent,
+    'ejs-tooltip': TooltipComponent,
+    'ejs-listview': ListViewComponent,
+  },
+  props: {
+    notifications: {
+      type: Array,
+      default: () => []
+    },
   },
   data() {
     return {
@@ -141,7 +212,7 @@ export default {
       ]
     };
   },
-  mounted() {
+  async mounted() {
     window.onscroll = function() {
       const currentScrollPos = document.documentElement.scrollTop;
       if (store.getters.scrollPosition > currentScrollPos) {
@@ -151,7 +222,8 @@ export default {
       }
       store.commit('setScrollPosition', currentScrollPos);
     }
-    this.$nextTick(() => {
+    this.signedInUser = store.getters.user;
+    await this.$nextTick(() => {
       const dialogOverlay = document.getElementsByClassName("e-dlg-overlay")[0];
       dialogOverlay.style.position = 'fixed';
       const dialog = document.getElementsByClassName("e-dialog")[0];
@@ -160,7 +232,6 @@ export default {
       dialog.style.maxHeight = '100%';
       dialog.style.top = '';
     });
-    this.signedInUser = store.getters.user;
   },
   methods: {
     async breadcrumbCreated(){
@@ -169,7 +240,7 @@ export default {
         item.text = this.$filters.capitalize(item.text);
         if (Number.isInteger(parseInt(item.text))) {
           const prevText = this.$refs.breadcrumb.ej2Instances.properties.items[i - 1].text.toLowerCase();
-          if(prevText === 'topic'){
+          if(prevText === 'topic' || prevText === 'board'){
             await axios.get(`${process.env.VUE_APP_BACKEND}/forum/${prevText}/${item.text}/name`)
               .then(({data}) => {
                 item.text = data;
@@ -236,6 +307,20 @@ export default {
         this.signOut();
       }
     },
+    openTopic(topic){
+      this.$router.push({name: 'topic', params: {boardId: topic.boardId, topicId: topic.topicId}});
+    },
+    openProfile(username){
+      this.$router.push({name: 'profile', params: {username: username}});
+    },
+    async markAllAsRead(){
+      await axios.patch(`${process.env.VUE_APP_BACKEND}/notification/read`)
+        .then(() => {
+          this.$emit('all-read');
+        }).catch(error => {
+          alert(error.message)
+        })
+    }
   },
   watch: {
     $route: {
@@ -244,8 +329,8 @@ export default {
         this.breadcrumbUrl = newVal.path;
         this.breadcrumbKey++;
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

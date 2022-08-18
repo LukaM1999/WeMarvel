@@ -102,5 +102,6 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.13.3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.3" level="project" />
     <orderEntry type="library" name="Maven: com.auth0:java-jwt:3.19.2" level="project" />
+    <orderEntry type="library" name="pusher" level="application" />
   </component>
 </module>

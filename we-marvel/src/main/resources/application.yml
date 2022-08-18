@@ -79,5 +79,6 @@ security:
     - /characters/popular
     - /user
     - /forum/**
+    - /notification/**
   exposed-headers:
     - X-Xsrf-Token

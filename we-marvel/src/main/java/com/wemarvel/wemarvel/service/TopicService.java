@@ -9,4 +9,6 @@ public interface TopicService {
     List<Topic> getRecentBoardTopics(Long boardId);
     TopicDTO getTopicWithPosts(Long topicId);
     String getTopicName(Long topicId);
+    List<TopicDTO> getBoardTopics(Long id);
+    TopicDTO createTopic(TopicDTO topicDTO);
 }

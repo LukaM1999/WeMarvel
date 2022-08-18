@@ -1,11 +1,14 @@
 package com.wemarvel.wemarvel.repository;
 
 import com.wemarvel.wemarvel.model.Topic;
+import com.wemarvel.wemarvel.model.WatchedTopic;
 import com.wemarvel.wemarvel.model.dto.TopicDTO;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import javax.persistence.QueryHint;
 import java.util.List;
 
 public interface TopicRepository extends PagingAndSortingRepository<Topic, Long> {
@@ -28,4 +31,15 @@ public interface TopicRepository extends PagingAndSortingRepository<Topic, Long>
 
     @Query("SELECT t.title from Topic t WHERE t.id = ?1")
     String getTopicName(Long topicId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.TopicDTO(t.id, t.title, COUNT(p), max(p.createdAt), t.createdAt, t.ownerUsername) " +
+            "FROM Topic t " +
+            "LEFT JOIN Board b ON t.boardId = b.id " +
+            "LEFT JOIN Post p ON t.id = p.topicId " +
+            "WHERE t.boardId = ?1 " +
+            "GROUP BY t.id, t.title")
+    List<TopicDTO> getBoardTopics(Long id);
+
+    @Query("SELECT wt from WatchedTopic wt WHERE wt.topicId = ?1 AND wt.username = ?2")
+    WatchedTopic getWatchedTopic(Long topicId, String username);
 }

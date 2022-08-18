@@ -31,7 +31,7 @@
       </div>
     </div>
     <ejs-listview :key="listKey" ref="postList" :cssClass="'e-list-template'"
-                  :dataSource="topic.posts"
+                  :dataSource="pagedPosts"
                   :template="'template'">
       <template v-slot:template="{data}">
         <div :id="'post' + data.id" :class="[data.number === topic.posts.length ? '' : 'mb-5 border-bottom-gray']">
@@ -44,7 +44,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-3 ms-3 pt-2 profile-info">
+            <div class="col-3 ms-3 p-3 profile-info">
               <a class="custom-link e-bold" :href="`/profile/${data.ownerUsername}`"
                  @click.prevent="openProfile(data.ownerUsername)">{{ data.ownerUsername }}</a>
             </div>
@@ -56,7 +56,8 @@
                                 :quoted-post="getPostById(data.quotedPostId)" :level="1"/>
                     <p v-else>[This post has been deleted]</p>
                   </div>
-                  <span :id="'postContent' + data.id" v-if="!data.deleted" v-html="data.content"></span>
+                  <span :id="'postContent' + data.id" v-if="!data.deleted"
+                        v-html="data.content"></span>
                   <p v-else>[This post has been deleted]</p>
                 </div>
               </div>
@@ -85,8 +86,8 @@
       </template>
     </ejs-listview>
 
-    <ejs-pager ref="pager" :totalRecordsCount="topic.posts.length" :pageSize="20"
-               :pageCount="5"></ejs-pager>
+    <ejs-pager ref="pager" :click="changePage" :totalRecordsCount="topic.posts.length" :pageSize="10"
+               :pageCount="5" :query="query"></ejs-pager>
 
   </div>
 </template>
@@ -100,6 +101,8 @@ import RichTextEditor from "@/components/RichTextEditor";
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import QuotedPost from "@/components/QuotedPost";
 import {deleteObject, getStorage, ref} from "firebase/storage";
+import {Query} from "@syncfusion/ej2-data";
+import {store} from "@/main";
 export default {
   name: "Topic",
   components: {
@@ -112,6 +115,8 @@ export default {
   data() {
     return {
       topic: { posts: [] },
+      pagedPosts: [],
+      query: new Query().range(0, 10),
       showNewPostForm: false,
       rteValue: '',
       listKey: 0,
@@ -121,6 +126,8 @@ export default {
   },
   async mounted() {
     await this.getTopicWithPosts();
+    this.pagedPosts = this.topic.posts.slice(0, 10);
+    console.log(this.$refs.pager.ej2Instances);
   },
   methods: {
     async getTopicWithPosts(){
@@ -129,6 +136,20 @@ export default {
       for(let [i, post] of this.topic.posts.entries()){
         post.number = i + 1;
       }
+    },
+    changePage(e){
+      this.pagedPosts = this.topic.posts.slice((e.currentPage - 1)  * 10, e.currentPage * 10);
+      this.query = new Query().range((e.currentPage - 1)  * 10, e.currentPage * 10);
+      window.scroll({top: 0, behavior: 'smooth'});
+    },
+    goToLastPage(postId){
+      this.pagedPosts = this.topic.posts.slice((this.$refs.pager.ej2Instances.totalPages - 1)  * 10);
+      this.query = new Query().page((this.$refs.pager.ej2Instances.totalPages - 1), 10);
+      this.$refs.pager.goToPage(this.$refs.pager.ej2Instances.totalPages);
+      this.$nextTick(() => {
+        const postOffset = document.getElementById('post' + postId)?.offsetTop
+        window.scroll({top: postOffset, behavior: 'smooth'});
+      });
     },
     openProfile(username){
       this.$router.push({name: 'profile', params: {username: username}});
@@ -155,11 +176,16 @@ export default {
       this.showNewPostForm = false;
       this.listKey += 1;
       this.rteValue = '';
-      await this.$nextTick(() => {
-        document.getElementsByClassName('e-last')[0]?.click();
-        document.getElementById('post' + data.id).scrollIntoView({behavior: 'smooth'});
-      });
       this.quotedPost = null;
+      this.goToLastPage(data.id);
+      await axios.post(`${process.env.VUE_APP_BACKEND}/notification/topic`, {
+        type: 'new_topic_post',
+        boardId: this.topic.boardId,
+        topicId: this.topic.id,
+        topicTitle: this.topic.title,
+        posterUsername: data.ownerUsername,
+        socketId: store.getters.socketId,
+      });
     },
     updateRteValue(value){
       this.rteValue = value;
@@ -197,6 +223,7 @@ export default {
     editPost(post){
       this.rteValue = document.getElementById('postContent' + post.id).innerHTML;
       this.postToEdit = post;
+      this.quotedPost = null;
       this.showNewPostForm = true;
       window.scroll({
         top: 0,
@@ -216,9 +243,13 @@ export default {
       this.$refs.postList.updated();
       this.$refs.pager.refresh();
       this.listKey += 1;
-      this.showNewPostForm = false;
       this.rteValue = '';
-      document.getElementById('post' + this.postToEdit.id)?.scrollIntoView({behavior: 'smooth'});
+      this.showNewPostForm = false;
+      const postOffset = document.getElementById('post' + this.postToEdit.id)?.offsetTop
+      window.scroll({
+        top: postOffset,
+        behavior: 'smooth'
+      });
       this.postToEdit = null;
     }
   },

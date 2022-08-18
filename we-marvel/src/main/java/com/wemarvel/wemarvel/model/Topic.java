@@ -17,18 +17,23 @@ public class Topic {
     private Long id;
 
     @Getter
+    @Setter
     private String ownerUsername;
 
     @Getter
+    @Setter
     private Long firstPostId;
 
     @Getter
+    @Setter
     private Long boardId;
 
     @Getter
+    @Setter
     private Long marvelEntityId;
 
     @Getter
+    @Setter
     private LocalDateTime createdAt;
 
     @Getter

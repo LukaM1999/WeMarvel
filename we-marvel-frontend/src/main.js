@@ -15,6 +15,8 @@ import Topic from "@/components/Topic";
 import Profile from "@/components/Profile";
 import {onAuthStateChanged} from "firebase/auth";
 import {auth} from "@/firebaseConfig";
+import Board from "@/components/Board";
+import Pusher from "pusher-js";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -40,9 +42,24 @@ const routes = [
                 component: ForumOverview
             },
             {
-                path: '/forum/topic/:id',
+                path: '/forum/board',
+                redirect: 'forum'
+            },
+            {
+                path: '/forum/board/:id/topic',
+                redirect: to => {
+                    return {name: 'board', params: {id: to.params.id}}
+                }
+            },
+            {
+                path: '/forum/board/:boardId/topic/:id',
                 name: 'topic',
                 component: Topic,
+            },
+            {
+                path: '/forum/board/:id',
+                name: 'board',
+                component: Board
             },
             {
                 path: '/profile/:username',
@@ -65,6 +82,7 @@ export const store = createStore({
         token: null,
         firebaseToken: null,
         scrollPosition: 0,
+        socketId: null,
     },
     mutations: {
         setToken(state, token) {
@@ -78,6 +96,9 @@ export const store = createStore({
         },
         setScrollPosition(state, position) {
             state.scrollPosition = position
+        },
+        setSocketId(state, socketId) {
+            state.socketId = socketId
         }
     },
     getters: {
@@ -92,11 +113,22 @@ export const store = createStore({
         },
         scrollPosition(state) {
             return state.scrollPosition
+        },
+        socketId(state) {
+            return state.socketId
         }
     }
 })
 
 jwtInterceptor()
+
+export const pusher = new Pusher('b0aaeba2e43d3ebdf234', {
+    cluster: 'eu'
+});
+Pusher.logToConsole = true;
+pusher.connection.bind("connected", () => {
+    store.commit('setSocketId', pusher.connection.socket_id);
+});
 
 const app = createApp(App)
 app.use(VueAxios, axios)
@@ -104,12 +136,6 @@ app.use(router)
 app.use(store)
 app.mount('#app')
 
-onAuthStateChanged(auth, (user) => {
-    user?.getIdToken().then(token => {
-        store.commit('setToken', token);
-    });
-    store.commit('setUser', user);
-})
 
 app.config.globalProperties.$filters = {
     date(value) {

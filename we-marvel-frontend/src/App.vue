@@ -1,11 +1,93 @@
 <template>
-  <router-view></router-view>
+  <router-view :notifications="notifications" @all-read="notifications = []"></router-view>
 </template>
 
 <script>
 
+import {onAuthStateChanged, onIdTokenChanged} from "firebase/auth";
+import {auth} from "@/firebaseConfig";
+import {pusher} from "@/main";
+import axios from "axios";
+import {store} from "@/main";
+import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
+
+let ToastObj = undefined;
+export let topicsChannel = undefined;
+let notificationSettings = undefined;
+const getNotificationSettings = async (displayName) => {
+  const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/notification/user/${displayName}/settings`);
+  notificationSettings = data;
+}
+
 export default {
   name: 'App',
+  data(){
+    return {
+      notifications: [],
+    }
+  },
+  async mounted() {
+    onIdTokenChanged(auth, async (user) => {
+      user?.getIdToken().then(token => {
+        store.commit('setToken', token);
+      });
+      store.commit('setUser', user);
+      if(!user?.displayName) {
+        pusher.connection.disconnect();
+        return;
+      }
+      if(pusher.connection.state === 'disconnected') {
+        pusher.connect();
+      }
+      if(notificationSettings && topicsChannel) return;
+      await getNotificationSettings(user.displayName);
+      await this.getAllUnreadNotifications();
+      if(!notificationSettings.topics) return;
+      topicsChannel = pusher.subscribe('topics');
+      topicsChannel.bind('new_topic_post', (data) => {
+        this.notifications.push(data);
+        if(this.$route.path === `/forum/board/${data.boardId}/topic/${data.topicId}`) {
+          return;
+        }
+        ToastObj = ToastUtility.show({
+          title: `New post in topic ${data.topicTitle}`,
+          content: 'Click button below to see it!',
+          cssClass: 'e-toast-info',
+          icon: 'e-comment-add e-icons',
+          position: {X: 'Right', Y: 'Top'},
+          showCloseButton: true,
+          buttons: [{
+            click: this.goToTopic(data.boardId, data.topicId),
+            model: {
+              content: 'Go to topic',
+            }
+          }],
+          timeOut: 7000,
+          extendedTimeout: 5000,
+          target: '#container',
+          animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
+          click: arg => {
+            console.log(arg);
+          }
+        });
+      });
+    })
+  },
+  methods: {
+    goToTopic(boardId, topicId) {
+      return () => {
+        ToastObj.hide();
+        this.$router.push({name: 'topic', params: {boardId: boardId, id: topicId}});
+      }
+    },
+    async getAllUnreadNotifications(){
+      await axios.get(`${process.env.VUE_APP_BACKEND}/notification/unread`).then(({data}) => {
+        this.notifications = data;
+      }).catch(error => {
+        alert(error.message)
+      })
+    },
+  }
 }
 </script>
 
@@ -269,6 +351,54 @@ tr:hover {
 
 .border-bottom-gray {
   border-bottom: 1px solid #e5e5e5;
+}
+
+.e-toast-container .e-toast .e-toast-actions .e-btn {
+  background-color: rgba(229, 78, 78, 0.7);
+  color: #fff;
+}
+
+.e-toast-container .e-toast .e-toast-actions .e-btn:hover {
+  background-color: rgba(229, 78, 78, 0.9);
+  color: #fff;
+}
+
+.e-badge[data-v-54f74f74] {
+  position: relative !important;
+  top: -15px !important;
+  left: -4px !important;
+}
+
+.e-listview:not(.e-list-template) .e-list-item {
+  height: auto;
+  max-height: 7em;
+  line-height: 24px;
+  padding: 0 14px;
+  position: relative;
+  border-bottom: 1px solid #e5e5e5;
+  min-height: 6em;
+}
+
+.e-tooltip-wrap.e-popup {
+  background-color: white;
+  border: none;
+  box-shadow: 0px 0px 6px 0px black;
+}
+
+.e-tooltip-wrap .e-arrow-tip-inner.e-tip-top {
+  color: white;
+}
+
+.e-listview[data-v-54f74f74] {
+  overflow: initial !important;
+}
+
+.e-icons.e-check-box[data-v-54f74f74]:before {
+  color: white;
+}
+
+.e-listview .e-icons[data-v-54f74f74]:hover {
+  cursor: pointer;
 }
 
 </style>
