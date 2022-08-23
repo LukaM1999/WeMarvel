@@ -4,6 +4,7 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 import com.wemarvel.wemarvel.model.Post;
+import com.wemarvel.wemarvel.model.RegisteredUser;
 import com.wemarvel.wemarvel.model.dto.PostDTO;
 import com.wemarvel.wemarvel.repository.PostRepository;
 import com.wemarvel.wemarvel.service.PostService;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.wemarvel.wemarvel.util.SecurityContextUtils.getSignedInUser;
+
 @Service
 public class PostServiceImpl implements PostService {
 
@@ -31,6 +34,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post createPost(Post post) {
+        RegisteredUser registeredUser = getSignedInUser();
+        if(registeredUser == null) return null;
+        post.setOwnerId(registeredUser.getId());
         post.setCreatedAt(LocalDateTime.now());
         return postRepository.save(post);
     }
@@ -50,16 +56,24 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        RegisteredUser registeredUser = getSignedInUser();
+        if(registeredUser == null || !registeredUser.getId().equals(post.getOwnerId())
+                || !registeredUser.getRole().getAuthority().equals("ADMIN"))
+            throw new RuntimeException("You are not authorized to delete this post");
         post.setDeleted(true);
         postRepository.save(post);
     }
 
     @Override
-    public Post updatePost(Long postId, String content, String modifiedBy) {
+    public Post updatePost(Long postId, String content) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        RegisteredUser registeredUser = getSignedInUser();
+        if(registeredUser == null || !registeredUser.getId().equals(post.getOwnerId())
+                || !registeredUser.getRole().getAuthority().equals("ADMIN"))
+            throw new RuntimeException("You are not authorized to modify this post");
         post.setContent(content);
         post.setModifiedAt(LocalDateTime.now());
-        post.setModifiedByUsername(modifiedBy);
+        post.setModifiedById(registeredUser.getId());
         post.setModifications(post.getModifications() + 1);
         return postRepository.save(post);
     }

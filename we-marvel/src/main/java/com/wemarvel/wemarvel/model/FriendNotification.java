@@ -19,9 +19,9 @@ public class FriendNotification extends Notification {
     @Setter
     private String message;
 
-    public FriendNotification(String type, String recipientUsername, LocalDateTime receivedAt,
+    public FriendNotification(String type, Long recipientId, LocalDateTime receivedAt,
                               String senderUsername, String message) {
-        super(type, recipientUsername, receivedAt);
+        super(type, recipientId, receivedAt);
         this.senderUsername = senderUsername;
         this.message = message;
     }

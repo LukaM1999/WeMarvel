@@ -29,7 +29,7 @@ public class CharacterDTO {
 
     @Getter
     @Setter
-    private String resourceURI;
+    private String url;
 
     @Getter
     @Setter
@@ -39,12 +39,12 @@ public class CharacterDTO {
     @Setter
     private Long ratingCount;
 
-    public CharacterDTO(Long id, String name, String description, String thumbnail, String resourceURI, Double averageRating, Long ratingCount) {
+    public CharacterDTO(Long id, String name, String description, String thumbnail, String url, Double averageRating, Long ratingCount) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
-        this.resourceURI = resourceURI;
+        this.url = url;
         this.ratingCount = ratingCount;
         this.averageRating = Objects.requireNonNullElse(averageRating, 0.0);
     }

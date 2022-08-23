@@ -15,6 +15,10 @@ public class ComicDTO {
 
     @Getter
     @Setter
+    private Long seriesId;
+
+    @Getter
+    @Setter
     private String title;
 
     @Getter
@@ -27,7 +31,7 @@ public class ComicDTO {
 
     @Getter
     @Setter
-    private String resourceURI;
+    private String url;
 
     @Getter
     @Setter
@@ -45,25 +49,27 @@ public class ComicDTO {
     @Setter
     private Long readingCount;
 
-    public ComicDTO(Long id, String title, String description, String thumbnail, String resourceURI, int pageCount,
+    public ComicDTO(Long id, Long seriesId, String title, String description, String thumbnail, String url, int pageCount,
                     Double averageRating, Long ratingCount) {
         this.id = id;
+        this.seriesId = seriesId;
         this.title = title;
         this.description = description;
         this.thumbnail = thumbnail;
-        this.resourceURI = resourceURI;
+        this.url = url;
         this.pageCount = pageCount;
         this.ratingCount = ratingCount;
         this.averageRating = Objects.requireNonNullElse(averageRating, 0.0);
     }
 
-    public ComicDTO(Long id, String title, String description, String thumbnail, String resourceURI, int pageCount,
+    public ComicDTO(Long id, Long seriesId, String title, String description, String thumbnail, String url, int pageCount,
                     Long readingCount) {
         this.id = id;
+        this.seriesId = seriesId;
         this.title = title;
         this.description = description;
         this.thumbnail = thumbnail;
-        this.resourceURI = resourceURI;
+        this.url = url;
         this.pageCount = pageCount;
         this.readingCount = readingCount;
     }

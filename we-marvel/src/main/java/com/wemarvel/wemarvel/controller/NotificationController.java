@@ -4,6 +4,7 @@ import com.wemarvel.wemarvel.model.Notification;
 import com.wemarvel.wemarvel.model.NotificationSettings;
 import com.wemarvel.wemarvel.model.RegisteredUser;
 import com.wemarvel.wemarvel.model.dto.NotificationDTO;
+import com.wemarvel.wemarvel.model.dto.NotificationSettingsDTO;
 import com.wemarvel.wemarvel.service.NotificationService;
 import com.wemarvel.wemarvel.service.NotificationSettingsService;
 import com.wemarvel.wemarvel.service.RegisteredUserService;
@@ -26,13 +27,14 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    @GetMapping("/user/{username}/settings")
-    public ResponseEntity<NotificationSettings> getNotificationSettings(@PathVariable String username) {
-        RegisteredUser user = registeredUserService.getUserByUsername(username);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(notificationSettingsService.getNotificationSettings(username));
+    @GetMapping("/settings")
+    public ResponseEntity<NotificationSettings> getNotificationSettings() {
+        return ResponseEntity.ok(notificationSettingsService.getNotificationSettings());
+    }
+
+    @PutMapping("/settings")
+    public void updateNotificationSettings(@RequestBody NotificationSettingsDTO notificationSettings) {
+        notificationSettingsService.updateNotificationSettings(notificationSettings);
     }
 
     @PostMapping("/topic")
@@ -47,7 +49,7 @@ public class NotificationController {
     }
 
     @GetMapping("/unread")
-    public ResponseEntity<List<Notification>> getAllUnreadNotifications() {
+    public ResponseEntity<List<NotificationDTO>> getAllUnreadNotifications() {
         return ResponseEntity.ok(notificationService.getAllUnreadNotifications());
     }
 

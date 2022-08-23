@@ -14,6 +14,9 @@ public class NotificationDTO {
     @Getter
     private Long id;
     @Getter
+    private Long recipientId;
+    @Getter
+    @Setter
     private String recipientUsername;
     @Getter
     @Setter
@@ -38,12 +41,22 @@ public class NotificationDTO {
     private String topicTitle;
     @Getter
     @Setter
+    private Long posterId;
+    @Getter
+    @Setter
     private String posterUsername;
     @Getter
     @Setter
     private String socketId;
     @Getter
     @Setter
-    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
+    @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime receivedAt;
+
+    public NotificationDTO(Long id, Long recipientId, String type, LocalDateTime receivedAt) {
+        this.id = id;
+        this.recipientId = recipientId;
+        this.type = type;
+        this.receivedAt = receivedAt;
+    }
 }

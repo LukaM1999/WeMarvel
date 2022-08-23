@@ -22,7 +22,7 @@ public class Notification {
     private Long id;
 
     @Getter
-    private String recipientUsername;
+    private Long recipientId;
 
     @Getter
     @Setter
@@ -38,9 +38,9 @@ public class Notification {
     @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime receivedAt;
 
-    public Notification(String type, String recipientUsername, LocalDateTime receivedAt) {
+    public Notification(String type, Long recipientId, LocalDateTime receivedAt) {
         this.type = type;
-        this.recipientUsername = recipientUsername;
+        this.recipientId = recipientId;
         this.receivedAt = receivedAt;
     }
 }

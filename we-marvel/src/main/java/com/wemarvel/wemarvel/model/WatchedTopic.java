@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,12 +12,13 @@ import javax.persistence.Id;
 public class WatchedTopic {
 
     @Id
-    @GeneratedValue()
+    @SequenceGenerator(name = "watchedTopicIdGen", sequenceName = "watchedTopicIdSeq", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "watchedTopicIdGen")
     @Getter
     public Long id;
 
     @Getter
-    public String username;
+    public Long userId;
 
     @Getter
     public Long topicId;

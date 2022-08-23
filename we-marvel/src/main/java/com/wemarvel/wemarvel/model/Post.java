@@ -21,7 +21,8 @@ public class Post {
     private Long id;
 
     @Getter
-    private String ownerUsername;
+    @Setter
+    private Long ownerId;
 
     @Getter
     private Long topicId;
@@ -47,7 +48,7 @@ public class Post {
 
     @Getter
     @Setter
-    private String modifiedByUsername;
+    private Long modifiedById;
 
     @Getter
     @Setter
@@ -59,8 +60,8 @@ public class Post {
     @Column(columnDefinition = "Boolean default false")
     private boolean deleted;
 
-    public Post(String ownerUsername, Long topicId, String content){
-        this.ownerUsername = ownerUsername;
+    public Post(Long ownerId, Long topicId, String content){
+        this.ownerId = ownerId;
         this.topicId = topicId;
         this.content = content;
     }

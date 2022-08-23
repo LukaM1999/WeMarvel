@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface NotificationSettingsRepository extends JpaRepository<NotificationSettings, String> {
+public interface NotificationSettingsRepository extends JpaRepository<NotificationSettings, Long> {
 
-    @Query("SELECT n.username FROM NotificationSettings n " +
-            "WHERE n.topics = true AND n.username <> ?1")
-    List<String> getUsersWithEnabledTopics(String excludedUsername);
+    @Query("SELECT n.userId FROM NotificationSettings n " +
+            "WHERE n.topics = true AND n.userId <> ?1")
+    List<Long> getUsersWithEnabledTopics(Long excludedUserId);
 }

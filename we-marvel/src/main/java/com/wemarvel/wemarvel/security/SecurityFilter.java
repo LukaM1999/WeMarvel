@@ -22,6 +22,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -59,12 +61,21 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
         if(decodedToken == null) return;
         RegisteredUser user = registeredUserService.getUserByEmail(decodedToken.getEmail());
-        System.out.println(user);
         if (user != null) {
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user,
                     new Credentials(decodedToken, token), user.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            if(user.getRole().getAuthority().equals("ADMIN")) {
+                if(Boolean.TRUE.equals(decodedToken.getClaims().get("admin"))) return;
+                Map<String, Object> claims = new HashMap<>(Map.of("admin", true));
+                try {
+                    FirebaseAuth.getInstance().setCustomUserClaims(decodedToken.getUid(), claims);
+                    log.info("Firebase claims set for user: " + decodedToken.getUid());
+                } catch (FirebaseAuthException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 }

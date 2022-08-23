@@ -4,10 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wemarvel.wemarvel.config.Environment;
-import com.wemarvel.wemarvel.model.Comic;
-import com.wemarvel.wemarvel.model.MarvelCharacter;
-import com.wemarvel.wemarvel.repository.ComicRepository;
-import com.wemarvel.wemarvel.repository.CharacterRepository;
+import com.wemarvel.wemarvel.model.*;
+import com.wemarvel.wemarvel.repository.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +40,21 @@ public class InitDataTask {
     @Autowired
     private ComicRepository comicRepository;
 
+    @Autowired
+    private CharacterInComicRepository characterInComicRepository;
+
+    @Autowired
+    private CharacterInSeriesRepository characterInSeriesRepository;
+
+    @Autowired
+    private SeriesRepository seriesRepository;
+
     @PostConstruct
     public void initData() {
         LOGGER.info("Init data");
         //initMarvelCharacters();
         //initComics();
+        //initSeries();
         //updateLatestMarvelCharacters();
         //updateLatestComics();
     }
@@ -169,10 +177,12 @@ public class InitDataTask {
                 String format = result.get("format").asText();
                 int pageCount = result.get("pageCount").asInt();
                 String description = result.get("description").asText();
-                String resourceURI = result.get("resourceURI").asText();
+                String comicUrl = result.get("urls").get(0).get("url").asText();
+                String[] seriesUriSplit = result.get("series").get("resourceURI").asText().split("/");
+                Long seriesId = Long.parseLong(seriesUriSplit[seriesUriSplit.length - 1]);
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
-                comicRepository.save(new Comic(id, title, description, variantDescription, thumbnail, resourceURI,
+                comicRepository.save(new Comic(id, seriesId, title, description, variantDescription, thumbnail, comicUrl,
                         modified, format, pageCount, issueNumber, 0.0));
             }
             total = total - 100;
@@ -201,10 +211,12 @@ public class InitDataTask {
                     String format = result.get("format").asText();
                     int pageCount = result.get("pageCount").asInt();
                     String description = result.get("description").asText();
-                    String resourceURI = result.get("resourceURI").asText();
+                    String comicUrl = result.get("urls").get(0).get("url").asText();
+                    String[] seriesUriSplit = result.get("series").get("resourceURI").asText().split("/");
+                    Long seriesId = Long.parseLong(seriesUriSplit[seriesUriSplit.length - 1]);
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
-                    comicRepository.save(new Comic(id, title, description, variantDescription, thumbnail, resourceURI,
+                    comicRepository.save(new Comic(id, seriesId, title, description, variantDescription, thumbnail, comicUrl,
                             modified, format, pageCount, issueNumber, 0.0));
                 }
                 total = total - 100;
@@ -232,7 +244,7 @@ public class InitDataTask {
                 Long id = result.get("id").asLong();
                 String name = result.get("name").asText();
                 String description = result.get("description").asText();
-                String resourceURI = result.get("resourceURI").asText();
+                String characterUrl = result.get("urls").get(0).get("url").asText();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
                 LocalDateTime modified = LocalDateTime.now();
                 try {
@@ -243,7 +255,33 @@ public class InitDataTask {
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
                 characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                        resourceURI, modified, 0.0));
+                        characterUrl, modified, 0.0));
+                int availableComics = result.get("comics").get("available").asInt();
+                if(availableComics > 0) {
+                    for(JsonNode item : result.get("comics").get("items")){
+                        String[] resourceUriSplit = item.get("resourceURI").asText().split("/");
+                        Long comicId = Long.parseLong(resourceUriSplit[resourceUriSplit.length - 1]);
+                        CharacterInComic characterInComic = characterInComicRepository.getByCharacterIdAndComicId(id, comicId);
+                        if(characterInComic == null)
+                            characterInComicRepository.save(new CharacterInComic(null, id, comicId));
+                    }
+                }
+                if(availableComics > 20) {
+                    saveCharacterInComic(id, availableComics);
+                }
+                int availableSeries = result.get("series").get("available").asInt();
+                if(availableSeries > 0) {
+                    for(JsonNode item : result.get("series").get("items")){
+                        String[] resourceUriSplit = item.get("resourceURI").asText().split("/");
+                        Long seriesId = Long.parseLong(resourceUriSplit[resourceUriSplit.length - 1]);
+                        CharacterInSeries characterInSeries = characterInSeriesRepository.getByCharacterIdAndSeriesId(id, seriesId);
+                        if(characterInSeries == null)
+                            characterInSeriesRepository.save(new CharacterInSeries(null, id, seriesId));
+                    }
+                }
+                if(availableSeries > 20) {
+                    saveCharacterInSeries(id, availableSeries);
+                }
             }
             total = total - 100;
             int offset = 100;
@@ -259,7 +297,7 @@ public class InitDataTask {
                     Long id = result.get("id").asLong();
                     String name = result.get("name").asText();
                     String description = result.get("description").asText();
-                    String resourceURI = result.get("resourceURI").asText();
+                    String characterUrl = result.get("urls").get(0).get("url").asText();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
                     LocalDateTime modified = LocalDateTime.now();
                     try {
@@ -270,13 +308,53 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                            resourceURI, modified, 0.0));
+                            characterUrl, modified, 0.0));
                 }
                 total = total - 100;
                 offset = offset + 100;
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void saveCharacterInSeries(Long id, int availableSeries) throws JsonProcessingException {
+        int offset = 20;
+        while (availableSeries > 0) {
+            long ts = System.currentTimeMillis();
+            String url = Environment.MARVEL_API_URL + "characters/" + id + "/series?limit=100&offset=" + offset +
+                    "&ts=" + ts + "&apikey=" + Environment.MARVEL_API_PUBLIC_KEY + "&hash=" + getHash(ts);
+            ResponseEntity<String> response =  new RestTemplate().getForEntity(url, String.class);
+            JsonNode root = new ObjectMapper().readTree(response.getBody());
+            JsonNode results = root.get("data").get("results");
+            for (JsonNode resultItem : results) {
+                Long seriesId = resultItem.get("id").asLong();
+                CharacterInSeries characterInSeries = characterInSeriesRepository.getByCharacterIdAndSeriesId(id, seriesId);
+                if(characterInSeries == null)
+                    characterInSeriesRepository.save(new CharacterInSeries(null, id, seriesId));
+            }
+            availableSeries = availableSeries - 100;
+            offset = offset + 100;
+        }
+    }
+
+    private void saveCharacterInComic(Long id, int availableComics) throws JsonProcessingException {
+        int offset = 20;
+        while (availableComics > 0) {
+            long ts = System.currentTimeMillis();
+            String url = Environment.MARVEL_API_URL + "characters/" + id + "/comics?limit=100&offset=" + offset +
+                    "&ts=" + ts + "&apikey=" + Environment.MARVEL_API_PUBLIC_KEY + "&hash=" + getHash(ts);
+            ResponseEntity<String> response =  new RestTemplate().getForEntity(url, String.class);
+            JsonNode root = new ObjectMapper().readTree(response.getBody());
+            JsonNode results = root.get("data").get("results");
+            for (JsonNode resultItem : results) {
+                Long comicId = resultItem.get("id").asLong();
+                CharacterInComic characterInComic = characterInComicRepository.getByCharacterIdAndComicId(id, comicId);
+                if(characterInComic == null)
+                    characterInComicRepository.save(new CharacterInComic(null, id, comicId));
+            }
+            availableComics = availableComics - 100;
+            offset = offset + 100;
         }
     }
 
@@ -301,7 +379,9 @@ public class InitDataTask {
                 String format = result.get("format").asText();
                 int pageCount = result.get("pageCount").asInt();
                 String description = result.get("description").asText();
-                String resourceURI = result.get("resourceURI").asText();
+                String comicUrl = result.get("urls").get(0).get("url").asText();
+                String[] seriesUriSplit = result.get("series").get("resourceURI").asText().split("/");
+                Long seriesId = Long.parseLong(seriesUriSplit[seriesUriSplit.length - 1]);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
                 LocalDateTime modified = LocalDateTime.now();
                 try {
@@ -311,7 +391,7 @@ public class InitDataTask {
                 }
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
-                comicRepository.save(new Comic(id, title, description, variantDescription, thumbnail, resourceURI,
+                comicRepository.save(new Comic(id, seriesId, title, description, variantDescription, thumbnail, comicUrl,
                         modified, format, pageCount, issueNumber, 0.0));
             }
             total = total - 100;
@@ -332,7 +412,9 @@ public class InitDataTask {
                     String format = result.get("format").asText();
                     int pageCount = result.get("pageCount").asInt();
                     String description = result.get("description").asText();
-                    String resourceURI = result.get("resourceURI").asText();
+                    String comicUrl = result.get("urls").get(0).get("url").asText();
+                    String[] seriesUriSplit = result.get("series").get("resourceURI").asText().split("/");
+                    Long seriesId = Long.parseLong(seriesUriSplit[seriesUriSplit.length - 1]);
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
                     LocalDateTime modified = LocalDateTime.now();
                     try {
@@ -342,8 +424,79 @@ public class InitDataTask {
                     }
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
-                    comicRepository.save(new Comic(id, title, description, variantDescription, thumbnail, resourceURI,
+                    comicRepository.save(new Comic(id, seriesId, title, description, variantDescription, thumbnail, comicUrl,
                             modified, format, pageCount, issueNumber, 0.0));
+                }
+                total = total - 100;
+                offset = offset + 100;
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void initSeries() {
+        RestTemplate restTemplate = new RestTemplate();
+        long ts = System.currentTimeMillis();
+        String url = Environment.MARVEL_API_URL + "series?limit=100&ts=" + ts + "&apikey=" +
+                Environment.MARVEL_API_PUBLIC_KEY + "&hash=" + getHash(ts);
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        int total = 100;
+        try {
+//            JsonNode root = mapper.readTree(response.getBody());
+//            JsonNode data = root.get("data");
+//            total = data.get("total").asInt();
+//            JsonNode results = data.get("results");
+//            for (JsonNode result : results) {
+//                Long id = result.get("id").asLong();
+//                String title = result.get("title").asText();
+//                String type = result.get("type").asText();
+//                String description = result.get("description").asText();
+//                String seriesUrl = result.get("urls").get(0).get("url").asText();
+//                Long startYear = result.get("startYear").asLong();
+//                Long endYear = result.get("endYear").asLong();
+//                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+//                LocalDateTime modified = LocalDateTime.now();
+//                try {
+//                    modified = LocalDateTime.parse(result.get("modified").asText(), formatter);
+//                } catch (Exception e) {
+//                    LOGGER.error("Error parsing date", e);
+//                }
+//                String thumbnail = result.get("thumbnail").get("path").asText() + "." +
+//                        result.get("thumbnail").get("extension").asText();
+//                seriesRepository.save(new Series(id, title, description, thumbnail,
+//                        seriesUrl, modified, type, startYear, endYear, 0.0));
+//            }
+//            total = total - 100;
+            int offset = 13000;
+            while (total > 0) {
+                ts = System.currentTimeMillis();
+                url = Environment.MARVEL_API_URL + "series?limit=100&offset=" + offset + "&ts=" + ts + "&apikey=" +
+                        Environment.MARVEL_API_PUBLIC_KEY + "&hash=" + getHash(ts);
+                response = restTemplate.getForEntity(url, String.class);
+                JsonNode root = mapper.readTree(response.getBody());
+                JsonNode data = root.get("data");
+                JsonNode results = data.get("results");
+                for (JsonNode result : results) {
+                    Long id = result.get("id").asLong();
+                    String title = result.get("title").asText();
+                    String type = result.get("type").asText();
+                    String description = result.get("description").asText();
+                    String seriesUrl = result.get("urls").get(0).get("url").asText();
+                    Long startYear = result.get("startYear").asLong();
+                    Long endYear = result.get("endYear").asLong();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+                    LocalDateTime modified = LocalDateTime.now();
+                    try {
+                        modified = LocalDateTime.parse(result.get("modified").asText(), formatter);
+                    } catch (Exception e) {
+                        LOGGER.error("Error parsing date", e);
+                    }
+                    String thumbnail = result.get("thumbnail").get("path").asText() + "." +
+                            result.get("thumbnail").get("extension").asText();
+                    seriesRepository.save(new Series(id, title, description, thumbnail,
+                            seriesUrl, modified, type, startYear, endYear, 0.0));
                 }
                 total = total - 100;
                 offset = offset + 100;

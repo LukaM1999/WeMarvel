@@ -1,17 +1,15 @@
 package com.wemarvel.wemarvel.util;
 
+import com.wemarvel.wemarvel.model.RegisteredUser;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class SecurityContextUtils {
-    public static String getSignedInUsername(){
+    public static RegisteredUser getSignedInUser(){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails)principal).getUsername();
-        } else {
-            username = principal.toString();
+        if (principal instanceof RegisteredUser) {
+            return (RegisteredUser) principal;
         }
-        return username;
+        return null;
     }
 }

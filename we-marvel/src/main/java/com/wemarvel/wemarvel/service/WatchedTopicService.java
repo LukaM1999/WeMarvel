@@ -7,5 +7,5 @@ import java.util.List;
 public interface WatchedTopicService {
     WatchedTopic watchTopic(Long topicId);
     List<WatchedTopic> getWatchedTopics();
-    WatchedTopic getWatchedTopic(Long topicId, String username);
+    WatchedTopic getWatchedTopic(Long topicId, Long userId);
 }

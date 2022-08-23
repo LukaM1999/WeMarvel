@@ -19,20 +19,20 @@ public interface CharacterRepository extends PagingAndSortingRepository<MarvelCh
 
     int countAllByNameContainingIgnoreCase(String name);
 
-    @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.description, c.thumbnail, c.resourceURI, " +
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.description, c.thumbnail, c.url, " +
             "c.averageRating, COUNT(r.rating)) " +
             "FROM MarvelCharacter c " +
             "LEFT JOIN Review r ON c.id = r.marvelEntityId " +
             "GROUP BY c.id, c.name, c.description," +
-            " c.thumbnail, c.resourceURI, c.averageRating " +
+            " c.thumbnail, c.url, c.averageRating " +
             "ORDER BY c.averageRating DESC, c.name ASC")
     Page<CharacterDTO> findAllByAverageRating(PageRequest pageRequest);
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.description, c.thumbnail, " +
-            "c.resourceURI, AVG(r.rating), COUNT(r.rating)) " +
+            "c.url, AVG(r.rating), COUNT(r.rating)) " +
             "FROM MarvelCharacter c " +
             "LEFT JOIN Review r ON c.id = r.marvelEntityId " +
-            "GROUP BY c.id, c.name, c.thumbnail, c.resourceURI " +
+            "GROUP BY c.id, c.name, c.thumbnail, c.url " +
             "ORDER BY COUNT(r.rating) DESC")
     Page<CharacterDTO> findAllByRatingCount(PageRequest pageRequest);
 

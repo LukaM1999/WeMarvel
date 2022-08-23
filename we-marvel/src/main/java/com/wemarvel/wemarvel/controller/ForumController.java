@@ -69,7 +69,7 @@ public class ForumController {
 
     @PatchMapping("/post/{postId}")
     public Post updatePost(@PathVariable Long postId, @RequestBody PostDTO post) {
-        return postService.updatePost(postId, post.getContent(), post.getModifiedByUsername());
+        return postService.updatePost(postId, post.getContent());
     }
 
     @GetMapping("/board/{boardId}")

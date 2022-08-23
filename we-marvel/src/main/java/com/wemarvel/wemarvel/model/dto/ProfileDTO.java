@@ -1,16 +1,19 @@
 package com.wemarvel.wemarvel.model.dto;
 
+import com.wemarvel.wemarvel.model.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProfileDTO {
     @Getter
     @Setter
-    private String id;
+    private Long id;
     @Getter
     @Setter
     private String username;
@@ -20,4 +23,16 @@ public class ProfileDTO {
     @Getter
     @Setter
     private String role;
+    @Getter
+    @Setter
+    private String imageUrl;
+    @Getter
+    @Setter
+    private String location;
+    @Getter
+    @Setter
+    private Gender gender;
+    @Getter
+    @Setter
+    private LocalDate birthday;
 }

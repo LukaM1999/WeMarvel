@@ -34,7 +34,7 @@ public class MarvelCharacter {
 
     @Getter
     @Setter
-    private String resourceURI;
+    private String url;
 
     @Getter
     @Setter

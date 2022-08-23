@@ -111,6 +111,9 @@
     <div id="container">
       <router-view></router-view>
     </div>
+    <footer class="footer">
+      <a href="https://marvel.com/" class="e-vertical-align-center" target="_blank"><h3>Data provided by Marvel. © 2022 MARVEL</h3></a>
+    </footer>
   </div>
 </template>
 
@@ -237,7 +240,7 @@ export default {
     async breadcrumbCreated(){
       for(let [i, item] of this.$refs.breadcrumb.ej2Instances.properties.items.entries()){
         if(item.text === '/' || i === 0) continue;
-        item.text = this.$filters.capitalize(item.text);
+        item.text = this.$filters.capitalize(item.text).split(new RegExp('[?#]'))[0];
         if (Number.isInteger(parseInt(item.text))) {
           const prevText = this.$refs.breadcrumb.ej2Instances.properties.items[i - 1].text.toLowerCase();
           if(prevText === 'topic' || prevText === 'board'){
@@ -303,8 +306,12 @@ export default {
       })
     },
     profileMenuItemSelected(e){
+      console.log(e);
       if(e.item.text === 'Sign out'){
         this.signOut();
+      }
+      if(e.item.text === 'View'){
+        this.$router.push({name: 'profile', params: {username: auth.currentUser.displayName}});
       }
     },
     openTopic(topic){
@@ -339,6 +346,16 @@ $btn-warning-bgcolor: #504a4a;
 
 .e-dlg-overlay {
   z-index: 10001;
+}
+
+.footer {
+  width: 100%;
+  height: 100px;
+  background-color: #f5f5f5;
+  border-top: 1px solid #e7e7e7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 </style>

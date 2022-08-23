@@ -18,7 +18,7 @@ public class Topic {
 
     @Getter
     @Setter
-    private String ownerUsername;
+    private Long ownerId;
 
     @Getter
     @Setter

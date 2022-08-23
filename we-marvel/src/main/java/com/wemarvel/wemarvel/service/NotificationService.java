@@ -10,6 +10,6 @@ public interface NotificationService {
     void sendTopicNotification(NotificationDTO notificationDTO);
     void sendFriendNotification(NotificationDTO notificationDTO);
     List<Notification> getAllNotifications();
-    List<Notification> getAllUnreadNotifications();
+    List<NotificationDTO> getAllUnreadNotifications();
     void markAllAsRead();
 }

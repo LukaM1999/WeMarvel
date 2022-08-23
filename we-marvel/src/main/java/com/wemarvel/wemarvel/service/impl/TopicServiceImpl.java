@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.wemarvel.wemarvel.util.SecurityContextUtils.getSignedInUsername;
+import static com.wemarvel.wemarvel.util.SecurityContextUtils.getSignedInUser;
 
 @Service
 public class TopicServiceImpl implements TopicService {
@@ -48,7 +48,7 @@ public class TopicServiceImpl implements TopicService {
             RegisteredUser profile = registeredUserService.getUserByUsername(post.getOwnerUsername());
             if(profile == null) continue;
             ProfileDTO profileDTO = new ProfileDTO();
-            profileDTO.setId(profile.getEmail());
+            profileDTO.setId(profile.getId());
             profileDTO.setUsername(profile.getUsername());
             profileDTO.setRole(profile.getRole().getAuthority());
             profileDTO.setDeleted(profile.isDeleted());
@@ -66,10 +66,10 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public List<TopicDTO> getBoardTopics(Long boardId) {
         List<TopicDTO> topics = topicRepository.getBoardTopics(boardId);
-        String username = getSignedInUsername();
-        if(username.isEmpty()) return topics;
+        RegisteredUser user = getSignedInUser();
+        if(user == null) return topics;
         for (TopicDTO topic : topics) {
-            boolean watched = topicRepository.getWatchedTopic(topic.getId(), username) != null;
+            boolean watched = topicRepository.getWatchedTopic(topic.getId(), user.getId()) != null;
             topic.setWatched(watched);
         }
         return topics;
@@ -80,10 +80,10 @@ public class TopicServiceImpl implements TopicService {
         Topic topic = new Topic();
         topic.setTitle(topicDTO.getTitle());
         topic.setBoardId(topicDTO.getBoardId());
-        topic.setOwnerUsername(topicDTO.getOwnerUsername());
+        topic.setOwnerId(topicDTO.getOwnerId());
         topic.setCreatedAt(LocalDateTime.now());
         Topic newTopic = topicRepository.save(topic);
-        Post newPost = postService.createPost(new Post(topicDTO.getOwnerUsername(), newTopic.getId(),
+        Post newPost = postService.createPost(new Post(topicDTO.getOwnerId(), newTopic.getId(),
                 topicDTO.getFirstPostContent()));
         topic.setFirstPostId(newPost.getId());
         topicRepository.save(topic);

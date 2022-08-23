@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface WatchedTopicRepository extends JpaRepository<WatchedTopic, Long> {
 
-    WatchedTopic findByTopicIdAndUsername(Long topicId, String username);
-    List<WatchedTopic> findByUsername(String username);
+    WatchedTopic findByTopicIdAndUserId(Long topicId, Long userId);
+    List<WatchedTopic> findByUserId(Long userId);
 }

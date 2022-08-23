@@ -12,12 +12,10 @@ import {store} from "@/main";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
 
 let ToastObj = undefined;
-export let topicsChannel = undefined;
+let topicsChannel = undefined;
+let messagesChannel = undefined;
+let friendRequestsChannel = undefined;
 let notificationSettings = undefined;
-const getNotificationSettings = async (displayName) => {
-  const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/notification/user/${displayName}/settings`);
-  notificationSettings = data;
-}
 
 export default {
   name: 'App',
@@ -28,6 +26,7 @@ export default {
   },
   async mounted() {
     onIdTokenChanged(auth, async (user) => {
+      console.log('onIdTokenChanged');
       user?.getIdToken().then(token => {
         store.commit('setToken', token);
       });
@@ -39,46 +38,53 @@ export default {
       if(pusher.connection.state === 'disconnected') {
         pusher.connect();
       }
-      if(notificationSettings && topicsChannel) return;
-      await getNotificationSettings(user.displayName);
+      await this.getNotificationSettings();
       await this.getAllUnreadNotifications();
-      if(!notificationSettings.topics) return;
-      topicsChannel = pusher.subscribe('topics');
-      topicsChannel.bind('new_topic_post', (data) => {
-        this.notifications.push(data);
-        if(this.$route.path === `/forum/board/${data.boardId}/topic/${data.topicId}`) {
-          return;
-        }
-        ToastObj = ToastUtility.show({
-          title: `New post in topic ${data.topicTitle}`,
-          content: 'Click button below to see it!',
-          cssClass: 'e-toast-info',
-          icon: 'e-comment-add e-icons',
-          position: {X: 'Right', Y: 'Top'},
-          showCloseButton: true,
-          buttons: [{
-            click: this.goToTopic(data.boardId, data.topicId),
-            model: {
-              content: 'Go to topic',
-            }
-          }],
-          timeOut: 7000,
-          extendedTimeout: 5000,
-          target: '#container',
-          animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
-          click: arg => {
-            console.log(arg);
+      if(!notificationSettings.topics) topicsChannel = pusher.unsubscribe('topics');
+      if(!notificationSettings.messages) messagesChannel = pusher.unsubscribe('messages');
+      if(!notificationSettings.friendRequests) friendRequestsChannel = pusher.unsubscribe('friend-requests');
+      if(notificationSettings.topics) {
+        topicsChannel = pusher.subscribe('topics');
+        topicsChannel.bind('new_topic_post', (data) => {
+          this.notifications.push(data);
+          if(this.$route.path === `/forum/board/${data.boardId}/topic/${data.topicId}`) {
+            return;
           }
+          ToastObj = ToastUtility.show({
+            title: `New post in topic ${data.topicTitle}`,
+            content: 'Click button below to see it!',
+            cssClass: 'e-toast-info',
+            icon: 'e-comment-add e-icons',
+            position: {X: 'Right', Y: 'Top'},
+            showCloseButton: true,
+            buttons: [{
+              click: this.goToTopic(data.boardId, data.topicId),
+              model: {
+                content: 'Go to topic',
+              }
+            }],
+            timeOut: 7000,
+            extendedTimeout: 5000,
+            target: '#container',
+            animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
+            click: arg => {
+              console.log(arg);
+            }
+          });
         });
-      });
+      }
     })
   },
   methods: {
     goToTopic(boardId, topicId) {
       return () => {
         ToastObj.hide();
-        this.$router.push({name: 'topic', params: {boardId: boardId, id: topicId}});
+        this.$router.push({name: 'topic', params: {boardId: boardId, id: topicId}, query: {page: 'last'}});
       }
+    },
+    async getNotificationSettings() {
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/notification/settings`);
+      notificationSettings = data;
     },
     async getAllUnreadNotifications(){
       await axios.get(`${process.env.VUE_APP_BACKEND}/notification/unread`).then(({data}) => {
@@ -101,6 +107,15 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  height: 100%;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
 }
 
 .grid-container {

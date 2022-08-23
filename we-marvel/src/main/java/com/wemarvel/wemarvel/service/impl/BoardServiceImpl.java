@@ -41,7 +41,7 @@ public class BoardServiceImpl implements BoardService {
                 boardDTO.setFirstTopicId(topics.get(0).getId());
                 boardDTO.setFirstTopicTitle(topics.get(0).getTitle());
                 boardDTO.setFirstTopicDate(topics.get(0).getCreatedAt());
-                RegisteredUser user = registeredUserService.getUserByUsername(topics.get(0).getOwnerUsername());
+                RegisteredUser user = registeredUserService.getUserById(topics.get(0).getOwnerId());
                 boardDTO.setFirstTopicUsername(user.getUsername());
                 boardDTO.setFirstTopicUserId(user.getEmail());
             }
@@ -49,7 +49,7 @@ public class BoardServiceImpl implements BoardService {
                 boardDTO.setSecondTopicId(topics.get(1).getId());
                 boardDTO.setSecondTopicTitle(topics.get(1).getTitle());
                 boardDTO.setSecondTopicDate(topics.get(1).getCreatedAt());
-                RegisteredUser user = registeredUserService.getUserByUsername(topics.get(1).getOwnerUsername());
+                RegisteredUser user = registeredUserService.getUserById(topics.get(1).getOwnerId());
                 boardDTO.setSecondTopicUsername(user.getUsername());
                 boardDTO.setSecondTopicUserId(user.getEmail());
             }

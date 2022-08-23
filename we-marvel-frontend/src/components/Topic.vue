@@ -45,8 +45,21 @@
           </div>
           <div class="row">
             <div class="col-3 ms-3 p-3 profile-info">
-              <a class="custom-link e-bold" :href="`/profile/${data.ownerUsername}`"
-                 @click.prevent="openProfile(data.ownerUsername)">{{ data.ownerUsername }}</a>
+              <div class="row">
+                <div class="col">
+                  <a class="custom-link e-bold" :href="`/profile/${data.ownerUsername}`"
+                     @click.prevent="openProfile(data.ownerUsername)">{{ data.ownerUsername }}</a>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col">
+                  <a :href="`/profile/${data.ownerUsername}`" style="max-width: inherit;"
+                  @click.prevent="openProfile(data.ownerUsername)"><img style="max-width: inherit; box-shadow: 0px 0px 10px 1px black"
+                       :src="data.ownerImageUrl ? data.ownerImageUrl : '/placeholder.jpg'"
+                       :alt="data.ownerUsername"/>
+                  </a>
+                </div>
+              </div>
             </div>
             <div class="col">
               <div class="row">
@@ -103,6 +116,7 @@ import QuotedPost from "@/components/QuotedPost";
 import {deleteObject, getStorage, ref} from "firebase/storage";
 import {Query} from "@syncfusion/ej2-data";
 import {store} from "@/main";
+import {onAuthStateChanged} from "firebase/auth";
 export default {
   name: "Topic",
   components: {
@@ -122,12 +136,24 @@ export default {
       listKey: 0,
       quotedPost: null,
       postToEdit: null,
+      admin: false,
     };
   },
   async mounted() {
+    onAuthStateChanged(auth, async user => {
+      if (user) {
+        await user.getIdTokenResult(true).then(idTokenResult => {
+          console.log(idTokenResult)
+          this.admin = !!idTokenResult.claims.admin;
+        });
+      }
+    });
     await this.getTopicWithPosts();
     this.pagedPosts = this.topic.posts.slice(0, 10);
-    console.log(this.$refs.pager.ej2Instances);
+    if(this.$route.query.page === 'last') {
+      const lastPageButton = document.querySelectorAll('[aria-label="Go to last page"]')[0];
+      lastPageButton?.click();
+    }
   },
   methods: {
     async getTopicWithPosts(){
@@ -170,6 +196,8 @@ export default {
       data.topicTitle = this.topic.title;
       data.number = this.topic.posts.length + 1;
       data.quotedPostId = this.quotedPost?.id;
+      data.ownerUsername = auth.currentUser.displayName;
+      data.ownerImageUrl = auth.currentUser.photoURL;
       this.topic.posts.push(data);
       this.$refs.postList.updated();
       this.$refs.pager.refresh();
@@ -194,7 +222,7 @@ export default {
       return this.topic.posts.find(post => post.id === id);
     },
     isAuthorized(username){
-      return this.$store.getters.user?.displayName === username;
+      return this.$store.getters.user?.displayName === username || this.admin;
     },
     async deletePost(post){
       await axios.delete(`${process.env.VUE_APP_BACKEND}/forum/post/${post.id}`);
@@ -274,6 +302,10 @@ export default {
 
 .e-listview .e-icons {
   color: unset;
+}
+
+.right-0 {
+  right: 0;
 }
 
 </style>

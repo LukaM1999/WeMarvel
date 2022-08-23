@@ -21,6 +21,10 @@ public class Comic {
 
     @Getter
     @Setter
+    private Long seriesId;
+
+    @Getter
+    @Setter
     private String title;
 
     @Column(length = 3000)
@@ -39,7 +43,7 @@ public class Comic {
 
     @Getter
     @Setter
-    private String resourceURI;
+    private String url;
 
     @Getter
     @Setter

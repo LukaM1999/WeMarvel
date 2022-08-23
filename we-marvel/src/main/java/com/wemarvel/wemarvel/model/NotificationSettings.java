@@ -15,7 +15,7 @@ import javax.persistence.Id;
 public class NotificationSettings {
     @Id
     @Getter
-    private String username;
+    private Long userId;
     @Getter
     @Setter
     @Column(columnDefinition = "Boolean default true")

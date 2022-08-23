@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
-import static com.wemarvel.wemarvel.util.SecurityContextUtils.getSignedInUsername;
+import static com.wemarvel.wemarvel.util.SecurityContextUtils.getSignedInUser;
 
 @Service
 public class WatchedTopicServiceImpl implements WatchedTopicService {
@@ -17,25 +18,22 @@ public class WatchedTopicServiceImpl implements WatchedTopicService {
 
     @Override
     public WatchedTopic watchTopic(Long topicId) {
-        String username = getSignedInUsername();
-        if(username == null) throw new IllegalStateException("User is not signed in");
-        WatchedTopic watchedTopic = watchedTopicRepository.findByTopicIdAndUsername(topicId, username);
+        Long userId = Objects.requireNonNull(getSignedInUser()).getId();
+        WatchedTopic watchedTopic = watchedTopicRepository.findByTopicIdAndUserId(topicId, userId);
         if(watchedTopic != null) {
             watchedTopicRepository.deleteById(watchedTopic.getId());
             return null;
         }
-        return watchedTopicRepository.save(new WatchedTopic(null, username, topicId));
+        return watchedTopicRepository.save(new WatchedTopic(null, userId, topicId));
     }
 
     @Override
     public List<WatchedTopic> getWatchedTopics() {
-        String username = getSignedInUsername();
-        if(username == null) throw new IllegalStateException("User is not signed in");
-        return watchedTopicRepository.findByUsername(username);
+        return watchedTopicRepository.findByUserId(Objects.requireNonNull(getSignedInUser()).getId());
     }
 
     @Override
-    public WatchedTopic getWatchedTopic(Long topicId, String username) {
-        return watchedTopicRepository.findByTopicIdAndUsername(topicId, username);
+    public WatchedTopic getWatchedTopic(Long topicId, Long userId) {
+        return watchedTopicRepository.findByTopicIdAndUserId(topicId, userId);
     }
 }

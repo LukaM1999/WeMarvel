@@ -16,7 +16,13 @@ public class PostDTO {
     private Long id;
     @Getter
     @Setter
+    private Long ownerId;
+    @Getter
+    @Setter
     private String ownerUsername;
+    @Getter
+    @Setter
+    private String ownerImageUrl;
     @Getter
     @Setter
     private Long topicId;
@@ -28,15 +34,18 @@ public class PostDTO {
     private Long quotedPostId;
     @Getter
     @Setter
-    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
+    @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime createdAt;
     @Getter
     @Setter
     private String content;
     @Getter
     @Setter
-    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
+    @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime modifiedAt;
+    @Getter
+    @Setter
+    private Long modifiedById;
     @Getter
     @Setter
     private String modifiedByUsername;
@@ -50,18 +59,21 @@ public class PostDTO {
     @Setter
     private ProfileDTO owner;
 
-    public PostDTO(Long id, String ownerUsername, Long topicId, String topicTitle,
+    public PostDTO(Long id, Long ownerId, String ownerUsername, String ownerImageUrl, Long topicId, String topicTitle,
                    Long quotedPostId,
-                   LocalDateTime createdAt, String content, LocalDateTime modifiedAt,
+                   LocalDateTime createdAt, String content, LocalDateTime modifiedAt, Long modifiedById,
                    String modifiedByUsername, int modifications, boolean deleted) {
         this.id = id;
+        this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
+        this.ownerImageUrl = ownerImageUrl;
         this.topicId = topicId;
         this.topicTitle = topicTitle;
         this.quotedPostId = quotedPostId;
         this.createdAt = createdAt;
         this.content = content;
         this.modifiedAt = modifiedAt;
+        this.modifiedById = modifiedById;
         this.modifiedByUsername = modifiedByUsername;
         this.modifications = modifications;
         this.deleted = deleted;

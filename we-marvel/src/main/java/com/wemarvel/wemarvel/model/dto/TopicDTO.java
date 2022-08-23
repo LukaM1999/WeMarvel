@@ -18,6 +18,9 @@ public class TopicDTO {
     private Long id;
     @Getter
     @Setter
+    private Long ownerId;
+    @Getter
+    @Setter
     private String ownerUsername;
     @Getter
     @Setter
@@ -30,7 +33,7 @@ public class TopicDTO {
     private Long marvelEntityId;
     @Getter
     @Setter
-    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
+    @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime createdAt;
     @Getter
     @Setter
@@ -49,7 +52,7 @@ public class TopicDTO {
     private Long postCount;
     @Getter
     @Setter
-    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "Europe/Belgrade")
+    @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime lastPostDate;
     @Getter
     @Setter
@@ -58,10 +61,11 @@ public class TopicDTO {
     @Setter
     private String firstPostContent;
 
-    public TopicDTO(Long id, String ownerUsername, Long boardId, String boardTitle,
+    public TopicDTO(Long id, Long ownerId, String ownerUsername, Long boardId, String boardTitle,
                     Long marvelEntityId, LocalDateTime createdAt,
                     String title, boolean sticky, boolean locked) {
         this.id = id;
+        this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
         this.boardId = boardId;
         this.boardTitle = boardTitle;
@@ -73,12 +77,13 @@ public class TopicDTO {
     }
 
     public TopicDTO(Long id, String title, Long posts, LocalDateTime lastPostDate,
-                    LocalDateTime createdAt, String ownerUsername) {
+                    LocalDateTime createdAt, Long ownerId, String ownerUsername) {
         this.id = id;
         this.title = title;
         this.postCount = posts;
         this.lastPostDate = lastPostDate;
         this.createdAt = createdAt;
+        this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
     }
 }
