@@ -73,4 +73,11 @@ public class ComicDTO {
         this.pageCount = pageCount;
         this.readingCount = readingCount;
     }
+
+    public ComicDTO(Long id, Long seriesId, String title, String thumbnail) {
+        this.id = id;
+        this.seriesId = seriesId;
+        this.title = title;
+        this.thumbnail = thumbnail;
+    }
 }

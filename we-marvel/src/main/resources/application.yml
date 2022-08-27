@@ -10,7 +10,6 @@ spring:
       platform: postgres
       mode: always
 
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -80,5 +79,8 @@ security:
     - /user
     - /forum/**
     - /notification/**
+    - /comicProgress/**
+    - /comic
+    - /series
   exposed-headers:
     - X-Xsrf-Token

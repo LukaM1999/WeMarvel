@@ -13,10 +13,9 @@ import TopRatedCharacters from "@/components/TopRatedCharacters";
 import ForumOverview from "@/components/ForumOverview";
 import Topic from "@/components/Topic";
 import Profile from "@/components/Profile";
-import {onAuthStateChanged} from "firebase/auth";
-import {auth} from "@/firebaseConfig";
 import Board from "@/components/Board";
 import Pusher from "pusher-js";
+import Users from "@/components/Users";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -65,6 +64,11 @@ const routes = [
                 path: '/profile/:username',
                 name: 'profile',
                 component: Profile
+            },
+            {
+                path: '/users',
+                name: 'users',
+                component: Users
             },
         ]
     },

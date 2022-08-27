@@ -1,8 +1,12 @@
 package com.wemarvel.wemarvel.repository;
 
 import com.wemarvel.wemarvel.model.RegisteredUser;
+import com.wemarvel.wemarvel.model.dto.ProfileDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
+
+import java.util.List;
 
 public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, Long> {
 
@@ -10,7 +14,8 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
 
     RegisteredUser getByUsername(String username);
 
-//    @Query("UPDATE RegisteredUser u SET u.firstName = ?1, u.lastName = ?2, u.email = ?3, u.phone = ?4, u.address = ?5, u.city = ?6, u.country = ?7, u.dislinktUsername = ?8, u.dislinktToken = ?9 WHERE u.username = ?10")
-//    RegisteredUser updateUser(String firstName, String lastName, String email, String phoneNumber, String address,
-//                              String city, String country, String dislinktUsername, String dislinktToken, String username);
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ProfileDTO(u.id, u.username, u.imageUrl, " +
+            "u.location, u.gender, u.birthday) " +
+            "FROM RegisteredUser u")
+    List<ProfileDTO> getProfiles();
 }

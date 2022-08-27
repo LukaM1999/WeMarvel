@@ -65,4 +65,12 @@ public class Comic {
     @Setter
     @Column(columnDefinition = "Decimal(4, 2) default '0.0'")
     private double averageRating;
+
+    public Comic(Long id, Long seriesId, String title, String thumbnail, String url) {
+        this.id = id;
+        this.seriesId = seriesId;
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.url = url;
+    }
 }

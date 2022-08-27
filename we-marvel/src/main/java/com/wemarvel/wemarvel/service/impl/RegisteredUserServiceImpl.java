@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
+import java.util.List;
 import java.util.UUID;
 
 import static com.wemarvel.wemarvel.util.SecurityContextUtils.getSignedInUser;
@@ -93,5 +94,10 @@ public class RegisteredUserServiceImpl implements RegisteredUserService {
         user.setGender(profile.getGender());
         user.setLocation(profile.getLocation());
         userRepository.save(user);
+    }
+
+    @Override
+    public List<ProfileDTO> getProfiles() {
+        return userRepository.getProfiles();
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import static com.wemarvel.wemarvel.util.SecurityContextUtils.getSignedInUser;
 
@@ -57,6 +58,11 @@ public class UserController {
     @PatchMapping("/profile")
     public void updateProfile(@RequestBody ProfileDTO profile) {
         registeredUserService.updateProfile(profile);
+    }
+
+    @GetMapping("/profile")
+    public List<ProfileDTO> getProfiles(){
+        return registeredUserService.getProfiles();
     }
 
 

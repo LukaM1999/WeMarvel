@@ -1,5 +1,6 @@
 package com.wemarvel.wemarvel.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.wemarvel.wemarvel.model.enums.ReadingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +17,8 @@ import java.time.LocalDate;
 public class ComicProgress {
 
     @Id
-    @GeneratedValue
+    @SequenceGenerator(name = "comicProgressIdGen", sequenceName = "comicProgressIdSeq", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "comicProgressIdGen")
     @Getter
     private Long id;
 
@@ -45,9 +47,11 @@ public class ComicProgress {
 
     @Getter
     @Setter
+    @JsonFormat(pattern = "dd.MM.yyyy.")
     private LocalDate startDate;
 
     @Getter
     @Setter
+    @JsonFormat(pattern = "dd.MM.yyyy.")
     private LocalDate endDate;
 }

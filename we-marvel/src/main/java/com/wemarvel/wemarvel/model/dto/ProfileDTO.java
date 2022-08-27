@@ -1,5 +1,6 @@
 package com.wemarvel.wemarvel.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.wemarvel.wemarvel.model.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,5 +35,15 @@ public class ProfileDTO {
     private Gender gender;
     @Getter
     @Setter
+    @JsonFormat(pattern = "dd.MM.yyyy.")
     private LocalDate birthday;
+
+    public ProfileDTO(Long id, String username, String imageUrl, String location, Gender gender, LocalDate birthday) {
+        this.id = id;
+        this.username = username;
+        this.imageUrl = imageUrl;
+        this.location = location;
+        this.gender = gender;
+        this.birthday = birthday;
+    }
 }

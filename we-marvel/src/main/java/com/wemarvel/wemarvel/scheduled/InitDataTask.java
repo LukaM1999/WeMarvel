@@ -59,7 +59,7 @@ public class InitDataTask {
         //updateLatestComics();
     }
 
-    @PreDestroy
+    //@PreDestroy
     public void destroy() {
         LOGGER.info("Dumping data");
         try {
@@ -522,7 +522,7 @@ public class InitDataTask {
     @Scheduled(cron = "0 0 4 * * *", zone = "Europe/Belgrade")
     public void updateDataScheduled(){
         LOGGER.info("Init data scheduled");
-        updateLatestMarvelCharacters();
-        updateLatestComics();
+        //updateLatestMarvelCharacters();
+        //updateLatestComics();
     }
 }

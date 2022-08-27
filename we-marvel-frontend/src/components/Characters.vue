@@ -81,7 +81,6 @@ export default {
       pageSize: 10,
       query: new Query().range(0, 10),
       fields: { text: 'name', id: 'id' },
-      characterTemplate: null,
       search: '',
       sort: 'name',
     };

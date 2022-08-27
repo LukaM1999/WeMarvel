@@ -1,5 +1,5 @@
 <template>
-<div style="overflow-x: hidden">
+<div id="profileContainer" style="overflow-x: hidden">
   <h1>{{$route.params.username}}'s Profile</h1>
   <ejs-tab ref="tabs" :selected="tabSelected" class="e-fill">
     <e-tabitems>
@@ -13,6 +13,21 @@
 
             </div>
           </div>
+        </template>
+      </e-tabitem>
+      <e-tabitem :header="{text: 'Comics'}" :content="'comicsTemplate'">
+        <template v-slot:comicsTemplate="{}">
+          <ComicProgress/>
+        </template>
+      </e-tabitem>
+      <e-tabitem :header="{text: 'Posts'}" :content="'friendsTemplate'">
+        <template v-slot:friendsTemplate="{}">
+
+        </template>
+      </e-tabitem>
+      <e-tabitem :header="{text: 'Friends'}" :content="'friendsTemplate'">
+        <template v-slot:friendsTemplate="{}">
+
         </template>
       </e-tabitem>
       <e-tabitem v-if="isAuthorized" :header="{text: 'Settings'}" :content="'settingsTemplate'">
@@ -79,8 +94,12 @@
                                     :autoUpload="false" maxFileSize="5000000"
                                     :multiple="false" :selected="imageSelected"
                                     :asyncSettings="path"
-                                    :beforeUpload="beforeUpload">
-
+                                    :beforeUpload="beforeUpload"
+                                    :clearing="clearingFile" :removing="removing">
+                        <e-files v-if="imageInfo.size > 0">
+                          <e-uploadedfiles name='profile-picture' :size="imageInfo.size"
+                                           :type="imageInfo.contentType"></e-uploadedfiles>
+                        </e-files>
                       </ejs-uploader>
                     </div>
                   </div>
@@ -94,7 +113,8 @@
                   <b class="label">Birthday:</b>
                 </div>
                 <div class="col-4">
-                  <ejs-datepicker :value="profile.birthday" v-model="profile.birthday" :format="'dd.MM.yyyy.'"></ejs-datepicker>
+                  <ejs-datepicker :value="profile.birthday" v-model="profile.birthday" :format="'dd.MM.yyyy.'"
+                  :enableMask="true" :maskPlaceholder="maskPlaceholder"></ejs-datepicker>
                 </div>
               </div>
               <div class="row justify-content-center mb-2">
@@ -150,9 +170,9 @@
                   <ejs-switch :value="notificationSettings.friendRequests" :checked="notificationSettings.friendRequests" v-model="notificationSettings.friendRequests"></ejs-switch>
                 </div>
               </div>
-              <div v-if="changesExist()" class="row mt-3">
+              <div class="row mt-3">
                 <div class="col">
-                  <ejs-button @click="saveNotificationSettings">Save</ejs-button>
+                  <ejs-button :disabled="!changesExist()" @click="saveNotificationSettings">Save notifications</ejs-button>
                 </div>
               </div>
             </div>
@@ -170,17 +190,21 @@ import {ButtonComponent, SwitchComponent} from "@syncfusion/ej2-vue-buttons";
 import axios from "axios";
 import {auth} from "@/firebaseConfig";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
-import {verifyPasswordResetCode, sendPasswordResetEmail, confirmPasswordReset, onIdTokenChanged, updateProfile} from "firebase/auth";
-import {UploaderComponent} from "@syncfusion/ej2-vue-inputs";
-import {getDownloadURL, getStorage, ref, uploadBytes} from "firebase/storage";
+import {verifyPasswordResetCode, sendPasswordResetEmail,
+  confirmPasswordReset, onIdTokenChanged, updateProfile} from "firebase/auth";
+import {UploaderComponent, FilesDirective, UploadedFilesDirective} from "@syncfusion/ej2-vue-inputs";
+import {getDownloadURL, getStorage, ref, uploadBytes, getMetadata, deleteObject} from "firebase/storage";
 import {DatePickerComponent, MaskedDateTime} from '@syncfusion/ej2-vue-calendars'
 import { ComboBoxComponent } from "@syncfusion/ej2-vue-dropdowns";
 import moment from "moment";
+import {store} from "@/main";
+import ComicProgress from "@/components/ComicProgress";
 
 
 export default {
   name: "Profile",
   components: {
+    ComicProgress,
     "ejs-tab": TabComponent,
     "e-tabitems": TabItemsDirective,
     "e-tabitem": TabItemDirective,
@@ -188,7 +212,9 @@ export default {
     "ejs-button": ButtonComponent,
     "ejs-uploader": UploaderComponent,
     'ejs-datepicker' : DatePickerComponent,
-    'ejs-combobox': ComboBoxComponent
+    'ejs-combobox': ComboBoxComponent,
+    'e-files': FilesDirective,
+    'e-uploadedfiles': UploadedFilesDirective,
   },
   data(){
     return {
@@ -229,12 +255,21 @@ export default {
       gender: '',
       birthday: '',
       location: '',
+      imageInfo: {
+        size: 0,
+        contentType: 'png'
+      },
+      maskPlaceholder: {day: 'dd', month: 'mm', year: 'yyyy'}
     }
   },
   async mounted() {
-    onIdTokenChanged(auth, (user) => {
-      this.isAuthorized = auth.currentUser.displayName === this.$route.params.username;
-      this.imageUrl = auth.currentUser.photoURL;
+    onIdTokenChanged(auth, async (user) => {
+      this.isAuthorized = user.displayName === this.$route.params.username;
+      this.imageUrl = user.photoURL;
+      if(!this.imageUrl) return;
+      const storage = getStorage()
+      this.imageInfo = await getMetadata(ref(storage, this.imageUrl))
+      this.imageInfo.contentType = "." + this.imageInfo.contentType.split('/')[1];
     });
     if(this.$route.query.mode !== 'resetPassword' || !this.$route.query.oobCode) return;
     this.$refs.tabs.select(1);
@@ -245,7 +280,7 @@ export default {
   },
   methods: {
     async tabSelected(e) {
-      if(e.selectedIndex === 1){
+      if(e.selectedIndex === 4){
         await this.getNotificationSettings();
         await this.getProfileInfo();
       }
@@ -309,11 +344,10 @@ export default {
         content: 'Check your email for the password reset link',
         cssClass: 'e-toast-success',
         icon: 'e-success e-icons',
-        position: {X: 'Right', Y: 'Top'},
+        position: {X: document.body.offsetWidth - 360, Y: 80},
         showCloseButton: true,
         timeOut: 7000,
         extendedTimeout: 5000,
-        target: '#container',
         animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
       });
     },
@@ -325,11 +359,10 @@ export default {
         content: 'Please sign in again',
         cssClass: 'e-toast-success',
         icon: 'e-success e-icons',
-        position: {X: 'Right', Y: 'Top'},
+        position: {X: document.body.offsetWidth - 360, Y: 80},
         showCloseButton: true,
         timeOut: 7000,
         extendedTimeout: 5000,
-        target: '#container',
         animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
       });
       this.showPasswordResetForm = false;
@@ -346,11 +379,10 @@ export default {
         content: 'Username changed successfully',
         cssClass: 'e-toast-success',
         icon: 'e-success e-icons',
-        position: {X: 'Right', Y: 'Top'},
+        position: {X: document.body.offsetWidth - 360, Y: 80},
         showCloseButton: true,
         timeOut: 7000,
         extendedTimeout: 5000,
-        target: '#container',
         animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
       });
     },
@@ -372,17 +404,17 @@ export default {
       await updateProfile(auth.currentUser, {photoURL: url});
       await axios.patch(`${process.env.VUE_APP_BACKEND}/user/image`, {imageUrl: url});
       this.imageUrl = url;
-      this.$refs.uploader.clearAll();
+      this.imageInfo = metadata;
+      this.imageInfo.contentType = '.' + metadata.contentType.split('/')[1];
       ToastUtility.show({
         title: 'Profile image changed',
         content: 'Profile image changed successfully',
         cssClass: 'e-toast-success',
         icon: 'e-success e-icons',
-        position: {X: 'Right', Y: 'Top'},
+        position: {X: document.body.offsetWidth - 360, Y: 80},
         showCloseButton: true,
         timeOut: 7000,
         extendedTimeout: 5000,
-        target: '#container',
         animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
       });
     },
@@ -397,16 +429,41 @@ export default {
         content: 'Profile info changed successfully',
         cssClass: 'e-toast-success',
         icon: 'e-success e-icons',
-        position: {X: 'Right', Y: 'Top'},
+        position: {X: document.body.offsetWidth - 360, Y: 80},
         showCloseButton: true,
         timeOut: 7000,
         extendedTimeout: 5000,
-        target: '#container',
         animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
       });
       this.gender = this.profile.gender;
       this.location = this.profile.location;
       this.birthday = moment(this.profile.birthday).format('DD.MM.yyyy.');
+    },
+    async clearingFile(e){
+      if(e.filesData[0]?.statusCode !== '2') {
+        this.imageUrl = '';
+        this.imageInfo = {size: 0, contentType: '.png'};
+        return;
+      }
+      const storage = getStorage();
+      await deleteObject(ref(storage, this.imageUrl))
+      await updateProfile(auth.currentUser, {photoURL: ''});
+      await axios.patch(`${process.env.VUE_APP_BACKEND}/user/image`, {imageUrl: ''});
+      this.imageUrl = '';
+      this.imageInfo = {size: 0, contentType: '.png'};
+    },
+    async removing(e){
+      if(e.filesData[0]?.statusCode !== '2') {
+        this.imageUrl = '';
+        this.imageInfo = {size: 0, contentType: '.png'};
+        return;
+      }
+      const storage = getStorage();
+      await deleteObject(ref(storage, this.imageUrl))
+      await updateProfile(auth.currentUser, {photoURL: ''});
+      await axios.patch(`${process.env.VUE_APP_BACKEND}/user/image`, {imageUrl: ''});
+      this.imageUrl = '';
+      this.imageInfo = {size: 0, contentType: '.png'};
     }
   },
   provide: {

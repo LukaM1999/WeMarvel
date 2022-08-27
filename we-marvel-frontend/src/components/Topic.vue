@@ -54,7 +54,8 @@
               <div class="row mt-3">
                 <div class="col">
                   <a :href="`/profile/${data.ownerUsername}`" style="max-width: inherit;"
-                  @click.prevent="openProfile(data.ownerUsername)"><img style="max-width: inherit; box-shadow: 0px 0px 10px 1px black"
+                  @click.prevent="openProfile(data.ownerUsername)">
+                    <img style="max-width: inherit; box-shadow: 0px 0px 10px 1px black"
                        :src="data.ownerImageUrl ? data.ownerImageUrl : '/placeholder.jpg'"
                        :alt="data.ownerUsername"/>
                   </a>
