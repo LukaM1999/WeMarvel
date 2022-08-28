@@ -24,6 +24,11 @@ public class NotificationSettingsServiceImpl implements NotificationSettingsServ
     }
 
     @Override
+    public NotificationSettings getByUserId(Long userId) {
+        return notificationSettingsRepository.findById(userId).orElse(null);
+    }
+
+    @Override
     public List<Long> getUsersWithEnabledTopics(Long excludedUserId) {
         return notificationSettingsRepository.getUsersWithEnabledTopics(excludedUserId);
     }

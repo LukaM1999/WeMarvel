@@ -38,8 +38,14 @@ public class NotificationController {
     }
 
     @PostMapping("/topic")
-    public ResponseEntity<String> sendTopicNotification(@RequestBody NotificationDTO notificationDTO) {
+    public ResponseEntity<?> sendTopicNotification(@RequestBody NotificationDTO notificationDTO) {
         notificationService.sendTopicNotification(notificationDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/friend")
+    public ResponseEntity<?> sendFriendNotification(@RequestBody NotificationDTO notificationDTO) {
+        notificationService.sendFriendNotification(notificationDTO);
         return ResponseEntity.ok().build();
     }
 
@@ -54,7 +60,7 @@ public class NotificationController {
     }
 
     @PatchMapping("/read")
-    public ResponseEntity<String> markAllAsRead() {
+    public ResponseEntity<?> markAllAsRead() {
         notificationService.markAllAsRead();
         return ResponseEntity.ok().build();
     }

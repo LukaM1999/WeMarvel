@@ -44,9 +44,6 @@ public class UserController {
 
     @GetMapping("/{username}")
     public ResponseEntity<RegisteredUser> getRegisteredUser(@PathVariable String username){
-        RegisteredUser user = getSignedInUser();
-        if(user == null || (!user.getUsername().equals(username) && user.getRole().getAuthority().equals("USER")))
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         return ResponseEntity.ok(registeredUserService.getUserByUsername(username));
     }
 

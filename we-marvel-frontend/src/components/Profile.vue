@@ -1,33 +1,26 @@
 <template>
 <div id="profileContainer" style="overflow-x: hidden">
   <h1>{{$route.params.username}}'s Profile</h1>
-  <ejs-tab ref="tabs" :selected="tabSelected" class="e-fill">
+  <ejs-tab v-if="profile.username" ref="tabs" :selected="tabSelected" class="e-fill">
     <e-tabitems>
-      <e-tabitem :header="{text: 'About'}" :content="'aboutTemplate'">
-        <template v-slot:aboutTemplate="{}">
-          <div class="row">
-            <div class="col">
-
-            </div>
-            <div class="col">
-
-            </div>
-          </div>
+      <e-tabitem :header="{text: 'Overview'}" :content="'overviewTemplate'">
+        <template v-slot:overviewTemplate="{}">
+          <ProfileOverview v-if="profile.username" :profile="profile" />
         </template>
       </e-tabitem>
       <e-tabitem :header="{text: 'Comics'}" :content="'comicsTemplate'">
         <template v-slot:comicsTemplate="{}">
-          <ComicProgress/>
-        </template>
-      </e-tabitem>
-      <e-tabitem :header="{text: 'Posts'}" :content="'friendsTemplate'">
-        <template v-slot:friendsTemplate="{}">
-
+          <ComicProgress :username="profile.username" :authorized="isAuthorized"/>
         </template>
       </e-tabitem>
       <e-tabitem :header="{text: 'Friends'}" :content="'friendsTemplate'">
         <template v-slot:friendsTemplate="{}">
-
+          <Users v-if="profile?.username" :username="profile.username"></Users>
+        </template>
+      </e-tabitem>
+      <e-tabitem v-if="isAuthorized" :header="{text: 'Friend requests'}" :content="'friendRequestsTemplate'">
+        <template v-slot:friendRequestsTemplate="{}">
+          <FriendRequests ref="friendRequestsRef"/>
         </template>
       </e-tabitem>
       <e-tabitem v-if="isAuthorized" :header="{text: 'Settings'}" :content="'settingsTemplate'">
@@ -199,12 +192,18 @@ import { ComboBoxComponent } from "@syncfusion/ej2-vue-dropdowns";
 import moment from "moment";
 import {store} from "@/main";
 import ComicProgress from "@/components/ComicProgress";
+import ProfileOverview from "@/components/ProfileOverview";
+import Users from "@/components/Users";
+import FriendRequests from "@/components/FriendRequests";
 
 
 export default {
   name: "Profile",
   components: {
+    Users,
+    ProfileOverview,
     ComicProgress,
+    FriendRequests,
     "ejs-tab": TabComponent,
     "e-tabitems": TabItemsDirective,
     "e-tabitem": TabItemDirective,
@@ -229,7 +228,7 @@ export default {
         friendRequests: true,
       },
       profile: {
-        gender: {text: 'Not specified', value: null},
+        gender: '',
         birthday: '',
         location: '',
       },
@@ -259,30 +258,37 @@ export default {
         size: 0,
         contentType: 'png'
       },
-      maskPlaceholder: {day: 'dd', month: 'mm', year: 'yyyy'}
+      maskPlaceholder: {day: 'dd', month: 'mm', year: 'yyyy'},
     }
   },
   async mounted() {
+    await this.getProfileInfo();
     onIdTokenChanged(auth, async (user) => {
       this.isAuthorized = user.displayName === this.$route.params.username;
       this.imageUrl = user.photoURL;
+      if(this.$route.query.tab) {
+        await this.$nextTick(() => {
+          this.$refs.tabs.select(Number.parseInt(this.$route.query.tab));
+        });
+      }
       if(!this.imageUrl) return;
       const storage = getStorage()
       this.imageInfo = await getMetadata(ref(storage, this.imageUrl))
       this.imageInfo.contentType = "." + this.imageInfo.contentType.split('/')[1];
     });
-    if(this.$route.query.mode !== 'resetPassword' || !this.$route.query.oobCode) return;
-    this.$refs.tabs.select(1);
-    this.oobCode = this.$route.query.oobCode;
-    const email = await verifyPasswordResetCode(auth, this.oobCode);
-    if(!email) return;
-    this.showPasswordResetForm = true;
+    if(this.$route.query.mode === 'resetPassword' && this.$route.query.oobCode) {
+      this.$refs.tabs.select(4);
+      this.oobCode = this.$route.query.oobCode;
+      const email = await verifyPasswordResetCode(auth, this.oobCode);
+      if (!email) return;
+      this.showPasswordResetForm = true;
+    }
   },
   methods: {
     async tabSelected(e) {
+      this.$router.push({query: {tab: e.selectedIndex}});
       if(e.selectedIndex === 4){
         await this.getNotificationSettings();
-        await this.getProfileInfo();
       }
     },
     async getNotificationSettings(){
@@ -291,7 +297,7 @@ export default {
       this.oldNotificationSettings = Object.assign({}, data);
     },
     async getProfileInfo(){
-      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/user/${auth.currentUser.displayName}`)
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/user/${this.$route.params.username}`);
       const newData = this.replaceNullWithEmpty(data);
       this.profile = newData;
       this.gender = newData.gender;
@@ -468,11 +474,25 @@ export default {
   },
   provide: {
     datepicker: [MaskedDateTime]
-  }
+  },
+  watch: {
+    $route: {
+      deep: true,
+      handler: function (to, from) {
+        if(to.query.tab !== from.query.tab) {
+          this.$refs.tabs.select(parseInt(to.query.tab));
+        }
+        if(to.params.username === from.params.username) return;
+        this.username = to.params.username;
+        this.getProfileInfo();
+        this.isAuthorized = auth.currentUser.displayName === this.username;
+      },
+    }
+  },
 }
 </script>
 
-<style scoped>
+<style>
 .label {
   font-size: 16px;
 }

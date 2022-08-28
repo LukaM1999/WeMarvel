@@ -46,7 +46,7 @@ export default {
       if(notificationSettings.topics) {
         topicsChannel = pusher.subscribe('topics');
         topicsChannel.bind('new_topic_post', (data) => {
-          this.notifications.push(data);
+          this.notifications.unshift(data);
           if(this.$route.path === `/forum/board/${data.boardId}/topic/${data.topicId}`) {
             return;
           }
@@ -61,6 +61,57 @@ export default {
               click: this.goToTopic(data.boardId, data.topicId),
               model: {
                 content: 'Go to topic',
+              }
+            }],
+            timeOut: 7000,
+            extendedTimeout: 5000,
+            target: '#container',
+            animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
+            click: arg => {
+              console.log(arg);
+            }
+          });
+        });
+      }
+      if(notificationSettings.friendRequests){
+        friendRequestsChannel = pusher.subscribe('friends');
+        friendRequestsChannel.bind('new_friend_request', (data) => {
+          this.notifications.unshift(data);
+          ToastObj = ToastUtility.show({
+            title: `New friend request from ${data.senderUsername}`,
+            content: 'Click button below to see it!',
+            cssClass: 'e-toast-info',
+            icon: 'e-people e-icons',
+            position: {X: 'Right', Y: 'Top'},
+            showCloseButton: true,
+            buttons: [{
+              click: this.goToProfile(data.senderUsername),
+              model: {
+                content: 'Go to profile',
+              }
+            }],
+            timeOut: 7000,
+            extendedTimeout: 5000,
+            target: '#container',
+            animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
+            click: arg => {
+              console.log(arg);
+            }
+          });
+        });
+        friendRequestsChannel.bind('accepted_friend_request', (data) => {
+          this.notifications.unshift(data);
+          ToastObj = ToastUtility.show({
+            title: `${data.senderUsername} accepted your friend request`,
+            content: 'Click button below to see their profile!',
+            cssClass: 'e-toast-info',
+            icon: 'e-check-circle e-icons',
+            position: {X: 'Right', Y: 'Top'},
+            showCloseButton: true,
+            buttons: [{
+              click: this.goToProfile(data.senderUsername),
+              model: {
+                content: 'Go to profile',
               }
             }],
             timeOut: 7000,
@@ -93,7 +144,13 @@ export default {
         alert(error.message)
       })
     },
-  }
+    goToProfile(senderUsername) {
+      return () => {
+        ToastObj.hide();
+        this.$router.push({name: 'profile', params: {username: senderUsername}});
+      }
+    }
+  },
 }
 </script>
 
@@ -386,7 +443,7 @@ tr:hover {
 
 .e-listview:not(.e-list-template) .e-list-item {
   height: auto;
-  max-height: 7em;
+  max-height: 11em;
   line-height: 24px;
   padding: 0 14px;
   position: relative;

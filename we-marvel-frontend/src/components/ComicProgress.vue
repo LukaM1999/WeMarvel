@@ -2,10 +2,11 @@
 <div id="comicProgressContainer">
   <ComicProgressForm ref="comicProgress" v-if="showForm" :key="comicProgressKey" :comic-progress="selectedRow"
   @comic-progress-created="comicProgressCreated"/>
-  <ejs-grid class="mt-3" :dataSource='comics' :allowPaging='true' :pageSettings="pageSettings"
-            :editSettings='editSettings' :toolbar='toolbar' height='273px'
+  <ejs-grid :dataSource='comics' :allowPaging='true' :pageSettings="pageSettings"
+            :editSettings='editSettings' :toolbar="authorized ? toolbar : ''" height='273px'
             :allowFiltering='true' :filterSettings="filterSettings" :allowSorting="true"
-            :beginEdit="beforeEdit" :beforeDelete="beforeDelete" :actionBegin="actionBegin">
+            :beginEdit="beforeEdit" :beforeDelete="beforeDelete" :actionBegin="actionBegin"
+            :allowResizing="true">
     <e-columns>
       <e-column field="index" :allowFiltering="false" :allowSorting="false" headerText="#" width="40" textAlign="Center" :template="'indexTemplate'"></e-column>
       <e-column field="comicUrl" :allowFiltering="false" :allowSorting="false" headerText="Image" width="70" textAlign="Center" :template="'imageTemplate'"></e-column>
@@ -40,7 +41,7 @@ import {
   Toolbar,
   Edit,
   Filter,
-  Sort
+  Sort, Resize
 } from "@syncfusion/ej2-vue-grids";
 import axios from "axios";
 import {auth} from "@/firebaseConfig";
@@ -54,6 +55,18 @@ export default {
     'ejs-grid': GridComponent,
     'e-columns': ColumnsDirective,
     'e-column': ColumnDirective,
+  },
+  props: {
+    authorized: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    username: {
+      type: String,
+      default: "",
+      required: true,
+    },
   },
   data(){
     return {
@@ -70,6 +83,7 @@ export default {
       selectedRow: {},
       showForm: false,
       comicProgressKey: 0,
+      isAuthorized: false,
     }
   },
   async mounted() {
@@ -77,7 +91,7 @@ export default {
   },
   methods: {
     async getUserComics () {
-      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/comicProgress/user/${auth.currentUser.displayName}`);
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/comicProgress/user/${this.username}`);
       this.comics = data;
       for (let c of this.comics){
         if(!c.comicThumbnail) continue;
@@ -93,8 +107,8 @@ export default {
       return lowerStatus.charAt(0).toUpperCase() + lowerStatus.slice(1)
     },
     beforeEdit(e){
-      console.log(e.rowData);
       e.cancel = true;
+      if(!this.authorized) return;
       this.showForm = false;
       this.comicProgressKey++;
       this.selectedRow = e.rowData;
@@ -176,7 +190,7 @@ export default {
     }
   },
   provide: {
-    grid: [Page, Edit, Toolbar, Filter, Sort]
+    grid: [Page, Edit, Toolbar, Filter, Sort, Resize]
   },
 }
 </script>

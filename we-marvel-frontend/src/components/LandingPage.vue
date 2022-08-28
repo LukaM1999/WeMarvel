@@ -16,7 +16,7 @@
           <template v-slot:notificationsTemplate="{}">
             <div id="notifications" title="View notifications" class="row h-100 align-items-center">
               <ejs-tooltip isSticky="true" position="TopLeft" :content="'tooltipTemplate'"
-                           opensOn="Click" width="30%">
+                           opensOn="Click" >
                 <template v-slot:tooltipTemplate="{}">
                   <ejs-listview id="notificationsList" :dataSource="notifications"
                                 :headerTemplate="'notificationsHeaderTemplate'"
@@ -38,23 +38,40 @@
                     </template>
                     <template v-slot:notificationsTemplate="{data}">
                       <div class="row">
-                        <div class="col d-flex justify-content-start">
-                          <b v-if="data.type === 'new_topic_post'">New post</b>
-                        </div>
-                        <div class="col d-flex justify-content-end">
-                          <i>{{data.receivedAt}}</i>
-                        </div>
-                      </div>
-                      <div class="row">
                         <div class="col justify-content-start">
-                          <a class="custom-link" :href="`/profile/${data.posterUsername}`"
-                                                            @click.prevent="openProfile(data.posterUsername)">
-                            {{data.posterUsername}}</a>
+                          <div class="row">
+                            <div class="col">
+                              <b v-if="data.type !== 'accepted_friend_request'">New {{data.type === 'new_topic_post' ? 'post' : 'friend request'}} from <a class="custom-link" :href="`/profile/${data.senderUsername}`"
+                                                                                                            @click.prevent="openProfile(data.senderUsername)">
+                                {{data.senderUsername}}</a>
+                              </b>
+                              <b v-else>Friend request accepted from <a class="custom-link" :href="`/profile/${data.senderUsername}`"
+                                                                 @click.prevent="openProfile(data.senderUsername)">
+                                {{data.senderUsername}}</a></b>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col">
+                              <a :href="`/profile/${data.senderUsername}`">
+                                <img v-if="data.senderUsername" :src="data.senderImageUrl || '/placeholder.jpg'"
+                                     width="50" height="50" :alt="data.senderUsername"/>
+                              </a>
+                            </div>
+                          </div>
                         </div>
                         <div class="col justify-content-end">
-                          <a class="custom-link" :href="`/forum/board/${data.boardId}/topic/${data.topicId}`"
-                                                             @click.prevent="openTopic(data)">
-                            {{data.topicTitle}}</a>
+                          <div class="row justify-content-end">
+                            <div class="col">
+                              <i>{{data.receivedAt}}</i>
+                            </div>
+                          </div>
+                          <div v-if="data.boardId" class="row justify-content-end">
+                            <div class="col">
+                              <a class="custom-link" :href="`/forum/board/${data.boardId}/topic/${data.topicId}`"
+                                 @click.prevent="openTopic(data)">
+                                {{data.topicTitle}}</a>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </template>
@@ -205,11 +222,15 @@ export default {
       profileMenuItems: [
         {
           text: 'Profile',
-          iconCss: 'e-icons e-profile',
+          iconCss: 'profile-image',
           items: [
-            {text: 'View', iconCss: 'e-icons e-view'},
+            {text: 'Profile'},
+            {text: 'Comics'},
+            {text: 'Friends'},
+            {text: 'Friend requests'},
+            {text: 'Settings'},
             {separator: true},
-            {text: 'Sign out', iconCss: 'e-icons e-signout'},
+            {text: 'Sign out'},
           ]
         }
       ]
@@ -226,6 +247,7 @@ export default {
       store.commit('setScrollPosition', currentScrollPos);
     }
     this.signedInUser = store.getters.user;
+    this.profileMenuItems[0].text = this.signedInUser?.displayName || 'Profile';
     await this.$nextTick(() => {
       const dialogOverlay = document.getElementsByClassName("e-dlg-overlay")[0];
       dialogOverlay.style.position = 'fixed';
@@ -234,6 +256,13 @@ export default {
       dialog.style.left = ''
       dialog.style.maxHeight = '100%';
       dialog.style.top = '';
+      const imageSpan = document.getElementsByClassName("profile-image")[0];
+      imageSpan.style.backgroundImage = `url(${this.signedInUser?.photoURL || '/placeholder.jpg'})`;
+      imageSpan.style.width = '50px';
+      imageSpan.style.height = '50px';
+      imageSpan.style.backgroundSize = 'contain';
+      imageSpan.style.backgroundRepeat = 'no-repeat';
+      imageSpan.classList.remove('e-menu-icon');
     });
   },
   methods: {
@@ -307,18 +336,32 @@ export default {
     },
     profileMenuItemSelected(e){
       console.log(e);
-      if(e.item.text === 'Sign out'){
-        this.signOut();
-      }
-      if(e.item.text === 'View'){
-        this.$router.push({name: 'profile', params: {username: auth.currentUser.displayName}});
+      switch (e.item.text) {
+        case 'Profile':
+          this.openProfile(0);
+          break;
+        case 'Comics':
+          this.openProfile(1);
+          break;
+        case 'Friends':
+          this.openProfile(2);
+          break;
+        case 'Friend requests':
+          this.openProfile(3);
+          break;
+        case 'Settings':
+          this.openProfile(4);
+          break;
+        case 'Sign out':
+          this.signOut();
+          break;
       }
     },
     openTopic(topic){
       this.$router.push({name: 'topic', params: {boardId: topic.boardId, topicId: topic.topicId}});
     },
-    openProfile(username){
-      this.$router.push({name: 'profile', params: {username: username}});
+    openProfile(tabNumber){
+      this.$router.push({name: 'profile', params: {username: auth.currentUser?.displayName}, query: {tab: tabNumber}});
     },
     async markAllAsRead(){
       await axios.patch(`${process.env.VUE_APP_BACKEND}/notification/read`)

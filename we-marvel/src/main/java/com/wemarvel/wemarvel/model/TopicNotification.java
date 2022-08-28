@@ -21,16 +21,12 @@ public class TopicNotification extends Notification {
     @Getter
     @Setter
     private String topicTitle;
-    @Getter
-    @Setter
-    private Long posterId;
 
-    public TopicNotification(String type, Long recipientId, LocalDateTime receivedAt,
-                             Long boardId, Long topicId, String topicTitle, Long posterId) {
-        super(type, recipientId, receivedAt);
+    public TopicNotification(String type, Long recipientId, Long senderId, LocalDateTime receivedAt,
+                             Long boardId, Long topicId, String topicTitle) {
+        super(type, recipientId, senderId, receivedAt);
         this.boardId = boardId;
         this.topicId = topicId;
         this.topicTitle = topicTitle;
-        this.posterId = posterId;
     }
 }

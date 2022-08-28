@@ -82,5 +82,6 @@ security:
     - /comicProgress/**
     - /comic
     - /series
+    - /friend
   exposed-headers:
     - X-Xsrf-Token

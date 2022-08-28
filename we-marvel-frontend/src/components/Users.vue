@@ -1,13 +1,13 @@
 <template>
 <div id="usersContainer">
   <ejs-listview v-if="users.length > 0" :cssClass="'e-list-template'" :dataSource="users"
-                :template="'template'" :fields="fields"
+                :template="'userTemplate'" :fields="fields"
                 :headerTemplate="'headerTemplate'" :showHeader="true" ref="list">
     <template v-slot:headerTemplate="{}">
       <div class="row">
         <div class="col align-self-center">
           <div class="e-list-header-text">
-            <span class="e-list-header-text-content">Users</span>
+            <span class="e-list-header-text-content">{{username ? 'Friends' : 'Users'}}</span>
           </div>
         </div>
         <div class="col align-self-center">
@@ -32,7 +32,7 @@
         </div>
       </div>
     </template>
-    <template v-slot:template="{data}">
+    <template v-slot:userTemplate="{data}">
       <div class="e-list-wrapper">
         <div>
           <div class="e-card-header">
@@ -66,7 +66,7 @@
               <b class="label">Gender:</b>
             </div>
             <div class="col">
-              {{data.gender ? $filters.capitalize(data.gender.toLowerCase().replace('_', '-')) : 'Unknown'}}
+              {{data.gender ? capitalize(data.gender.toLowerCase().replace('_', '-')) : 'Unknown'}}
             </div>
           </div>
           <div class="row">
@@ -77,12 +77,20 @@
               {{data.birthday ? data.birthday : 'Unknown'}}
             </div>
           </div>
+          <div v-if="username" class="row">
+            <div class="col d-flex text-nowrap">
+              <b class="label">Friends since:</b>
+            </div>
+            <div class="col">
+              {{data.friendsSince ? data.friendsSince : 'Unknown'}}
+            </div>
+          </div>
         </div>
       </div>
     </template>
   </ejs-listview>
-
-  <ejs-pager ref="pager" :totalRecordsCount="totalRecordsCount" :pageSize="20"
+  <h1 v-if="users.length === 0">No users found</h1>
+  <ejs-pager v-if="users.length > 0" ref="pager" :totalRecordsCount="totalRecordsCount" :pageSize="20"
              :pageCount="5" :click="changePage"></ejs-pager>
 </div>
 </template>
@@ -93,6 +101,7 @@ import {DataManager, Query} from '@syncfusion/ej2-data';
 import {ComboBoxComponent} from "@syncfusion/ej2-vue-dropdowns";
 import axios from "axios";
 import {PagerComponent} from "@syncfusion/ej2-vue-grids";
+import {capitalize} from "eslint-plugin-vue/lib/utils/casing";
 
 export default {
   name: "Users",
@@ -101,9 +110,16 @@ export default {
     'ejs-pager': PagerComponent,
     'ejs-combobox': ComboBoxComponent
   },
+  props: {
+    username: {
+      type: String,
+      default: ''
+    }
+  },
   data(){
     return {
       users: [],
+      capitalize,
       fields: {
         id: 'id',
         username: 'username',
@@ -113,16 +129,20 @@ export default {
       },
       totalRecordsCount: 0,
       search: '',
-      sort: 'username',
+      sort: 'Username',
       sortOrder: 'ascending',
-      sortOptions: ['username', 'location', 'gender', 'birthday']
+      sortOptions: ['Username', 'Location', 'Gender', 'Birthday']
     }
   },
   async mounted() {
-    await this.getUsers();
+    if(this.username !== ''){
+      await this.getFriends();
+    } else {
+      await this.getUsers();
+    }
     this.$refs.list.ej2Instances.dataSource = new DataManager(this.users).executeLocal(
-        new Query().search(this.search, ['username', 'location'], 'contains', true).
-        sortBy(this.sort, this.sortOrder).range(0, 20));
+        new Query().search(this.search, ['username', 'location', 'gender', 'birthday'], 'contains', true).
+        sortBy(this.sort.toLowerCase(), this.sortOrder).range(0, 20));
     this.totalRecordsCount = this.users.length;
   },
   methods: {
@@ -130,23 +150,27 @@ export default {
       const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/user/profile`);
       this.users = data;
     },
+    async getFriends(){
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/friend/${this.username}/accepted`);
+      this.users = data;
+    },
     openProfile(username){
       this.$router.push({name: 'profile', params: {username: username}});
     },
     searchUsers(){
       this.$refs.list.ej2Instances.dataSource = new DataManager(this.users).executeLocal(
-          new Query().search(this.search, ['username', 'location'], 'contains', true)
-              .sortBy(this.sort, this.sortOrder));
+          new Query().search(this.search, ['username', 'location', 'gender', 'birthday'], 'contains', true)
+              .sortBy(this.sort.toLowerCase(), this.sortOrder));
       this.totalRecordsCount = this.$refs.list.ej2Instances.dataSource.length;
       this.$refs.list.ej2Instances.dataSource = new DataManager(this.users).executeLocal(
-          new Query().search(this.search, ['username', 'location'], 'contains', true)
-              .sortBy(this.sort, this.sortOrder).range(0, 20));
+          new Query().search(this.search, ['username', 'location', 'gender', 'birthday'], 'contains', true)
+              .sortBy(this.sort.toLowerCase(), this.sortOrder).range(0, 20));
       this.$refs.pager.goToPage(1);
     },
     changePage(e){
       this.$refs.list.ej2Instances.dataSource = new DataManager(this.users).executeLocal(
-          new Query().search(this.search, ['username', 'location'], 'contains', true)
-              .sortBy(this.sort, this.sortOrder).range((e.currentPage - 1)  * 20, e.currentPage * 20));
+          new Query().search(this.search, ['username', 'location', 'gender', 'birthday'], 'contains', true)
+              .sortBy(this.sort.toLowerCase(), this.sortOrder).range((e.currentPage - 1)  * 20, e.currentPage * 20));
       window.scroll({top: 0, behavior: 'smooth'});
     },
     changeSortOrder(){
@@ -159,8 +183,8 @@ export default {
 
 <style>
 #usersContainer .e-listview .e-list-item {
-  height: 220px;
   width: 250px;
+  max-height: 250px;
   float: left;
   margin: 1% 1% 0;
 }
