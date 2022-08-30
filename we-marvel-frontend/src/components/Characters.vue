@@ -110,7 +110,7 @@ export default {
         this.$refs.pager.goToPage(1)
       }
       const response = await axios.
-        get(`${process.env.VUE_APP_BACKEND}/characters?limit=${limit}&offset=${offset}&sortBy=${this.sort}${this.search ? '&name=' + this.search : ''}`);
+        get(`${process.env.VUE_APP_BACKEND}/character?limit=${limit}&offset=${offset}&sortBy=${this.sort}${this.search ? '&name=' + this.search : ''}`);
       const characters = response.data
       for(let c of characters){
         const lastDot = c.thumbnail.lastIndexOf(".");
@@ -120,7 +120,7 @@ export default {
       await this.getCharacterCount();
     },
     async getCharacterCount(){
-      const response = await axios.get(`${process.env.VUE_APP_BACKEND}/characters/count${this.search ? '?name=' + this.search : ''}`);
+      const response = await axios.get(`${process.env.VUE_APP_BACKEND}/character/count${this.search ? '?name=' + this.search : ''}`);
       this.totalCharacters = response.data;
     }
   }

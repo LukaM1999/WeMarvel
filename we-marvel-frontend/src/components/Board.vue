@@ -1,9 +1,9 @@
 <template>
   <div id="boardContainer">
-    <h1>{{ board?.title }}</h1>
-    <p>{{board.description}}</p>
-    <ejs-button @click="toggleTopicForm" class="mb-3 mt-2">{{showNewTopicForm ? 'Cancel' : 'New topic'}}</ejs-button>
-    <div id="newTopicContainer" v-if="showNewTopicForm" class="row mb-5">
+    <h1>{{marvelEntity.title || board.title}}</h1>
+    <p>{{marvelEntity.description || board.description}}</p>
+<!--    <ejs-button @click="toggleTopicForm" class="mb-3 mt-2">{{showNewTopicForm ? 'Cancel' : 'New topic'}}</ejs-button>-->
+    <div :key="newTopicKey" id="newTopicContainer" v-if="showNewTopicForm" class="row mb-5">
       <div class="col">
         <h3>New topic</h3>
         <div class="row mb-3 justify-content-center">
@@ -16,16 +16,27 @@
             </div>
           </div>
         </div>
-        <RichTextEditor @value-changed="updateTopicContent"/>
+        <RichTextEditor ref="rte" @value-changed="updateTopicContent"/>
         <ejs-button  @click="createNewTopic" class="mt-4"
                      :content="'Create topic'"></ejs-button>
       </div>
     </div>
     <div class="row">
       <div class="col">
-        <ejs-grid :key="tableKey" allowSorting="true" ref="grid" :dataSource="board.topics"
-                  :rowTemplate="'rowTemplate'" :toolbar="toolbarOptions">
+        <ejs-grid ref="grid" :key="tableKey"
+                  :allowSorting="true"
+                  :allowPaging="true"
+                  :allowResizing="true"
+                  :allowFiltering="true"
+                  :filterSettings="filterSettings"
+                  :dataSource="topics"
+                  :editSettings="editSettings"
+                  :pageSettings="pageSettings"
+                  :rowTemplate="'rowTemplate'"
+                  :toolbar="toolbarOptions"
+                  :actionBegin="actionBegin">
           <e-columns>
+            <e-column headerText="Watched" field="watched" width="50" textAlign="Center"></e-column>
             <e-column headerText="Topic title" field="title" width="200" textAlign="Center"></e-column>
             <e-column headerText='Posts' field="postCount" textAlign='Center' width=80></e-column>
             <e-column headerText='Last post' field="lastPostDate" textAlign='Center' width=80></e-column>
@@ -33,27 +44,28 @@
           <template v-slot:rowTemplate="{data}">
             <tr :id="'topic' + data.id">
               <td>
-                <div class="row">
+                <div v-if="isAuthorized" class="row">
                   <div class="col-1 align-self-center">
                     <ejs-button :iconCss="[data.watched ? 'e-icons e-eye-slash' : 'e-icons e-eye']"
-                                iconPosition="Right" @click.stop="toggleWatchTopic(data)"
-                                :title="data.watched ? 'Unwatch topic' : 'Watch topic'">{{data.watched ? 'Unwatch' : 'Watch'}}</ejs-button>
-
+                                iconPosition="Right" :isPrimary="!data.watched" @click.stop="toggleWatchTopic(data)"
+                                :title="data.watched ? 'Unwatch topic' : 'Watch topic'">
+                      {{data.watched ? 'Unwatch' : 'Watch'}}
+                    </ejs-button>
                   </div>
+                </div>
+              </td>
+              <td>
+                <div class="row">
                   <div class="col">
-                    <div class="row">
-                      <div class="col">
-                        <h3><a class="custom-link" :href="`/forum/board/${$route.params.id}/topic/${data.id}`"
-                               @click.prevent="openTopic(data.id)">{{ data.title }}</a></h3>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col">
-                          <a class="custom-link" :href="`/profile/${data.ownerUsername}`"
-                                                            @click.prevent="openProfile(data.ownerUsername)">
-                            {{data.ownerUsername}}</a> - {{data.createdAt}}
-                      </div>
-                    </div>
+                    <h3><a class="custom-link" :href="getTopicUrl(data.id)"
+                           @click.prevent="openTopic(data.id)">{{ data.title }}</a></h3>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                      <a class="custom-link" :href="`/profile/${data.ownerUsername}`"
+                                                        @click.prevent="openProfile(data.ownerUsername)">
+                        {{data.ownerUsername}}</a> - {{data.createdAt}}
                   </div>
                 </div>
               </td>
@@ -73,10 +85,20 @@
 
 <script>
 import axios from "axios";
-import {ColumnDirective, ColumnsDirective, GridComponent, Sort, Toolbar, Search} from "@syncfusion/ej2-vue-grids";
+import {
+  ColumnDirective,
+  ColumnsDirective,
+  GridComponent,
+  Sort,
+  Toolbar,
+  Search,
+  Filter, Page, Edit, Resize
+} from "@syncfusion/ej2-vue-grids";
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import RichTextEditor from "@/components/RichTextEditor";
 import {store} from "@/main";
+import {onIdTokenChanged} from "firebase/auth";
+import {auth} from "@/firebaseConfig";
 
 export default {
   name: "Board",
@@ -89,34 +111,114 @@ export default {
   },
   data() {
     return {
-      board: {topics: []},
+      board: {},
+      topics: [],
+      marvelEntity: {},
       tableKey: 0,
       toolbarOptions: ['Search'],
+      editSettings: {
+        allowAdding: true,
+        mode: 'Dialog',
+      },
+      pageSettings: {
+        pageCount: 5,
+        pageSize: 20,
+        pageSizes: [10, 20, 50, 100]
+      },
+      filterSettings: {type: 'Menu'},
       showNewTopicForm: false,
       newTopic: {
         title: '',
         content: ''
       },
+      isAuthorized: false,
+      newTopicKey: 0,
     }
   },
   async mounted() {
-    await this.getBoard();
+    onIdTokenChanged(auth, (user) => {
+      this.isAuthorized = !!user;
+      this.toolbarOptions = ['Search'];
+      if (this.isAuthorized && !this.toolbarOptions[1]) {
+        this.toolbarOptions.push('Add');
+      }
+    })
+    if(this.$route.params.characterId){
+      this.board.id = 1;
+      await this.getCharacter();
+      await this.getCharacterTopics();
+    }
+    else if(this.$route.params.comicId) {
+      this.board.id = 2;
+      await this.getComic();
+      await this.getComicTopics();
+    }
+    else if(this.$route.params.seriesId) {
+      this.board.id = 3;
+      await this.getSeries();
+      await this.getSeriesTopics();
+    }
+    else if(this.$route.params.id) {
+      await this.getBoard();
+    }
   },
   methods: {
     async getBoard(){
       const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/forum/board/${this.$route.params.id}`);
-      this.board = data;
+      const {topics, ...board} = data;
+      this.board = board;
+      this.topics = topics;
       this.tableKey++;
     },
+    async getCharacter(){
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/character/${this.$route.params.characterId}`);
+      this.marvelEntity = data;
+      this.marvelEntity.title = data.name;
+    },
+    async getCharacterTopics(){
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/forum/character/${this.$route.params.characterId}/topic`);
+      this.topics = data;
+      this.tableKey++;
+    },
+    async getComic(){
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/comic/${this.$route.params.comicId}`);
+      this.marvelEntity = data;
+    },
+    async getComicTopics(){
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/forum/comic/${this.$route.params.comicId}/topic`);
+      this.topics = data;
+      this.tableKey++;
+    },
+    async getSeries(){
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/series/${this.$route.params.seriesId}`);
+      this.character = data;
+    },
+    async getSeriesTopics(){
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/forum/series/${this.$route.params.seriesId}/topic`);
+      this.topics = data;
+      this.tableKey++;
+    },
+    getTopicUrl(topicId){
+      if(this.$route.params.characterId){
+        return `/forum/board/1/character/${this.$route.params.characterId}/topic/${topicId}`;
+      }
+      else if(this.$route.params.comicId) {
+        return `/forum/board/2/comic/${this.$route.params.comicId}/topic/${topicId}`;
+      }
+      else if(this.$route.params.seriesId) {
+        return `/forum/board/3/series/${this.$route.params.seriesId}/topic/${topicId}`;
+      }
+      return `/forum/board/${this.$route.params.id}/topic/${topicId}`;
+    },
     openTopic(topicId){
-      this.$router.push({name: 'topic', params: {boardId: this.$route.params.id, id: topicId}});
+      this.$router.push(this.getTopicUrl(topicId));
     },
     openProfile(username){
       this.$router.push({name: 'profile', params: {username: username}});
     },
     async toggleWatchTopic(topic){
       const {data} = await axios.post(`${process.env.VUE_APP_BACKEND}/forum/topic/${topic.id}/watch`);
-      this.board.topics.find(t => t.id === topic.id).watched = !!data;
+      this.topics.find(t => t.id === topic.id).watched = !!data;
       this.tableKey++;
     },
     updateTopicContent(value){
@@ -129,23 +231,39 @@ export default {
       if(!this.newTopic.title.length || !this.newTopic.content.length){
         return;
       }
-      const {data} = await axios.post(`${process.env.VUE_APP_BACKEND}/forum/board/${this.board.id}/topic`, {
+      const newTopic = {
         title: this.newTopic.title,
         firstPostContent: this.newTopic.content,
         ownerUsername: store.getters.user?.displayName,
-        boardId: this.board.id
-      });
+        boardId: this.board.id,
+        marvelEntityId: this.marvelEntity?.id,
+      }
+      const {data} = await axios.post(`${process.env.VUE_APP_BACKEND}/forum/board/${this.board.id}/topic`, newTopic);
       data.postCount = 1;
       data.lastPostDate = data.createdAt;
-      this.board.topics.push(data);
+      this.topics.push(data);
       this.tableKey++;
       this.newTopic.title = '';
       this.newTopic.content = '';
       this.toggleTopicForm();
     },
+    actionBegin(e){
+      if(e.requestType === 'add'){
+        e.cancel = true;
+        this.newTopic.content = '';
+        this.newTopic.title = '';
+        this.showNewTopicForm = false;
+        this.newTopicKey++;
+        this.showNewTopicForm = true
+        this.newTopicKey++;
+        this.$nextTick(() => {
+          document.getElementById('newTopicContainer').scrollIntoView({behavior: 'smooth'});
+        })
+      }
+    },
   },
   provide: {
-    grid: [Sort, Toolbar, Search]
+    grid: [Sort, Toolbar, Search, Filter, Page, Edit, Resize]
   }
 }
 </script>

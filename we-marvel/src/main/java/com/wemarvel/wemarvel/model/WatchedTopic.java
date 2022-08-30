@@ -9,6 +9,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"topic_id", "user_id"}))
 public class WatchedTopic {
 
     @Id
@@ -18,8 +19,10 @@ public class WatchedTopic {
     public Long id;
 
     @Getter
+    @Column(name = "user_id")
     public Long userId;
 
     @Getter
+    @Column(name = "topic_id")
     public Long topicId;
 }

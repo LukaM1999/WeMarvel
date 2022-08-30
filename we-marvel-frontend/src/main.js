@@ -16,6 +16,8 @@ import Profile from "@/components/Profile";
 import Board from "@/components/Board";
 import Pusher from "pusher-js";
 import Users from "@/components/Users";
+import CharacterBoard from "@/components/CharacterBoard";
+import ComicBoard from "@/components/ComicBoard";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -45,6 +47,51 @@ const routes = [
                 redirect: 'forum'
             },
             {
+                path: '/forum/board/1',
+                name: 'character-board',
+                component: CharacterBoard,
+            },
+            {
+                path: '/forum/board/1/character',
+                component: CharacterBoard,
+            },
+            {
+                path: '/forum/board/1/character/:characterId',
+                name: 'character-topics',
+                component: Board,
+                alias: '/forum/board/1/character/:characterId/topic'
+            },
+            {
+                path: '/forum/board/2',
+                name: 'comic-board',
+                component: ComicBoard,
+            },
+            {
+                path: '/forum/board/2/comic',
+                component: ComicBoard,
+            },
+            {
+                path: '/forum/board/2/comic/:comicId',
+                component: Board,
+                name: 'comic-topics',
+                alias: '/forum/board/2/comic/:comicId/topic'
+            },
+            {
+                path: '/forum/board/3',
+                name: 'comic-board',
+                component: ComicBoard,
+            },
+            {
+                path: '/forum/board/3/series',
+                component: ComicBoard,
+            },
+            {
+                path: '/forum/board/3/series/:seriesId',
+                component: Board,
+                name: 'series-topics',
+                alias: '/forum/board/3/series/:seriesId/topic'
+            },
+            {
                 path: '/forum/board/:id/topic',
                 redirect: to => {
                     return {name: 'board', params: {id: to.params.id}}
@@ -53,6 +100,16 @@ const routes = [
             {
                 path: '/forum/board/:boardId/topic/:id',
                 name: 'topic',
+                component: Topic,
+            },
+            {
+                path: '/forum/board/1/character/:characterId/topic/:id',
+                name: 'character-topic',
+                component: Topic,
+            },
+            {
+                path: '/forum/board/1/comic/:comicId/topic/:id',
+                name: 'comic-topic',
                 component: Topic,
             },
             {
@@ -87,6 +144,7 @@ export const store = createStore({
         firebaseToken: null,
         scrollPosition: 0,
         socketId: null,
+        breadcrumbs: {},
     },
     mutations: {
         setToken(state, token) {
@@ -103,6 +161,9 @@ export const store = createStore({
         },
         setSocketId(state, socketId) {
             state.socketId = socketId
+        },
+        setBreadcrumb(state, breadcrumb) {
+            state.breadcrumbs[breadcrumb.id] = breadcrumb.name;
         }
     },
     getters: {
@@ -120,6 +181,9 @@ export const store = createStore({
         },
         socketId(state) {
             return state.socketId
+        },
+        breadcrumb: (state) => (id) => {
+            return state.breadcrumbs[id]
         }
     }
 })

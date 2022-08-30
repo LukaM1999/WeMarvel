@@ -44,6 +44,7 @@ public class BoardServiceImpl implements BoardService {
                 RegisteredUser user = registeredUserService.getUserById(topics.get(0).getOwnerId());
                 boardDTO.setFirstTopicUsername(user.getUsername());
                 boardDTO.setFirstTopicUserId(user.getEmail());
+                boardDTO.setFirstTopicUserImageUrl(user.getImageUrl());
             }
             if(topics.size() > 1) {
                 boardDTO.setSecondTopicId(topics.get(1).getId());
@@ -52,6 +53,7 @@ public class BoardServiceImpl implements BoardService {
                 RegisteredUser user = registeredUserService.getUserById(topics.get(1).getOwnerId());
                 boardDTO.setSecondTopicUsername(user.getUsername());
                 boardDTO.setSecondTopicUserId(user.getEmail());
+                boardDTO.setSecondTopicUserImageUrl(user.getImageUrl());
             }
             boardDTOs.add(boardDTO);
         }

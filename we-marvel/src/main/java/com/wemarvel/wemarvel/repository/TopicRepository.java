@@ -16,14 +16,14 @@ public interface TopicRepository extends PagingAndSortingRepository<Topic, Long>
     @Query("SELECT new com.wemarvel.wemarvel.model.Topic(t.id, p.ownerId, t.id, t.boardId, t.id, " +
             "p.createdAt, t.title, false, false) " +
             "FROM Topic t " +
-            "LEFT JOIN Post p ON t.id = p.topicId " +
-            "WHERE t.id = ?1 " +
+            "INNER JOIN Post p ON t.id = p.topicId " +
+            "WHERE t.boardId = ?1 " +
             "GROUP BY t.id, p.ownerId, t.boardId, p.createdAt, t.title " +
             "ORDER BY p.createdAt DESC")
     List<Topic> getRecentBoardTopics(Long id, PageRequest pageRequest);
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.TopicDTO(t.id, u.id, u.username, t.boardId, b.title, " +
-            "t.marvelEntityId, t.createdAt, t.title, t.sticky, t.locked) " +
+            "t.createdAt, t.title, t.sticky, t.locked) " +
             "FROM Topic t " +
             "LEFT JOIN RegisteredUser u ON t.ownerId = u.id " +
             "LEFT JOIN Board b ON t.boardId = b.id " +
@@ -40,9 +40,42 @@ public interface TopicRepository extends PagingAndSortingRepository<Topic, Long>
             "LEFT JOIN Post p ON t.id = p.topicId " +
             "LEFT JOIN RegisteredUser u ON t.ownerId = u.id " +
             "WHERE t.boardId = ?1 " +
-            "GROUP BY t.id, t.title")
+            "GROUP BY t.id, t.title, u.username")
     List<TopicDTO> getBoardTopics(Long id);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.TopicDTO(t.id, t.title, COUNT(p), max(p.createdAt), " +
+            "t.createdAt, t.ownerId, u.username, c.id, c.name) " +
+            "FROM Topic t " +
+            "LEFT JOIN Board b ON t.boardId = b.id " +
+            "LEFT JOIN Post p ON t.id = p.topicId " +
+            "LEFT JOIN RegisteredUser u ON t.ownerId = u.id " +
+            "LEFT JOIN MarvelCharacter c ON c.id = t.marvelEntityId " +
+            "WHERE t.boardId = 1 AND c IS NOT NULL " +
+            "GROUP BY t.id, t.title, u.username, c.id, c.name")
+    List<TopicDTO> getCharacterBoardTopics(PageRequest pageRequest);
 
     @Query("SELECT wt from WatchedTopic wt WHERE wt.topicId = ?1 AND wt.userId = ?2")
     WatchedTopic getWatchedTopic(Long topicId, Long userId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.TopicDTO(t.id, t.title, COUNT(p), max(p.createdAt), " +
+            "t.createdAt, t.ownerId, u.username, c.id, c.title) " +
+            "FROM Topic t " +
+            "LEFT JOIN Board b ON t.boardId = b.id " +
+            "LEFT JOIN Post p ON t.id = p.topicId " +
+            "LEFT JOIN RegisteredUser u ON t.ownerId = u.id " +
+            "LEFT JOIN Comic c ON c.id = t.marvelEntityId " +
+            "WHERE t.boardId = 1 AND c IS NOT NULL " +
+            "GROUP BY t.id, t.title, u.username, c.id, c.title")
+    List<TopicDTO> getComicBoardTopics(PageRequest pageRequest);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.TopicDTO(t.id, t.title, COUNT(p), max(p.createdAt), " +
+            "t.createdAt, t.ownerId, u.username, c.id, c.name) " +
+            "FROM Topic t " +
+            "INNER JOIN Board b ON t.boardId = b.id " +
+            "INNER JOIN Post p ON t.id = p.topicId " +
+            "INNER JOIN RegisteredUser u ON t.ownerId = u.id " +
+            "INNER JOIN MarvelCharacter c ON c.id = ?1 " +
+            "WHERE t.boardId = 1 AND t.marvelEntityId = c.id " +
+            "GROUP BY t.id, t.title, u.username, c.id, c.name")
+    List<TopicDTO> getAllByCharacterId(Long characterId);
 }

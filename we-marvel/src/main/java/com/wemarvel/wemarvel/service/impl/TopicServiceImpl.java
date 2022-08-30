@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -65,7 +66,11 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     public List<TopicDTO> getBoardTopics(Long boardId) {
-        List<TopicDTO> topics = topicRepository.getBoardTopics(boardId);
+        List<TopicDTO> topics;
+        if(boardId == 1) topics = topicRepository.getCharacterBoardTopics(PageRequest.of(0, 100));
+        else if(boardId == 2) topics = topicRepository.getComicBoardTopics(PageRequest.of(0, 100));
+        else topics = topicRepository.getBoardTopics(boardId);
+        topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
         RegisteredUser user = getSignedInUser();
         if(user == null) return topics;
         for (TopicDTO topic : topics) {
@@ -77,18 +82,34 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     public TopicDTO createTopic(TopicDTO topicDTO) {
+        RegisteredUser user = getSignedInUser();
+        if(user == null) throw new UsernameNotFoundException("User not found");
         Topic topic = new Topic();
         topic.setTitle(topicDTO.getTitle());
         topic.setBoardId(topicDTO.getBoardId());
-        topic.setOwnerId(topicDTO.getOwnerId());
+        topic.setOwnerId(user.getId());
         topic.setCreatedAt(LocalDateTime.now());
+        topic.setMarvelEntityId(topicDTO.getMarvelEntityId());
         Topic newTopic = topicRepository.save(topic);
-        Post newPost = postService.createPost(new Post(topicDTO.getOwnerId(), newTopic.getId(),
+        Post newPost = postService.createPost(new Post(user.getId(), newTopic.getId(),
                 topicDTO.getFirstPostContent()));
         topic.setFirstPostId(newPost.getId());
         topicRepository.save(topic);
         topicDTO.setId(newTopic.getId());
         topicDTO.setCreatedAt(newTopic.getCreatedAt());
         return topicDTO;
+    }
+
+    @Override
+    public List<TopicDTO> getByCharacterId(Long id) {
+        List<TopicDTO> topics = topicRepository.getAllByCharacterId(id);
+        topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
+        RegisteredUser user = getSignedInUser();
+        if(user == null) return topics;
+        for (TopicDTO topic : topics) {
+            boolean watched = topicRepository.getWatchedTopic(topic.getId(), user.getId()) != null;
+            topic.setWatched(watched);
+        }
+        return topics;
     }
 }

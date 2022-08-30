@@ -11,4 +11,5 @@ public interface CharacterService {
     int getCharactersCount(String name);
     List<CharacterDTO> getCharactersByAverageRating(int limit, int offset);
     List<CharacterDTO> getCharactersByRatingCount(int limit, int offset);
+    List<CharacterDTO> getCharactersWithPostInfo();
 }

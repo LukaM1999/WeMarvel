@@ -72,16 +72,13 @@ security:
     - /favicon.ico
     - /session/login
     - /public/**
-    - /characters
-    - /characters/count
-    - /characters/top-rated
-    - /characters/popular
-    - /user
+    - /characters/**
+    - /user/**
     - /forum/**
     - /notification/**
     - /comicProgress/**
-    - /comic
-    - /series
-    - /friend
+    - /comic/**
+    - /series/**
+    - /friend/**
   exposed-headers:
     - X-Xsrf-Token

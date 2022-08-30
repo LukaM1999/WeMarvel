@@ -2,14 +2,8 @@ package com.wemarvel.wemarvel.controller;
 
 import com.wemarvel.wemarvel.model.Post;
 import com.wemarvel.wemarvel.model.WatchedTopic;
-import com.wemarvel.wemarvel.model.dto.BoardDTO;
-import com.wemarvel.wemarvel.model.dto.BoardTopicsDTO;
-import com.wemarvel.wemarvel.model.dto.PostDTO;
-import com.wemarvel.wemarvel.model.dto.TopicDTO;
-import com.wemarvel.wemarvel.service.BoardService;
-import com.wemarvel.wemarvel.service.PostService;
-import com.wemarvel.wemarvel.service.TopicService;
-import com.wemarvel.wemarvel.service.WatchedTopicService;
+import com.wemarvel.wemarvel.model.dto.*;
+import com.wemarvel.wemarvel.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +25,7 @@ public class ForumController {
 
     @Autowired
     private WatchedTopicService watchedTopicService;
+
 
     @GetMapping("/boards")
     public List<BoardDTO> getAllBoards() {
@@ -92,4 +87,8 @@ public class ForumController {
         return watchedTopicService.getWatchedTopics();
     }
 
+    @GetMapping("/character/{characterId}/topic")
+    public List<TopicDTO> getTopicsByCharacterId(@PathVariable Long characterId) {
+        return topicService.getByCharacterId(characterId);
+    }
 }

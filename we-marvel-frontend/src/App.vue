@@ -398,6 +398,26 @@ tr:hover {
   overflow-x: hidden;
 }
 
+.e-grid .e-gridheader {
+  padding-right: 0px !important;
+}
+
+.e-grid .e-toolbar {
+  border-top: 0;
+}
+
+.e-grid .e-filtered::before {
+  color: black;
+}
+
+.e-grid .e-gridheader .e-icons:not(.e-icon-hide):not(.e-check):not(.e-stop):not(.e-icon-reorderuparrow):not(.e-icon-reorderdownarrow) {
+  color: #fff;
+}
+
+.e-grid .e-icons:not(.e-btn-icon) {
+  color: #fff;
+}
+
 .custom-link {
   font-weight: bold;
   text-decoration: none;

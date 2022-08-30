@@ -33,6 +33,9 @@ public class TopicDTO {
     private Long marvelEntityId;
     @Getter
     @Setter
+    private String marvelEntityName;
+    @Getter
+    @Setter
     @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime createdAt;
     @Getter
@@ -62,18 +65,31 @@ public class TopicDTO {
     private String firstPostContent;
 
     public TopicDTO(Long id, Long ownerId, String ownerUsername, Long boardId, String boardTitle,
-                    Long marvelEntityId, LocalDateTime createdAt,
+                    LocalDateTime createdAt,
                     String title, boolean sticky, boolean locked) {
         this.id = id;
         this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
         this.boardId = boardId;
         this.boardTitle = boardTitle;
-        this.marvelEntityId = marvelEntityId;
         this.createdAt = createdAt;
         this.title = title;
         this.sticky = sticky;
         this.locked = locked;
+    }
+
+    public TopicDTO(Long id, String title, Long posts, LocalDateTime lastPostDate,
+                    LocalDateTime createdAt, Long ownerId, String ownerUsername,
+                    Long marvelEntityId, String marvelEntityName) {
+        this.id = id;
+        this.title = title;
+        this.postCount = posts;
+        this.lastPostDate = lastPostDate;
+        this.createdAt = createdAt;
+        this.ownerId = ownerId;
+        this.ownerUsername = ownerUsername;
+        this.marvelEntityId = marvelEntityId;
+        this.marvelEntityName = marvelEntityName;
     }
 
     public TopicDTO(Long id, String title, Long posts, LocalDateTime lastPostDate,

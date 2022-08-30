@@ -8,7 +8,7 @@
                     :rowTemplate="'rowTemplate'">
             <e-columns>
               <e-column headerText="Board" width="80" textAlign="Center"></e-column>
-              <e-column headerText='Recent active topics' textAlign='Center' width=100></e-column>
+              <e-column headerText='Recent active topics' textAlign='Left' width=100></e-column>
             </e-columns>
             <template v-slot:rowTemplate="{data}">
               <tr>
@@ -31,27 +31,59 @@
                 </td>
                 <td v-if="data.firstTopicId">
                   <div class="row">
-                    <div class="col">
-                      <a class="custom-link"
-                         :href="`/forum/topic/${data.firstTopicId}`"
-                         @click.prevent="openRecentTopic(data.firstTopicId, data.id)">
-                        {{ data.firstTopicTitle }}
+                    <div class="col-2 d-flex justify-content-end">
+                      <a :href="`/profile/${data.firstTopicUsername}`"
+                         @click.prevent="openProfile(data.firstTopicUsername)">
+                        <img width="50" height="50" :src="data.firstTopicUserImageUrl || '/placeholder.jpg'" :alt="data.firstTopicUsername" />
                       </a>
-                      <div class="topic-details">
-                        <i>{{ data.firstTopicDate }}, by <a class="custom-link" :href="`/profile/${data.firstTopicUsername}`"
-                                                             @click.prevent="openProfile(data.firstTopicUsername)">
-                          {{data.firstTopicUsername}}</a></i>
+                    </div>
+                    <div class="col justify-content-start d-grid">
+                      <div class="row">
+                        <div class="col d-flex">
+                          <a class="custom-link"
+                             :href="`/forum/topic/${data.firstTopicId}`"
+                             @click.prevent="openRecentTopic(data.firstTopicId, data.id)">
+                            {{ data.firstTopicTitle }}
+                          </a>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col">
+                          <div class="topic-details">
+                            <i>{{ data.firstTopicDate }}, by <a class="custom-link" :href="`/profile/${data.firstTopicUsername}`"
+                                                                @click.prevent="openProfile(data.firstTopicUsername)">
+                              {{data.firstTopicUsername}}</a></i>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div v-if="data.secondTopicId" class="row">
-                    <div class="col">
-                      <a class="custom-link" :href="`/forum/topic/${data.secondTopicId}`"
-                         @click.prevent="openRecentTopic(data.secondTopicId, data.id)">{{ data.secondTopicTitle }}</a>
-                      <div class="topic-details">
-                        <i>{{ data.secondTopicDate }}, by <a class="custom-link" :href="`/profile/${data.secondTopicUsername}`"
-                                                             @click.prevent="openProfile(data.secondTopicUsername)">
-                          {{data.secondTopicUsername}}</a></i>
+                    <div class="col-2 d-flex justify-content-end">
+                      <a :href="`/profile/${data.secondTopicUsername}`"
+                         @click.prevent="openProfile(data.secondTopicUsername)">
+                        <img width="50" height="50" :src="data.secondTopicUserImageUrl || '/placeholder.jpg'"
+                             :alt="data.secondTopicUsername" />
+                      </a>
+                    </div>
+                    <div class="col justify-content-start d-grid">
+                      <div class="row">
+                        <div class="col d-flex">
+                          <a class="custom-link"
+                             :href="`/forum/topic/${data.secondTopicId}`"
+                             @click.prevent="openRecentTopic(data.secondTopicId, data.id)">
+                            {{ data.secondTopicTitle }}
+                          </a>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col">
+                          <div class="topic-details">
+                            <i>{{ data.secondTopicDate }}, by <a class="custom-link" :href="`/profile/${data.secondTopicUsername}`"
+                                                                @click.prevent="openProfile(data.secondTopicUsername)">
+                              {{data.secondTopicUsername}}</a></i>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

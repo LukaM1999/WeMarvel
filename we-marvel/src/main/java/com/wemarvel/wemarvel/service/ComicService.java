@@ -10,4 +10,5 @@ public interface ComicService {
     List<Comic> getComics(String title, int limit, int offset, String sortBy, String sortOrder);
     List<ComicDTO> getBySeriesIdSimple(Long seriesId);
     Comic getById(Long comicId);
+    List<ComicDTO> getComicsWithPostInfo();
 }

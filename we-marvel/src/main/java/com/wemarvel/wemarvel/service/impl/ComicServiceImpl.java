@@ -15,6 +15,7 @@ import java.util.List;
 
 @Service
 public class ComicServiceImpl implements ComicService {
+
     @Autowired
     private ComicRepository comicRepository;
 
@@ -40,5 +41,10 @@ public class ComicServiceImpl implements ComicService {
     @Override
     public Comic getById(Long id){
         return comicRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<ComicDTO> getComicsWithPostInfo() {
+        return comicRepository.findAllWithPostInfo();
     }
 }

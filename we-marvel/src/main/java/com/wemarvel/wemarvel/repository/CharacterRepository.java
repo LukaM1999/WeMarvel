@@ -36,4 +36,13 @@ public interface CharacterRepository extends PagingAndSortingRepository<MarvelCh
             "ORDER BY COUNT(r.rating) DESC")
     Page<CharacterDTO> findAllByRatingCount(PageRequest pageRequest);
 
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.thumbnail, " +
+            "COUNT(distinct t.id), COUNT(p), MAX(p.createdAt)) " +
+            "FROM MarvelCharacter c " +
+            "LEFT JOIN Topic t ON c.id = t.marvelEntityId " +
+            "LEFT JOIN Post p ON p.topicId = t.id " +
+            "GROUP BY c.id, c.name, c.thumbnail " +
+            "ORDER BY c.name")
+    List<CharacterDTO> findAllWithPostInfo();
+
 }

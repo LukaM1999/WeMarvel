@@ -71,7 +71,7 @@ export default {
   methods: {
     async getCharacters(){
       const response = await axios.
-      get(`${process.env.VUE_APP_BACKEND}/characters/top-rated?limit=10000&offset=0`);
+      get(`${process.env.VUE_APP_BACKEND}/character/top-rated?limit=10000&offset=0`);
       const characters = response.data
       for(let i = 0; i < characters.length; i++){
         const c = characters[i]

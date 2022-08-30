@@ -11,4 +11,5 @@ public interface TopicService {
     String getTopicName(Long topicId);
     List<TopicDTO> getBoardTopics(Long id);
     TopicDTO createTopic(TopicDTO topicDTO);
+    List<TopicDTO> getByCharacterId(Long id);
 }

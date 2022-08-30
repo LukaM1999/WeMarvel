@@ -55,4 +55,9 @@ public class CharacterServiceImpl implements CharacterService {
         Page<CharacterDTO> characters = characterRepository.findAllByRatingCount(PageRequest.of(offset, limit));
         return characters.getContent();
     }
+
+    @Override
+    public List<CharacterDTO> getCharactersWithPostInfo() {
+        return characterRepository.findAllWithPostInfo();
+    }
 }

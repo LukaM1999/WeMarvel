@@ -1,9 +1,11 @@
 package com.wemarvel.wemarvel.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @NoArgsConstructor
@@ -49,6 +51,15 @@ public class ComicDTO {
     @Setter
     private Long readingCount;
 
+    @Getter
+    @Setter
+    private Long postCount;
+
+    @Getter
+    @Setter
+    @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
+    private LocalDateTime lastPostDate;
+
     public ComicDTO(Long id, Long seriesId, String title, String description, String thumbnail, String url, int pageCount,
                     Double averageRating, Long ratingCount) {
         this.id = id;
@@ -79,5 +90,16 @@ public class ComicDTO {
         this.seriesId = seriesId;
         this.title = title;
         this.thumbnail = thumbnail;
+    }
+
+    public ComicDTO(Long id, Long seriesId, String title,
+                    String thumbnail, Long postCount,
+                    LocalDateTime lastPostDate) {
+        this.id = id;
+        this.seriesId = seriesId;
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.postCount = postCount;
+        this.lastPostDate = lastPostDate;
     }
 }

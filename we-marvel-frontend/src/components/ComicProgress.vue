@@ -72,7 +72,11 @@ export default {
     return {
       comics: [],
       toolbar: ['Add', 'Edit', 'Delete'],
-      pageSettings: {pageCount: 5, pageSize: 20, pageSizes: [10, 20, 50, 100]},
+      pageSettings: {
+        pageCount: 5,
+        pageSize: 20,
+        pageSizes: [10, 20, 50, 100]
+      },
       filterSettings: {type: 'Menu'},
       editSettings: {
         allowEditing: true,

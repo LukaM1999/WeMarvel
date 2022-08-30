@@ -2,6 +2,7 @@ package com.wemarvel.wemarvel.repository;
 
 import com.wemarvel.wemarvel.model.Comic;
 import com.wemarvel.wemarvel.model.MarvelCharacter;
+import com.wemarvel.wemarvel.model.dto.CharacterDTO;
 import com.wemarvel.wemarvel.model.dto.ComicDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,4 +39,13 @@ public interface ComicRepository extends PagingAndSortingRepository<Comic, Long>
     @Query("SELECT NEW com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, c.title, c.thumbnail) " +
             "FROM Comic c WHERE c.seriesId = ?1")
     List<ComicDTO> getBySeriesIdSimple(Long seriesId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, c.title, c.thumbnail, " +
+            "COUNT(p), MAX(p.createdAt)) " +
+            "FROM Comic c " +
+            "LEFT JOIN Topic t ON c.id = t.marvelEntityId " +
+            "LEFT JOIN Post p ON p.topicId = t.id " +
+            "GROUP BY c.id, c.seriesId, c.title, c.thumbnail " +
+            "ORDER BY c.title")
+    List<ComicDTO> findAllWithPostInfo();
 }

@@ -64,4 +64,12 @@ public class BoardDTO {
     @Getter
     @Setter
     private String secondTopicUsername;
+
+    @Getter
+    @Setter
+    private String firstTopicUserImageUrl;
+
+    @Getter
+    @Setter
+    private String secondTopicUserImageUrl;
 }

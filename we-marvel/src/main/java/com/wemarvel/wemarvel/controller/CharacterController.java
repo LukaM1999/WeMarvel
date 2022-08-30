@@ -12,11 +12,17 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/characters")
+@RequestMapping("/character")
 public class CharacterController {
 
     @Autowired
     private CharacterService characterService;
+
+
+    @GetMapping("/{characterId}")
+    public MarvelCharacter getCharacter(@PathVariable Long characterId) {
+        return characterService.getCharacter(characterId);
+    }
 
     @GetMapping("")
     public List<MarvelCharacter> getCharacters(@PathParam("name") Optional<String> name, @PathParam("limit") int limit,
@@ -52,5 +58,17 @@ public class CharacterController {
             return characterService.getCharactersByRatingCount(limit, offset);
         }
         return characterService.getCharactersByRatingCount(50, 0);
+    }
+
+    @GetMapping("/withPostInfo")
+    public List<CharacterDTO> getCharactersWithPostInfo() {
+        return characterService.getCharactersWithPostInfo();
+    }
+
+    @GetMapping("/{characterId}/name")
+    public String getCharacterName(@PathVariable Long characterId) {
+        MarvelCharacter character = characterService.getCharacter(characterId);
+        if(character == null) return null;
+        return character.getName();
     }
 }

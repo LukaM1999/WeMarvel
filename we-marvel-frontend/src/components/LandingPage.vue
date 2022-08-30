@@ -4,7 +4,7 @@
       <e-items>
         <e-item :template="'menuTemplate'" align="Center">
           <template v-slot:menuTemplate="{}">
-            <ejs-menu :items="menuItems" @select="menuItemSelected"></ejs-menu>
+            <ejs-menu :items="menuItems"></ejs-menu>
           </template>
         </e-item>
         <e-item v-if="!signedInUser" :template="'signInTemplate'" align="Right">
@@ -15,8 +15,7 @@
         <e-item v-if="signedInUser" :template="'notificationsTemplate'" align="Right">
           <template v-slot:notificationsTemplate="{}">
             <div id="notifications" title="View notifications" class="row h-100 align-items-center">
-              <ejs-tooltip isSticky="true" position="TopLeft" :content="'tooltipTemplate'"
-                           opensOn="Click" >
+              <ejs-tooltip :isSticky="false" position="TopLeft" :content="'tooltipTemplate'">
                 <template v-slot:tooltipTemplate="{}">
                   <ejs-listview id="notificationsList" :dataSource="notifications"
                                 :headerTemplate="'notificationsHeaderTemplate'"
@@ -269,16 +268,27 @@ export default {
     async breadcrumbCreated(){
       for(let [i, item] of this.$refs.breadcrumb.ej2Instances.properties.items.entries()){
         if(item.text === '/' || i === 0) continue;
-        item.text = this.$filters.capitalize(item.text).split(new RegExp('[?#]'))[0];
+        item.text = item.text.split(new RegExp('[?#]'))[0];
+        const prevText = this.$refs.breadcrumb.ej2Instances.properties.items[i - 1].text.toLowerCase();
+        if(prevText === 'profile') continue;
+        if(store.getters.breadcrumb(`${prevText}_${item.text}`)){
+          item.text = store.getters.breadcrumb(`${prevText}_${item.text}`);
+          continue;
+        }
         if (Number.isInteger(parseInt(item.text))) {
-          const prevText = this.$refs.breadcrumb.ej2Instances.properties.items[i - 1].text.toLowerCase();
           if(prevText === 'topic' || prevText === 'board'){
-            await axios.get(`${process.env.VUE_APP_BACKEND}/forum/${prevText}/${item.text}/name`)
-              .then(({data}) => {
-                item.text = data;
-              })
+            const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/forum/${prevText}/${item.text}/name`)
+            store.commit('setBreadcrumb', {id: `${prevText}_${item.text}`, name: data});
+            item.text = data;
+            return;
+          } else {
+            const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/${prevText}/${item.text}/name`)
+            store.commit('setBreadcrumb', {id: `${prevText}_${item.text}`, name: data});
+            item.text = data;
+            return;
           }
         }
+        item.text = this.$filters.capitalize(item.text);
       }
     },
     openSignIn() {

@@ -38,4 +38,9 @@ public class ComicController {
     public List<ComicDTO> getBySeriesIdSimple(@PathVariable Long seriesId){
         return comicService.getBySeriesIdSimple(seriesId);
     }
+
+    @GetMapping("/withPostInfo")
+    public List<ComicDTO> getComicsWithPostInfo(){
+        return comicService.getComicsWithPostInfo();
+    }
 }
