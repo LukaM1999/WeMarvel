@@ -2,6 +2,7 @@ package com.wemarvel.wemarvel.controller;
 
 import com.wemarvel.wemarvel.model.Comic;
 import com.wemarvel.wemarvel.model.MarvelCharacter;
+import com.wemarvel.wemarvel.model.dto.CharacterDTO;
 import com.wemarvel.wemarvel.model.dto.ComicDTO;
 import com.wemarvel.wemarvel.service.CharacterService;
 import com.wemarvel.wemarvel.service.ComicService;
@@ -21,6 +22,11 @@ public class ComicController {
     @Autowired
     private ComicService comicService;
 
+    @GetMapping("/{comicId}")
+    public Comic getComic(@PathVariable Long comicId) {
+        return comicService.getById(comicId);
+    }
+
     @GetMapping("")
     public List<Comic> getComics(@PathParam("title") Optional<String> title, @PathParam("limit") int limit,
                                      @PathParam("offset") int offset,
@@ -37,6 +43,13 @@ public class ComicController {
     @GetMapping("/series/{seriesId}/simple")
     public List<ComicDTO> getBySeriesIdSimple(@PathVariable Long seriesId){
         return comicService.getBySeriesIdSimple(seriesId);
+    }
+
+    @GetMapping("/{comicId}/name")
+    public String getComicName(@PathVariable Long comicId) {
+        Comic comic = comicService.getById(comicId);
+        if(comic == null) return null;
+        return comic.getTitle();
     }
 
     @GetMapping("/withPostInfo")

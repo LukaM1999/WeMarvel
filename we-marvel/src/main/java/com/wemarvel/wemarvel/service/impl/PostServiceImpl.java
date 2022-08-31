@@ -10,6 +10,7 @@ import com.wemarvel.wemarvel.repository.PostRepository;
 import com.wemarvel.wemarvel.service.PostService;
 import org.hibernate.id.GUIDGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,8 +69,9 @@ public class PostServiceImpl implements PostService {
     public Post updatePost(Long postId, String content) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
         RegisteredUser registeredUser = getSignedInUser();
-        if(registeredUser == null || !registeredUser.getId().equals(post.getOwnerId())
-                || !registeredUser.getRole().getAuthority().equals("ADMIN"))
+        if(registeredUser == null) throw new UsernameNotFoundException("User not logged in");
+        if(!registeredUser.getId().equals(post.getOwnerId())
+                && !registeredUser.getRole().getAuthority().equals("ADMIN"))
             throw new RuntimeException("You are not authorized to modify this post");
         post.setContent(content);
         post.setModifiedAt(LocalDateTime.now());

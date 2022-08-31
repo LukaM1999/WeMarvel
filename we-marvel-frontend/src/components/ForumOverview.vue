@@ -143,7 +143,7 @@ export default {
       this.$router.push({name: 'profile', params: {username: username}});
     },
     openBoard(boardId){
-      this.$router.push({name: 'board', params: {id: boardId}});
+      this.$router.push(`/forum/board/${boardId}`);
     }
   },
 }

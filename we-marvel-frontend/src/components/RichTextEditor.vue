@@ -67,8 +67,10 @@ export default {
   },
   mounted() {
     this.rteValue = this.initialValue;
-    console.log(this.rteValue);
     this.$refs.rteInstance.updated();
+    document.querySelectorAll('input[id^="rte_toolbar"]').forEach((el) => {
+      el.style.visibility = 'hidden';
+    });
   },
   methods: {
     actionBegin(args) {
@@ -106,7 +108,6 @@ export default {
     },
     onChange(){
       this.$emit('value-changed', this.rteValue);
-      console.log('Emitting value changed');
     }
   }
 }

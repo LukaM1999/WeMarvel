@@ -21,6 +21,10 @@ public class ComicDTO {
 
     @Getter
     @Setter
+    private String seriesTitle;
+
+    @Getter
+    @Setter
     private String title;
 
     @Getter
@@ -53,7 +57,12 @@ public class ComicDTO {
 
     @Getter
     @Setter
+    private Long topicCount;
+
+    @Getter
+    @Setter
     private Long postCount;
+
 
     @Getter
     @Setter
@@ -92,13 +101,15 @@ public class ComicDTO {
         this.thumbnail = thumbnail;
     }
 
-    public ComicDTO(Long id, Long seriesId, String title,
-                    String thumbnail, Long postCount,
+    public ComicDTO(Long id, Long seriesId, String seriesTitle, String title,
+                    String thumbnail, Long topicCount, Long postCount,
                     LocalDateTime lastPostDate) {
         this.id = id;
         this.seriesId = seriesId;
+        this.seriesTitle = seriesTitle;
         this.title = title;
         this.thumbnail = thumbnail;
+        this.topicCount = topicCount;
         this.postCount = postCount;
         this.lastPostDate = lastPostDate;
     }

@@ -12,4 +12,6 @@ public interface TopicService {
     List<TopicDTO> getBoardTopics(Long id);
     TopicDTO createTopic(TopicDTO topicDTO);
     List<TopicDTO> getByCharacterId(Long id);
+    List<TopicDTO> getByComicId(Long comicId);
+    List<TopicDTO> getBySeriesId(Long seriesId);
 }

@@ -59,7 +59,7 @@ public class InitDataTask {
         //updateLatestComics();
     }
 
-    //@PreDestroy
+    @PreDestroy
     public void destroy() {
         LOGGER.info("Dumping data");
         try {

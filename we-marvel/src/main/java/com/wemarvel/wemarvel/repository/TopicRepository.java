@@ -78,4 +78,26 @@ public interface TopicRepository extends PagingAndSortingRepository<Topic, Long>
             "WHERE t.boardId = 1 AND t.marvelEntityId = c.id " +
             "GROUP BY t.id, t.title, u.username, c.id, c.name")
     List<TopicDTO> getAllByCharacterId(Long characterId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.TopicDTO(t.id, t.title, COUNT(p), max(p.createdAt), " +
+            "t.createdAt, t.ownerId, u.username, c.id, c.title) " +
+            "FROM Topic t " +
+            "INNER JOIN Board b ON t.boardId = b.id " +
+            "INNER JOIN Post p ON t.id = p.topicId " +
+            "INNER JOIN RegisteredUser u ON t.ownerId = u.id " +
+            "INNER JOIN Comic c ON c.id = ?1 " +
+            "WHERE t.boardId = 2 AND t.marvelEntityId = c.id " +
+            "GROUP BY t.id, t.title, u.username, c.id, c.title")
+    List<TopicDTO> getAllByComicId(Long comicId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.TopicDTO(t.id, t.title, COUNT(p), max(p.createdAt), " +
+            "t.createdAt, t.ownerId, u.username, s.id, s.title) " +
+            "FROM Topic t " +
+            "INNER JOIN Board b ON t.boardId = b.id " +
+            "INNER JOIN Post p ON t.id = p.topicId " +
+            "INNER JOIN RegisteredUser u ON t.ownerId = u.id " +
+            "INNER JOIN Series s ON s.id = ?1 " +
+            "WHERE t.boardId = 3 AND t.marvelEntityId = s.id " +
+            "GROUP BY t.id, t.title, u.username, s.id, s.title")
+    List<TopicDTO> getAllBySeriesId(Long seriesId);
 }

@@ -26,6 +26,7 @@ public class SeriesDTO {
     private Long startYear;
     private Long endYear;
     private double averageRating;
+    private Long topicCount;
     private Long postCount;
     @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime lastPostDate;
@@ -36,11 +37,12 @@ public class SeriesDTO {
         this.thumbnail = thumbnail;
     }
 
-    public SeriesDTO(Long id, String title, String thumbnail,
+    public SeriesDTO(Long id, String title, String thumbnail, Long topicCount,
                      Long postCount, LocalDateTime lastPostDate) {
         this.id = id;
         this.title = title;
         this.thumbnail = thumbnail;
+        this.topicCount = topicCount;
         this.postCount = postCount;
         this.lastPostDate = lastPostDate;
     }

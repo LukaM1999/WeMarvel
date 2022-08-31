@@ -112,4 +112,30 @@ public class TopicServiceImpl implements TopicService {
         }
         return topics;
     }
+
+    @Override
+    public List<TopicDTO> getByComicId(Long comicId) {
+        List<TopicDTO> topics = topicRepository.getAllByComicId(comicId);
+        topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
+        RegisteredUser user = getSignedInUser();
+        if(user == null) return topics;
+        for (TopicDTO topic : topics) {
+            boolean watched = topicRepository.getWatchedTopic(topic.getId(), user.getId()) != null;
+            topic.setWatched(watched);
+        }
+        return topics;
+    }
+
+    @Override
+    public List<TopicDTO> getBySeriesId(Long seriesId) {
+        List<TopicDTO> topics = topicRepository.getAllBySeriesId(seriesId);
+        topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
+        RegisteredUser user = getSignedInUser();
+        if(user == null) return topics;
+        for (TopicDTO topic : topics) {
+            boolean watched = topicRepository.getWatchedTopic(topic.getId(), user.getId()) != null;
+            topic.setWatched(watched);
+        }
+        return topics;
+    }
 }

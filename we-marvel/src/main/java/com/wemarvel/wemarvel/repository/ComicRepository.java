@@ -40,12 +40,13 @@ public interface ComicRepository extends PagingAndSortingRepository<Comic, Long>
             "FROM Comic c WHERE c.seriesId = ?1")
     List<ComicDTO> getBySeriesIdSimple(Long seriesId);
 
-    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, c.title, c.thumbnail, " +
-            "COUNT(p), MAX(p.createdAt)) " +
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, s.title, c.title, c.thumbnail, " +
+            "COUNT(distinct t.id), COUNT(p), MAX(p.createdAt)) " +
             "FROM Comic c " +
             "LEFT JOIN Topic t ON c.id = t.marvelEntityId " +
             "LEFT JOIN Post p ON p.topicId = t.id " +
-            "GROUP BY c.id, c.seriesId, c.title, c.thumbnail " +
-            "ORDER BY c.title")
+            "LEFT JOIN Series s ON s.id = c.seriesId " +
+            "GROUP BY c.id, c.seriesId, s.title, c.title, c.thumbnail " +
+            "ORDER BY s.title")
     List<ComicDTO> findAllWithPostInfo();
 }

@@ -91,4 +91,14 @@ public class ForumController {
     public List<TopicDTO> getTopicsByCharacterId(@PathVariable Long characterId) {
         return topicService.getByCharacterId(characterId);
     }
+
+    @GetMapping("/comic/{comicId}/topic")
+    public List<TopicDTO> getTopicsByComicId(@PathVariable Long comicId) {
+        return topicService.getByComicId(comicId);
+    }
+
+    @GetMapping("/series/{seriesId}/topic")
+    public List<TopicDTO> getTopicsBySeriesId(@PathVariable Long seriesId) {
+        return topicService.getBySeriesId(seriesId);
+    }
 }

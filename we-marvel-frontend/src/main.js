@@ -13,11 +13,12 @@ import TopRatedCharacters from "@/components/TopRatedCharacters";
 import ForumOverview from "@/components/ForumOverview";
 import Topic from "@/components/Topic";
 import Profile from "@/components/Profile";
-import Board from "@/components/Board";
 import Pusher from "pusher-js";
 import Users from "@/components/Users";
-import CharacterBoard from "@/components/CharacterBoard";
+import CharacterBoard from "@/components/MarvelEntityBoard";
 import ComicBoard from "@/components/ComicBoard";
+import BoardTopics from "@/components/BoardTopics";
+import MarvelEntityBoard from "@/components/MarvelEntityBoard";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -47,49 +48,37 @@ const routes = [
                 redirect: 'forum'
             },
             {
-                path: '/forum/board/1',
-                name: 'character-board',
-                component: CharacterBoard,
+                path: '/forum/board/:boardId([123])',
+                name: 'entity-board',
+                component: MarvelEntityBoard,
             },
             {
-                path: '/forum/board/1/character',
-                component: CharacterBoard,
+                path: '/forum/board/:boardId([123])/topic',
+                redirect: to => {
+                    return { name: 'entity-board', params: to.params }
+                }
             },
             {
-                path: '/forum/board/1/character/:characterId',
-                name: 'character-topics',
-                component: Board,
-                alias: '/forum/board/1/character/:characterId/topic'
+                path: '/forum/board/:boardId([123])/:entity(character|comic|series)',
+                component: MarvelEntityBoard,
             },
             {
-                path: '/forum/board/2',
-                name: 'comic-board',
-                component: ComicBoard,
+                path: '/forum/board/:boardId/:entity(character|comic|series)/:entityId',
+                name: 'entity-topics',
+                component: BoardTopics,
             },
             {
-                path: '/forum/board/2/comic',
-                component: ComicBoard,
-            },
-            {
-                path: '/forum/board/2/comic/:comicId',
-                component: Board,
-                name: 'comic-topics',
-                alias: '/forum/board/2/comic/:comicId/topic'
-            },
-            {
-                path: '/forum/board/3',
-                name: 'comic-board',
-                component: ComicBoard,
-            },
-            {
-                path: '/forum/board/3/series',
-                component: ComicBoard,
-            },
-            {
-                path: '/forum/board/3/series/:seriesId',
-                component: Board,
-                name: 'series-topics',
-                alias: '/forum/board/3/series/:seriesId/topic'
+                path: '/forum/board/:boardId/:entity(character|comic|series)/:entityId/topic',
+                redirect: to => {
+                    return {
+                        name: 'entity-topics',
+                        params: {
+                            boardId: to.params.boardId,
+                            entity: to.params.entity,
+                            entityId: to.params.entityId
+                        }
+                    }
+                }
             },
             {
                 path: '/forum/board/:id/topic',
@@ -98,24 +87,19 @@ const routes = [
                 }
             },
             {
-                path: '/forum/board/:boardId/topic/:id',
+                path: '/forum/board/:boardId/:entity(character|comic|series)/:entityId/topic/:id',
+                name: 'entity-topic',
+                component: Topic,
+            },
+            {
+                path: '/forum/board/:boardId([^123])',
+                name: 'board',
+                component: BoardTopics,
+            },
+            {
+                path: '/forum/board/:boardId([^123])/topic/:id',
                 name: 'topic',
                 component: Topic,
-            },
-            {
-                path: '/forum/board/1/character/:characterId/topic/:id',
-                name: 'character-topic',
-                component: Topic,
-            },
-            {
-                path: '/forum/board/1/comic/:comicId/topic/:id',
-                name: 'comic-topic',
-                component: Topic,
-            },
-            {
-                path: '/forum/board/:id',
-                name: 'board',
-                component: Board
             },
             {
                 path: '/profile/:username',
