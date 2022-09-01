@@ -24,6 +24,11 @@ public class SeriesController {
         return seriesService.getById(seriesId);
     }
 
+    @GetMapping("")
+    private List<SeriesDTO> getAllSeries(){
+        return seriesService.getAllSeries();
+    }
+
     @GetMapping("/simple")
     private List<SeriesDTO> getSeriesSimple(){
         return seriesService.getSeriesSimple();
@@ -39,5 +44,10 @@ public class SeriesController {
     @GetMapping("/withPostInfo")
     public List<SeriesDTO> getSeriesWithPostInfo(){
         return seriesService.getSeriesWithPostInfo();
+    }
+
+    @GetMapping("/character/{characterId}")
+    public List<SeriesDTO> getSeriesWithCharacter(@PathVariable Long characterId){
+        return seriesService.getSeriesWithCharacter(characterId);
     }
 }

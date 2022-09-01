@@ -12,6 +12,7 @@ import java.util.List;
 
 @Service
 public class SeriesServiceImpl implements SeriesService {
+
     @Autowired
     private SeriesRepository seriesRepository;
 
@@ -28,5 +29,15 @@ public class SeriesServiceImpl implements SeriesService {
     @Override
     public List<SeriesDTO> getSeriesWithPostInfo() {
         return seriesRepository.findAllWithPostInfo();
+    }
+
+    @Override
+    public List<SeriesDTO> getSeriesWithCharacter(Long characterId) {
+        return seriesRepository.getSeriesWithCharacter(characterId);
+    }
+
+    @Override
+    public List<SeriesDTO> getAllSeries() {
+        return seriesRepository.getAllSeries();
     }
 }

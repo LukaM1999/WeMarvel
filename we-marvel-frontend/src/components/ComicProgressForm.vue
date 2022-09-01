@@ -230,7 +230,6 @@ export default {
       this.filteredComics = new DataManager(this.comics);
     },
     comicsRowSelected(e){
-      console.log(e.data);
       this.progress.comicId = e.data.id;
       this.progress.pageCount = e.data.pageCount;
     },
@@ -240,7 +239,6 @@ export default {
     }
   },
   provide: {
-    combobox: [Virtualization],
     grid: [Page, InfiniteScroll, Toolbar],
     datepicker: [MaskedDateTime]
   }

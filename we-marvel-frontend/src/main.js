@@ -16,9 +16,12 @@ import Profile from "@/components/Profile";
 import Pusher from "pusher-js";
 import Users from "@/components/Users";
 import CharacterBoard from "@/components/MarvelEntityBoard";
-import ComicBoard from "@/components/ComicBoard";
 import BoardTopics from "@/components/BoardTopics";
 import MarvelEntityBoard from "@/components/MarvelEntityBoard";
+import MarvelEntity from "@/components/MarvelEntity";
+import Comics from "@/components/Comics";
+import Series from "@/components/Series";
+import MarvelCharacters from "@/components/MarvelCharacters";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -111,6 +114,26 @@ const routes = [
                 name: 'users',
                 component: Users
             },
+            {
+                path: '/character',
+                name: 'character',
+                component: MarvelCharacters,
+            },
+            {
+                path: '/comic',
+                name: 'comic',
+                component: Comics,
+            },
+            {
+                path: '/series',
+                name: 'series',
+                component: Series,
+            },
+            {
+                path: '/:entity(character|comic|series)/:entityId',
+                name: 'entity',
+                component: MarvelEntity,
+            }
         ]
     },
 ]

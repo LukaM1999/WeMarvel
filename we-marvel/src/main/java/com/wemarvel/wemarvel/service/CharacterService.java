@@ -12,4 +12,6 @@ public interface CharacterService {
     List<CharacterDTO> getCharactersByAverageRating(int limit, int offset);
     List<CharacterDTO> getCharactersByRatingCount(int limit, int offset);
     List<CharacterDTO> getCharactersWithPostInfo();
+    List<CharacterDTO> getCharactersInComic(Long comicId);
+    List<CharacterDTO> getCharactersInSeries(Long seriesId);
 }

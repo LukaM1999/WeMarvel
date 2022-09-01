@@ -45,6 +45,18 @@ public class ComicDTO {
 
     @Getter
     @Setter
+    private String variantDescription;
+
+    @Getter
+    @Setter
+    private String format;
+
+    @Getter
+    @Setter
+    private Double issueNumber;
+
+    @Getter
+    @Setter
     private Double averageRating;
 
     @Getter
@@ -112,5 +124,22 @@ public class ComicDTO {
         this.topicCount = topicCount;
         this.postCount = postCount;
         this.lastPostDate = lastPostDate;
+    }
+
+    public ComicDTO(Long id, Long seriesId, String seriesTitle,
+                    String title, String description, String thumbnail,
+                    String url, int pageCount, String variantDescription,
+                    String format, Double issueNumber) {
+        this.id = id;
+        this.seriesId = seriesId;
+        this.seriesTitle = seriesTitle;
+        this.title = title;
+        this.description = description;
+        this.thumbnail = thumbnail;
+        this.url = url;
+        this.pageCount = pageCount;
+        this.variantDescription = variantDescription;
+        this.format = format;
+        this.issueNumber = issueNumber;
     }
 }

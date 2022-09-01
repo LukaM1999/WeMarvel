@@ -71,4 +71,14 @@ public class CharacterController {
         if(character == null) return null;
         return character.getName();
     }
+
+    @GetMapping("/comic/{comicId}")
+    public List<CharacterDTO> getCharactersInComic(@PathVariable Long comicId) {
+        return characterService.getCharactersInComic(comicId);
+    }
+
+    @GetMapping("/series/{seriesId}")
+    public List<CharacterDTO> getCharactersInSeries(@PathVariable Long seriesId) {
+        return characterService.getCharactersInSeries(seriesId);
+    }
 }

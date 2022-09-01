@@ -46,4 +46,16 @@ public class SeriesDTO {
         this.postCount = postCount;
         this.lastPostDate = lastPostDate;
     }
+
+    public SeriesDTO(Long id, String title, String description,
+                     String thumbnail, String type,
+                     Long startYear, Long endYear) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.thumbnail = thumbnail;
+        this.type = type;
+        this.startYear = startYear;
+        this.endYear = endYear;
+    }
 }

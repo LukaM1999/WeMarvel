@@ -3,7 +3,9 @@ package com.wemarvel.wemarvel.service.impl;
 import com.wemarvel.wemarvel.model.Comic;
 import com.wemarvel.wemarvel.model.ComicProgress;
 import com.wemarvel.wemarvel.model.RegisteredUser;
+import com.wemarvel.wemarvel.model.dto.CharacterDTO;
 import com.wemarvel.wemarvel.model.dto.ComicProgressDTO;
+import com.wemarvel.wemarvel.model.dto.SeriesDTO;
 import com.wemarvel.wemarvel.repository.ComicProgressRepository;
 import com.wemarvel.wemarvel.service.ComicProgressService;
 import com.wemarvel.wemarvel.service.ComicService;
@@ -93,5 +95,39 @@ public class ComicProgressServiceImpl implements ComicProgressService {
     @Override
     public void delete(Long id) {
         comicProgressRepository.deleteById(id);
+    }
+
+    @Override
+    public List<ComicProgressDTO> getUnreviewedComics() {
+        RegisteredUser user = getSignedInUser();
+        if(user == null) throw new UsernameNotFoundException("User not found");
+        List<ComicProgressDTO> comics = comicProgressRepository.getUnreviewedComics(user.getId());
+        for(ComicProgressDTO progress : comics) {
+            Comic comic = comicService.getById(progress.getComicId());
+            if(comic == null) continue;
+            progress.setComicPages(comic.getPageCount());
+        }
+        return comics;
+    }
+
+    @Override
+    public List<SeriesDTO> getUnreviewedSeries() {
+        RegisteredUser user = getSignedInUser();
+        if(user == null) throw new UsernameNotFoundException("User not logged in");
+        return comicProgressRepository.getUnreviewedSeries(user.getId());
+    }
+
+    @Override
+    public List<CharacterDTO> getUnreviewedCharacters() {
+        RegisteredUser user = getSignedInUser();
+        if(user == null) throw new UsernameNotFoundException("User not logged in");
+        return comicProgressRepository.getUnreviewedCharacters(user.getId());
+    }
+
+    @Override
+    public ComicProgressDTO getUserComic(String username, Long comicId) {
+        RegisteredUser user = registeredUserService.getUserByUsername(username);
+        if(user == null) throw new UsernameNotFoundException("User not found");
+        return comicProgressRepository.getUserComic(user.getId(), comicId);
     }
 }

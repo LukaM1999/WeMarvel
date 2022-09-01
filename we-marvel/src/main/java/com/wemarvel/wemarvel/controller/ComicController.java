@@ -56,4 +56,24 @@ public class ComicController {
     public List<ComicDTO> getComicsWithPostInfo(){
         return comicService.getComicsWithPostInfo();
     }
+
+    @GetMapping("/{comicId}/withSeries")
+    public ComicDTO getComicWithSeries(@PathVariable Long comicId){
+        return comicService.getComicWithSeries(comicId);
+    }
+
+    @GetMapping("/withSeries")
+    public List<ComicDTO> getComicsWithSeries(){
+        return comicService.getComicsWithSeries();
+    }
+
+    @GetMapping("/series/{seriesId}")
+    public List<ComicDTO> getComicsBySeries(@PathVariable Long seriesId){
+        return comicService.getBySeriesId(seriesId);
+    }
+
+    @GetMapping("/character/{characterId}")
+    public List<ComicDTO> getComicsWithCharacter(@PathVariable Long characterId){
+        return comicService.getComicsWithCharacter(characterId);
+    }
 }

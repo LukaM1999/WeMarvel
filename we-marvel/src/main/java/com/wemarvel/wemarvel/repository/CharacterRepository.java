@@ -23,8 +23,8 @@ public interface CharacterRepository extends PagingAndSortingRepository<MarvelCh
             "c.averageRating, COUNT(r.rating)) " +
             "FROM MarvelCharacter c " +
             "LEFT JOIN Review r ON c.id = r.marvelEntityId " +
-            "GROUP BY c.id, c.name, c.description," +
-            " c.thumbnail, c.url, c.averageRating " +
+            "GROUP BY c.id, c.name, c.description, " +
+            "c.thumbnail, c.url, c.averageRating " +
             "ORDER BY c.averageRating DESC, c.name ASC")
     Page<CharacterDTO> findAllByAverageRating(PageRequest pageRequest);
 
@@ -45,4 +45,19 @@ public interface CharacterRepository extends PagingAndSortingRepository<MarvelCh
             "ORDER BY c.name")
     List<CharacterDTO> findAllWithPostInfo();
 
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.description, c.thumbnail) " +
+            "FROM MarvelCharacter c " +
+            "INNER JOIN CharacterInComic cic ON cic.comicId = ?1 " +
+            "WHERE cic.comicId = ?1 AND cic.characterId = c.id " +
+            "GROUP BY c.id, c.name, c.description, c.thumbnail " +
+            "ORDER BY c.name")
+    List<CharacterDTO> getCharactersInComic(Long comicId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.description, c.thumbnail) " +
+            "FROM MarvelCharacter c " +
+            "INNER JOIN CharacterInSeries cis ON cis.seriesId = ?1 " +
+            "WHERE cis.seriesId = ?1 AND cis.characterId = c.id " +
+            "GROUP BY c.id, c.name, c.description, c.thumbnail " +
+            "ORDER BY c.name")
+    List<CharacterDTO> getCharactersInSeries(Long seriesId);
 }

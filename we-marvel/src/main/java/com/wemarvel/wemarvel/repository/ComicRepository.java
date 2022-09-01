@@ -40,6 +40,14 @@ public interface ComicRepository extends PagingAndSortingRepository<Comic, Long>
             "FROM Comic c WHERE c.seriesId = ?1")
     List<ComicDTO> getBySeriesIdSimple(Long seriesId);
 
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, s.title, c.title, " +
+            "c.description, c.thumbnail, c.url, c.pageCount, " +
+            "c.variantDescription, c.format, c.issueNumber) " +
+            "FROM Comic c " +
+            "LEFT JOIN Series s ON s.id = c.seriesId " +
+            "WHERE c.seriesId = ?1")
+    List<ComicDTO> getBySeriesId(Long seriesId);
+
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, s.title, c.title, c.thumbnail, " +
             "COUNT(distinct t.id), COUNT(p), MAX(p.createdAt)) " +
             "FROM Comic c " +
@@ -49,4 +57,31 @@ public interface ComicRepository extends PagingAndSortingRepository<Comic, Long>
             "GROUP BY c.id, c.seriesId, s.title, c.title, c.thumbnail " +
             "ORDER BY s.title")
     List<ComicDTO> findAllWithPostInfo();
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, s.title, c.title, " +
+            "c.description, c.thumbnail, " +
+            "c.url, c.pageCount, c.variantDescription, c.format, c.issueNumber) " +
+            "FROM Comic c " +
+            "INNER JOIN Series s ON s.id = c.seriesId " +
+            "WHERE c.id = ?1")
+    ComicDTO getComicWithSeries(Long comicId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, s.title, c.title, " +
+            "c.description, c.thumbnail, c.url, c.pageCount, " +
+            "c.variantDescription, c.format, c.issueNumber) " +
+            "FROM Comic c " +
+            "LEFT JOIN Series s ON s.id = c.seriesId")
+    List<ComicDTO> getComicsWithSeries();
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, s.title, c.title, " +
+            "c.description, c.thumbnail, c.url, c.pageCount, " +
+            "c.variantDescription, c.format, c.issueNumber) " +
+            "FROM Comic c " +
+            "INNER JOIN CharacterInComic cic ON cic.characterId = ?1 " +
+            "INNER JOIN Series s ON s.id = c.seriesId " +
+            "WHERE cic.characterId = ?1 AND cic.comicId = c.id " +
+            "GROUP BY c.id, c.seriesId, s.title, c.title, c.description, c.thumbnail, c.url, c.pageCount, " +
+            "c.variantDescription, c.format, c.issueNumber " +
+            "ORDER BY c.title")
+    List<ComicDTO> getComicsWithCharacter(Long characterId);
 }

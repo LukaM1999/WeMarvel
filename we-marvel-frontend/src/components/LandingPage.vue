@@ -66,8 +66,7 @@
                           </div>
                           <div v-if="data.boardId" class="row justify-content-end">
                             <div class="col">
-                              <a class="custom-link" :href="`/forum/board/${data.boardId}/topic/${data.topicId}`"
-                                 @click.prevent="openTopic(data)">
+                              <a class="custom-link" :href="`/forum/board/${data.boardId}/topic/${data.topicId}`">
                                 {{data.topicTitle}}</a>
                             </div>
                           </div>
@@ -115,7 +114,7 @@
                    v-model="password" required />
             <label class="e-float-text e-label">Password</label>
             <span class="e-input-group-icon e-password" @click="changeIcon">
-              <box-icon :name="isShowIcon ? 'show' : 'hide'" color="gray"></box-icon>
+              <span :class="isShowIcon ? 'e-icons e-eye' : 'e-icons e-eye-slash'" style="color: gray"></span>
             </span>
           </div>
         </div>
@@ -144,14 +143,12 @@ import {
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import { store } from '@/main'
 import {DialogComponent, TooltipComponent} from '@syncfusion/ej2-vue-popups';
-import {TextBoxComponent} from '@syncfusion/ej2-vue-inputs';
 import {auth} from "@/firebaseConfig";
 import {signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendEmailVerification, signOut, deleteUser, updateProfile} from "firebase/auth";
 import axios from "axios";
-import Pusher from "pusher-js";
 import {topicsChannel} from "@/App";
-import {ListViewComponent, Virtualization} from "@syncfusion/ej2-vue-lists";
+import {ListViewComponent} from "@syncfusion/ej2-vue-lists";
 
 export default {
   name: "LandingPage",
@@ -196,25 +193,33 @@ export default {
         {
           text: 'Comics',
           items: [
-            { text: 'Search', url: `${process.env.VUE_APP_FRONTEND}/comics/search` },
-            { text: 'Most popular', url: `${process.env.VUE_APP_FRONTEND}/comics/popular` },
-            { text: 'Top rated', url: `${process.env.VUE_APP_FRONTEND}/comics/top-rated` },
+            { text: 'Search', url: '/comic'},
+            { text: 'Most popular', url: `/comic/popular` },
+            { text: 'Top rated', url: `/comic/top-rated` },
           ]
         },
         {
           text: 'Characters',
           items: [
-            { text: 'Search', url: `${process.env.VUE_APP_FRONTEND}/characters/search` },
-            { text: 'Most popular', url: `${process.env.VUE_APP_FRONTEND}/characters/popular` },
-            { text: 'Top rated', url: `${process.env.VUE_APP_FRONTEND}/characters/top-rated` },
+            { text: 'Search', url: `/character` },
+            { text: 'Most popular', url: `character/popular` },
+            { text: 'Top rated', url: `/character/top-rated` },
+          ]
+        },
+        {
+          text: 'Series',
+          items: [
+            { text: 'Search', url: '/series'},
+            { text: 'Most popular', url: `/series/popular` },
+            { text: 'Top rated', url: `/series/top-rated` },
           ]
         },
         {
           text: 'Community',
           items: [
-            { text: 'Forum', url: `${process.env.VUE_APP_FRONTEND}/forum` },
-            { text: 'Clubs', url: `${process.env.VUE_APP_FRONTEND}/clubs` },
-            { text: 'Users', url: `${process.env.VUE_APP_FRONTEND}/users` },
+            { text: 'Forum', url: `$/forum` },
+            { text: 'Clubs', url: `/clubs` },
+            { text: 'Users', url: `$/users` },
           ]
         }
       ],
@@ -225,6 +230,7 @@ export default {
           items: [
             {text: 'Profile'},
             {text: 'Comics'},
+            {text: 'Reviews'},
             {text: 'Friends'},
             {text: 'Friend requests'},
             {text: 'Settings'},
@@ -239,15 +245,22 @@ export default {
     window.onscroll = function() {
       const currentScrollPos = document.documentElement.scrollTop;
       if (store.getters.scrollPosition > currentScrollPos) {
-        document.getElementsByClassName("e-toolbar")[0].style.top = "0px";
+        const toolbar = document.getElementsByClassName("e-toolbar")[0];
+        if(toolbar) toolbar.style.top = "0";
       } else {
-        document.getElementsByClassName("e-toolbar")[0].style.top = "-80px";
+        const toolbar = document.getElementsByClassName("e-toolbar")[0];
+        if(toolbar) toolbar.style.top = "-80px";
       }
       store.commit('setScrollPosition', currentScrollPos);
     }
     this.signedInUser = store.getters.user;
     this.profileMenuItems[0].text = this.signedInUser?.displayName || 'Profile';
     await this.$nextTick(() => {
+      const toolbarItems = document.querySelectorAll('.e-toolbar .e-toolbar-items .e-toolbar-item > *');
+      for(let i of toolbarItems) {
+        i.style.display = 'contents';
+        console.log(i);
+      }
       const dialogOverlay = document.getElementsByClassName("e-dlg-overlay")[0];
       dialogOverlay.style.position = 'fixed';
       const dialog = document.getElementsByClassName("e-dialog")[0];
@@ -256,6 +269,7 @@ export default {
       dialog.style.maxHeight = '100%';
       dialog.style.top = '';
       const imageSpan = document.getElementsByClassName("profile-image")[0];
+      if(!imageSpan) return;
       imageSpan.style.backgroundImage = `url(${this.signedInUser?.photoURL || '/placeholder.jpg'})`;
       imageSpan.style.width = '50px';
       imageSpan.style.height = '50px';
@@ -345,33 +359,17 @@ export default {
       })
     },
     profileMenuItemSelected(e){
-      console.log(e);
-      switch (e.item.text) {
-        case 'Profile':
-          this.openProfile(0);
-          break;
-        case 'Comics':
-          this.openProfile(1);
-          break;
-        case 'Friends':
-          this.openProfile(2);
-          break;
-        case 'Friend requests':
-          this.openProfile(3);
-          break;
-        case 'Settings':
-          this.openProfile(4);
-          break;
-        case 'Sign out':
-          this.signOut();
-          break;
+      if(e.item.text === 'Sign out'){
+        this.signOut();
+        return;
       }
+      this.openProfile(e.item.text.toLowerCase());
     },
     openTopic(topic){
       this.$router.push({name: 'topic', params: {boardId: topic.boardId, topicId: topic.topicId}});
     },
-    openProfile(tabNumber){
-      this.$router.push({name: 'profile', params: {username: auth.currentUser?.displayName}, query: {tab: tabNumber}});
+    openProfile(tabName){
+      this.$router.push({name: 'profile', params: {username: auth.currentUser?.displayName}, query: {tab: tabName}});
     },
     async markAllAsRead(){
       await axios.patch(`${process.env.VUE_APP_BACKEND}/notification/read`)

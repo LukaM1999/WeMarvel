@@ -60,4 +60,14 @@ public class CharacterServiceImpl implements CharacterService {
     public List<CharacterDTO> getCharactersWithPostInfo() {
         return characterRepository.findAllWithPostInfo();
     }
+
+    @Override
+    public List<CharacterDTO> getCharactersInComic(Long comicId) {
+        return characterRepository.getCharactersInComic(comicId);
+    }
+
+    @Override
+    public List<CharacterDTO> getCharactersInSeries(Long seriesId) {
+        return characterRepository.getCharactersInSeries(seriesId);
+    }
 }

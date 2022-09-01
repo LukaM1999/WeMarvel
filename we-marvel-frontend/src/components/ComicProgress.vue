@@ -1,34 +1,38 @@
 <template>
 <div id="comicProgressContainer">
-  <ComicProgressForm ref="comicProgress" v-if="showForm" :key="comicProgressKey" :comic-progress="selectedRow"
-  @comic-progress-created="comicProgressCreated"/>
-  <ejs-grid :dataSource='comics' :allowPaging='true' :pageSettings="pageSettings"
-            :editSettings='editSettings' :toolbar="authorized ? toolbar : ''" height='273px'
-            :allowFiltering='true' :filterSettings="filterSettings" :allowSorting="true"
-            :beginEdit="beforeEdit" :beforeDelete="beforeDelete" :actionBegin="actionBegin"
-            :allowResizing="true">
-    <e-columns>
-      <e-column field="index" :allowFiltering="false" :allowSorting="false" headerText="#" width="40" textAlign="Center" :template="'indexTemplate'"></e-column>
-      <e-column field="comicUrl" :allowFiltering="false" :allowSorting="false" headerText="Image" width="70" textAlign="Center" :template="'imageTemplate'"></e-column>
-      <e-column field='comicTitle' headerText='Title' textAlign='Center' width="150"></e-column>
-      <e-column field='firstRating' headerText='Rating' textAlign="Center" width=80></e-column>
-      <e-column field='firstPagesRead' headerText='Pages read' textAlign="Center" width=100></e-column>
-      <e-column field='firstStatus' :filter="{type: 'CheckBox'}" textAlign="Center" headerText='Status' width="100" :template="'statusTemplate'"></e-column>
-    </e-columns>
-    <template v-slot:imageTemplate="{data}">
-      <a :href="data.comicUrl" target="_blank" style="max-width: inherit;">
-        <img style="box-shadow: 0px 0px 10px 1px black"
-             :src="data.comicThumbnail"
-             :alt="data.comicTitle" :title="data.comicTitle"/>
-      </a>
-    </template>
-    <template v-slot:indexTemplate="{data}">
-      {{getRowIndex(data)}}
-    </template>
-    <template v-slot:statusTemplate="{data}">
-      {{formatStatus(data.firstStatus)}}
-    </template>
-  </ejs-grid>
+  <div class="row">
+    <div class="col">
+      <ComicProgressForm ref="comicProgress" v-if="showForm" :key="comicProgressKey" :comic-progress="selectedRow"
+                         @comic-progress-created="comicProgressCreated"/>
+      <ejs-grid :dataSource='comics' :allowPaging='true' :pageSettings="pageSettings"
+                :editSettings='editSettings' :toolbar="authorized ? toolbar : ''" height='273px'
+                :allowFiltering='true' :filterSettings="filterSettings" :allowSorting="true"
+                :beginEdit="beforeEdit" :beforeDelete="beforeDelete" :actionBegin="actionBegin"
+                :allowResizing="true">
+        <e-columns>
+          <e-column field="index" :allowFiltering="false" :allowSorting="false" headerText="#" width="40" textAlign="Center" :template="'indexTemplate'"></e-column>
+          <e-column field="comicUrl" :allowFiltering="false" :allowSorting="false" headerText="Image" width="70" textAlign="Center" :template="'imageTemplate'"></e-column>
+          <e-column field='comicTitle' headerText='Title' textAlign='Center' width="150"></e-column>
+          <e-column field='firstRating' headerText='Rating' textAlign="Center" width=80></e-column>
+          <e-column field='firstPagesRead' headerText='Pages read' textAlign="Center" width=100></e-column>
+          <e-column field='firstStatus' :filter="{type: 'CheckBox'}" textAlign="Center" headerText='Status' width="100" :template="'statusTemplate'"></e-column>
+        </e-columns>
+        <template v-slot:imageTemplate="{data}">
+          <a :href="data.comicUrl" target="_blank" style="max-width: inherit;">
+            <img style="box-shadow: 0px 0px 10px 1px black"
+                 :src="data.comicThumbnail"
+                 :alt="data.comicTitle" :title="data.comicTitle"/>
+          </a>
+        </template>
+        <template v-slot:indexTemplate="{data}">
+          {{getRowIndex(data)}}
+        </template>
+        <template v-slot:statusTemplate="{data}">
+          {{formatStatus(data.firstStatus)}}
+        </template>
+      </ejs-grid>
+    </div>
+  </div>
 </div>
 </template>
 
@@ -71,7 +75,7 @@ export default {
   data(){
     return {
       comics: [],
-      toolbar: ['Add', 'Edit', 'Delete'],
+      toolbar: ['Search', 'Add', 'Edit', 'Delete'],
       pageSettings: {
         pageCount: 5,
         pageSize: 20,

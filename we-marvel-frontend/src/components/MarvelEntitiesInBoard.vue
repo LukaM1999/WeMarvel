@@ -1,37 +1,41 @@
 <template>
   <div id="entitiesInBoardContainer">
-    <ejs-grid ref="grid" :dataSource='entities'
-              :allowPaging='true'
-              :pageSettings="pageSettings"
-              :toolbar="toolbar" height='273px'
-              :allowFiltering='true'
-              :filterSettings="filterSettings"
-              :allowSorting="true"
-              :allowResizing="true"
-              :editSettings="editSettings"
-              :allowGrouping="type.name === 'comic'"
-              :groupSettings="type.name === 'comic' ? groupSettings : undefined">
-      <e-columns>
-        <e-column field='seriesTitle' :headerText="'Series'" textAlign='Center' width="70"></e-column>
-        <e-column :allowGrouping="false" field='title' :headerText='capitalize(type.name)' textAlign='Center' width="120" :template="'titleTemplate'"></e-column>
-        <e-column :allowGrouping="false" field='topicCount'  headerText='Topics' textAlign="Center" width=50></e-column>
-        <e-column :allowGrouping="false" field='postCount'  headerText='Posts' textAlign="Center" width=50></e-column>
-        <e-column :allowGrouping="false" field='lastPostDate' textAlign="Center" headerText='Last posted' width="70"></e-column>
-      </e-columns>
-      <template v-slot:titleTemplate="{data}">
-        <div class="row">
-          <div class="col">
-            <img style="box-shadow: 0px 0px 10px 1px black"
-                 :src="data.thumbnail"
-                 :alt="data.title" :title="data.title"/>
-          </div>
-          <div class="col">
-            <b style="font-size: 14px"><a class="custom-link" :href="`./${type.name}/${data.id}`"
-                   @click.prevent="openEntity(data.id)">{{data.title}}</a></b>
-          </div>
-        </div>
-      </template>
-    </ejs-grid>
+    <div class="row">
+      <div class="col">
+        <ejs-grid ref="grid" :dataSource='entities'
+                  :allowPaging='true'
+                  :pageSettings="pageSettings"
+                  :toolbar="toolbar" height='273px'
+                  :allowFiltering='true'
+                  :filterSettings="filterSettings"
+                  :allowSorting="true"
+                  :allowResizing="true"
+                  :editSettings="editSettings"
+                  :allowGrouping="type.name === 'comic'"
+                  :groupSettings="type.name === 'comic' ? groupSettings : undefined">
+          <e-columns>
+            <e-column field='seriesTitle' :headerText="'Series'" textAlign='Center' width="70"></e-column>
+            <e-column :allowGrouping="false" field='title' :headerText='capitalize(type.name)' textAlign='Center' width="120" :template="'titleTemplate'"></e-column>
+            <e-column :allowGrouping="false" field='topicCount'  headerText='Topics' textAlign="Center" width=50></e-column>
+            <e-column :allowGrouping="false" field='postCount'  headerText='Posts' textAlign="Center" width=50></e-column>
+            <e-column :allowGrouping="false" field='lastPostDate' textAlign="Center" headerText='Last posted' width="70"></e-column>
+          </e-columns>
+          <template v-slot:titleTemplate="{data}">
+            <div class="row">
+              <div class="col">
+                <img style="box-shadow: 0px 0px 10px 1px black"
+                     :src="data.thumbnail"
+                     :alt="data.title" :title="data.title"/>
+              </div>
+              <div class="col">
+                <b style="font-size: 14px"><a class="custom-link" :href="`./${type.name}/${data.id}`"
+                                              @click.prevent="openEntity(data.id)">{{data.title}}</a></b>
+              </div>
+            </div>
+          </template>
+        </ejs-grid>
+      </div>
+    </div>
   </div>
 </template>
 

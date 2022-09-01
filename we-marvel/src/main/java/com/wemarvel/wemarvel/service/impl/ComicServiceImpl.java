@@ -47,4 +47,24 @@ public class ComicServiceImpl implements ComicService {
     public List<ComicDTO> getComicsWithPostInfo() {
         return comicRepository.findAllWithPostInfo();
     }
+
+    @Override
+    public ComicDTO getComicWithSeries(Long comicId) {
+        return comicRepository.getComicWithSeries(comicId);
+    }
+
+    @Override
+    public List<ComicDTO> getComicsWithSeries() {
+        return comicRepository.getComicsWithSeries();
+    }
+
+    @Override
+    public List<ComicDTO> getBySeriesId(Long seriesId) {
+        return comicRepository.getBySeriesId(seriesId);
+    }
+
+    @Override
+    public List<ComicDTO> getComicsWithCharacter(Long characterId) {
+        return comicRepository.getComicsWithCharacter(characterId);
+    }
 }

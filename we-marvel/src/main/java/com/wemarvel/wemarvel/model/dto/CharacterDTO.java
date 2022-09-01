@@ -73,4 +73,17 @@ public class CharacterDTO {
         this.postCount = postCount;
         this.lastPostDate = lastPostDate;
     }
+
+    public CharacterDTO(Long id, String name, String thumbnail) {
+        this.id = id;
+        this.name = name;
+        this.thumbnail = thumbnail;
+    }
+
+    public CharacterDTO(Long id, String name, String description, String thumbnail) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.thumbnail = thumbnail;
+    }
 }

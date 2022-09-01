@@ -1,6 +1,6 @@
 <template>
 <div id="profileContainer" style="overflow-x: hidden">
-  <h1>{{$route.params.username}}'s Profile</h1>
+  <h1>{{profile.username}}'s Profile</h1>
   <ejs-tab v-if="profile.username" ref="tabs" :selected="tabSelected" class="e-fill">
     <e-tabitems>
       <e-tabitem :header="{text: 'Overview'}" :content="'overviewTemplate'">
@@ -11,6 +11,15 @@
       <e-tabitem :header="{text: 'Comics'}" :content="'comicsTemplate'">
         <template v-slot:comicsTemplate="{}">
           <ComicProgress :username="profile.username" :authorized="isAuthorized"/>
+        </template>
+      </e-tabitem>
+      <e-tabitem :header="{text: 'Reviews'}" :content="'reviewsTemplate'">
+        <template v-slot:reviewsTemplate="{}">
+          <Reviews :key="reviewsKey" @review-submitted="reviewSubmitted"
+                   v-if="editSettings"
+                   :edit-settings="editSettings"
+                   :toolbar="toolbar"
+                   :reviews="reviews"/>
         </template>
       </e-tabitem>
       <e-tabitem :header="{text: 'Friends'}" :content="'friendsTemplate'">
@@ -41,7 +50,7 @@
                                  v-model="password" required />
                           <label class="e-float-text e-label">Password</label>
                           <span class="e-input-group-icon e-password" @click="changeIcon">
-                            <box-icon :name="isShowIcon ? 'show' : 'hide'" color="gray"></box-icon>
+                            <span :class="isShowIcon ? 'e-icons e-eye' : 'e-icons e-eye-slash'" style="color: gray"></span>
                           </span>
                         </div>
                       </div>
@@ -183,23 +192,26 @@ import {ButtonComponent, SwitchComponent} from "@syncfusion/ej2-vue-buttons";
 import axios from "axios";
 import {auth} from "@/firebaseConfig";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
-import {verifyPasswordResetCode, sendPasswordResetEmail,
-  confirmPasswordReset, onIdTokenChanged, updateProfile} from "firebase/auth";
+import {
+  verifyPasswordResetCode, sendPasswordResetEmail,
+  confirmPasswordReset, onIdTokenChanged, updateProfile, getIdTokenResult
+} from "firebase/auth";
 import {UploaderComponent, FilesDirective, UploadedFilesDirective} from "@syncfusion/ej2-vue-inputs";
 import {getDownloadURL, getStorage, ref, uploadBytes, getMetadata, deleteObject} from "firebase/storage";
 import {DatePickerComponent, MaskedDateTime} from '@syncfusion/ej2-vue-calendars'
 import { ComboBoxComponent } from "@syncfusion/ej2-vue-dropdowns";
 import moment from "moment";
-import {store} from "@/main";
 import ComicProgress from "@/components/ComicProgress";
 import ProfileOverview from "@/components/ProfileOverview";
 import Users from "@/components/Users";
 import FriendRequests from "@/components/FriendRequests";
+import Reviews from "@/components/Reviews";
 
 
 export default {
   name: "Profile",
   components: {
+    Reviews,
     Users,
     ProfileOverview,
     ComicProgress,
@@ -238,6 +250,14 @@ export default {
         {text: 'Female', value: 'FEMALE'},
         {text: 'Non-binary', value: 'NON_BINARY'},
       ],
+      tabs: new Map([
+        ['profile', 0],
+        ['comics', 1],
+        ['reviews', 2],
+        ['friends', 3],
+        ['friend requests', 4],
+        ['settings', 5],
+      ]),
       isTypePassword: true,
       isShowIcon: true,
       showPasswordResetForm: false,
@@ -259,16 +279,24 @@ export default {
         contentType: 'png'
       },
       maskPlaceholder: {day: 'dd', month: 'mm', year: 'yyyy'},
+      reviews: [],
+      toolbar: ['Search'],
+      editSettings: {},
+      reviewsKey: 0,
+      isAdmin: false,
     }
   },
   async mounted() {
     await this.getProfileInfo();
     onIdTokenChanged(auth, async (user) => {
       this.isAuthorized = user.displayName === this.$route.params.username;
+      getIdTokenResult(user).then((idTokenResult) => {
+        this.isAdmin = idTokenResult.claims.admin;
+      });
       this.imageUrl = user.photoURL;
       if(this.$route.query.tab) {
         await this.$nextTick(() => {
-          this.$refs.tabs.select(Number.parseInt(this.$route.query.tab));
+          this.$refs.tabs.select(this.tabs.get(this.$route.query.tab));
         });
       }
       if(!this.imageUrl) return;
@@ -277,7 +305,7 @@ export default {
       this.imageInfo.contentType = "." + this.imageInfo.contentType.split('/')[1];
     });
     if(this.$route.query.mode === 'resetPassword' && this.$route.query.oobCode) {
-      this.$refs.tabs.select(4);
+      this.$refs.tabs.select(5);
       this.oobCode = this.$route.query.oobCode;
       const email = await verifyPasswordResetCode(auth, this.oobCode);
       if (!email) return;
@@ -286,10 +314,32 @@ export default {
   },
   methods: {
     async tabSelected(e) {
-      this.$router.push({query: {tab: e.selectedIndex}});
-      if(e.selectedIndex === 4){
+      this.$router.push({query: {tab: e.selectedItem.innerText.toLowerCase()}});
+      if(e.selectedIndex === 2){
+        if(this.isAuthorized || this.isAdmin) {
+          this.toolbar = ['Search', 'Add'];
+          this.editSettings = {
+            allowAdding: true,
+            mode: 'Dialog',
+          }
+        }
+        await this.getReviews();
+      }
+      else if(e.selectedIndex === 5){
         await this.getNotificationSettings();
       }
+    },
+    reviewSubmitted(review){
+      this.reviews.unshift(review);
+      this.reviewsKey++;
+    },
+    async getReviews(){
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/review/user/${this.$route.params.username}`);
+      for(let r of data){
+        const lastDot = r.marvelEntityThumbnail.lastIndexOf(".");
+        r.marvelEntityThumbnail = r.marvelEntityThumbnail.substring(0, lastDot) + "/portrait_small" + r.marvelEntityThumbnail.substring(lastDot);
+      }
+      this.reviews = data;
     },
     async getNotificationSettings(){
       const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/notification/settings`);
@@ -480,7 +530,7 @@ export default {
       deep: true,
       handler: function (to, from) {
         if(to.query.tab !== from.query.tab) {
-          this.$refs.tabs.select(parseInt(to.query.tab));
+          this.$refs.tabs.select(this.tabs.get(to.query.tab));
         }
         if(to.params.username === from.params.username) return;
         this.username = to.params.username;

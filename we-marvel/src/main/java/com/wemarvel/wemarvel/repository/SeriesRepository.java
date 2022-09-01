@@ -22,4 +22,20 @@ public interface SeriesRepository extends JpaRepository<Series, Long> {
             "GROUP BY s.id, s.title, s.thumbnail " +
             "ORDER BY s.title")
     List<SeriesDTO> findAllWithPostInfo();
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.SeriesDTO(s.id, s.title, s.description, " +
+            "s.thumbnail, s.type, s.startYear, s.endYear) " +
+            "FROM Series s " +
+            "INNER JOIN CharacterInSeries cis ON cis.characterId = ?1 " +
+            "WHERE cis.characterId = ?1 AND cis.seriesId = s.id " +
+            "GROUP BY s.id, s.title, s.description, s.thumbnail, s.type, s.startYear, s.endYear " +
+            "ORDER BY s.title")
+    List<SeriesDTO> getSeriesWithCharacter(Long characterId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.SeriesDTO(s.id, s.title, s.description, " +
+            "s.thumbnail, s.type, s.startYear, s.endYear) " +
+            "FROM Series s " +
+            "GROUP BY s.id, s.title, s.description, s.thumbnail, s.type, s.startYear, s.endYear " +
+            "ORDER BY s.title")
+    List<SeriesDTO> getAllSeries();
 }

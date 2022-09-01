@@ -72,7 +72,7 @@ security:
     - /favicon.ico
     - /session/login
     - /public/**
-    - /characters/**
+    - /character/**
     - /user/**
     - /forum/**
     - /notification/**
@@ -80,5 +80,6 @@ security:
     - /comic/**
     - /series/**
     - /friend/**
+    - /review/**
   exposed-headers:
     - X-Xsrf-Token
