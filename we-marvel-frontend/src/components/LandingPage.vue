@@ -25,10 +25,13 @@
                                 width="100%">
                     <template v-slot:notificationsHeaderTemplate="{}">
                       <div class="row justify-content-start">
-                        <div class="col">
+                        <div class="col-6">
                           <div class="e-list-header-text">
                             <span class="e-list-header-text-content">Notifications</span>
                           </div>
+                        </div>
+                        <div class="col justify-content-end">
+                          <a style="font-size: 15px;" class="custom-link" :href="`/profile/${signedInUser.displayName}?tab=notifications`">View all</a>
                         </div>
                         <div v-if="notifications.length > 0" class="col d-flex justify-content-end">
                           <span title="Mark all as read" class="e-icons e-check-box" @click="markAllAsRead"></span>
@@ -40,13 +43,9 @@
                         <div class="col justify-content-start">
                           <div class="row">
                             <div class="col">
-                              <b v-if="data.type !== 'accepted_friend_request'">New {{data.type === 'new_topic_post' ? 'post' : 'friend request'}} from <a class="custom-link" :href="`/profile/${data.senderUsername}`"
-                                                                                                            @click.prevent="openProfile(data.senderUsername)">
+                              <b>{{notificationTypes.get(data.type)}} from <a class="custom-link" :href="`/profile/${data.senderUsername}`">
                                 {{data.senderUsername}}</a>
                               </b>
-                              <b v-else>Friend request accepted from <a class="custom-link" :href="`/profile/${data.senderUsername}`"
-                                                                 @click.prevent="openProfile(data.senderUsername)">
-                                {{data.senderUsername}}</a></b>
                             </div>
                           </div>
                           <div class="row">
@@ -60,7 +59,7 @@
                         </div>
                         <div class="col justify-content-end">
                           <div class="row justify-content-end">
-                            <div class="col">
+                            <div style="text-align: right" class="col">
                               <i>{{data.receivedAt}}</i>
                             </div>
                           </div>
@@ -68,6 +67,11 @@
                             <div class="col">
                               <a class="custom-link" :href="`/forum/board/${data.boardId}/topic/${data.topicId}`">
                                 {{data.topicTitle}}</a>
+                            </div>
+                          </div>
+                          <div v-if="data.message" class="row justify-content-end">
+                            <div class="col">
+                              <span>{{data.message}}</span>
                             </div>
                           </div>
                         </div>
@@ -238,7 +242,13 @@ export default {
             {text: 'Sign out'},
           ]
         }
-      ]
+      ],
+      notificationTypes: new Map([
+          ['new_topic_post', 'New post'],
+          ['new_friend_request', 'New friend request'],
+          ['accepted_friend_request', 'Friend request accepted'],
+          ['new_message', 'New message'],
+      ])
     };
   },
   async mounted() {
@@ -372,7 +382,7 @@ export default {
       this.$router.push({name: 'profile', params: {username: auth.currentUser?.displayName}, query: {tab: tabName}});
     },
     async markAllAsRead(){
-      await axios.patch(`${process.env.VUE_APP_BACKEND}/notification/read`)
+      await axios.patch(`${process.env.VUE_APP_BACKEND}/notification/readAll`)
         .then(() => {
           this.$emit('all-read');
         }).catch(error => {

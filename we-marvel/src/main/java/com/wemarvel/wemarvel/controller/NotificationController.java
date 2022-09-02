@@ -56,7 +56,7 @@ public class NotificationController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Notification>> getAllNotifications() {
+    public ResponseEntity<List<NotificationDTO>> getAllNotifications() {
         return ResponseEntity.ok(notificationService.getAllNotifications());
     }
 
@@ -65,9 +65,15 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getAllUnreadNotifications());
     }
 
-    @PatchMapping("/read")
+    @PatchMapping("/readAll")
     public ResponseEntity<?> markAllAsRead() {
         notificationService.markAllAsRead();
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/read")
+    public ResponseEntity<?> markAsRead(@RequestBody NotificationDTO notificationDTO) {
+        notificationService.markAsRead(notificationDTO);
         return ResponseEntity.ok().build();
     }
 }

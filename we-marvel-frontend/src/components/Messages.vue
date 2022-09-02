@@ -1,6 +1,5 @@
 <template>
   <div class="window-container" :class="{ 'window-mobile': isDevice }">
-
     <div v-if="addNewRoom" class="row mt-3 mb-3 justify-content-center">
       <div class="col-8">
         <div class="row">
@@ -82,7 +81,6 @@ register();
 
 import axios from "axios";
 import {auth} from "@/firebaseServices/firebaseConfig";
-import {ComboBoxComponent} from "@syncfusion/ej2-vue-dropdowns";
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import Users from "@/components/Users";
 import {store} from "@/main";
@@ -141,7 +139,50 @@ export default {
         { name: 'deleteRoom', title: 'Delete chat' }
       ],
       messageSelectionActions: [{ name: 'deleteMessages', title: 'Delete' }],
-      styles: { container: { borderRadius: '4px' } },
+      styles: {
+        container: { borderRadius: '4px' },
+        icons: {
+          add: '#e54e54',
+          send: '#e54e54',
+          microphone: '#e54e54',
+          emoji: '#e54e54',
+          paperclip: '#e54e54',
+          checkmarkSeen: '#252591',
+        },
+        sidemenu: {
+          background: '#fff',
+          backgroundHover: '#f6f6f6',
+          backgroundActive: '#ee5057',
+          colorActive: '#fff',
+          borderColorSearch: '#e1e5e8'
+        },
+        general: {
+          color: '#0a0a0a',
+          colorButtonClear: '#1976d2',
+          colorButton: '#fff',
+          backgroundColorButton: '#1976d2',
+          backgroundInput: '#fff',
+          colorPlaceholder: '#9ca6af',
+          colorCaret: '#1976d2',
+          colorSpinner: '#333',
+          borderStyle: '1px solid #e1e4e8',
+          backgroundScrollIcon: '#fff'
+        },
+        room: {
+          colorUsername: '#0a0a0a',
+          colorMessage: '#a2aeb8',
+          colorTimestamp: '#a2aeb8',
+          colorStateOnline: '#4caf50',
+          colorStateOffline: '#9ca6af',
+          backgroundCounterBadge: '#0696c7',
+          colorCounterBadge: '#fff'
+        },
+        message: {
+          backgroundMe: '#f84c54',
+          colorTimestamp: '#a2aeb8',
+          colorNewMessages: '#f84c54',
+        }
+      },
       templatesText: [
         {
           tag: 'help',

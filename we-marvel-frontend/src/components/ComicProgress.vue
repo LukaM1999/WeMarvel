@@ -2,9 +2,9 @@
 <div id="comicProgressContainer">
   <div class="row">
     <div class="col">
-      <div class="row mb-3">
+      <div v-if="showForm" class="row mb-3">
         <div class="col">
-          <ComicProgressForm ref="comicProgress" v-if="showForm" :key="comicProgressKey" :comic-progress="selectedRow"
+          <ComicProgressForm ref="comicProgress" :key="comicProgressKey" :comic-progress="selectedRow"
                              @comic-progress-created="comicProgressCreated"/>
         </div>
       </div>

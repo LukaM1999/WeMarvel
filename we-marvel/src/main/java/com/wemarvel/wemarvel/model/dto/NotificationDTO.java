@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -52,6 +53,9 @@ public class NotificationDTO {
     @Setter
     @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime receivedAt;
+    @Getter
+    @Setter
+    private List<Long> toMarkAsRead;
 
     public NotificationDTO(Long id, String type, Long recipientId, Long senderId, LocalDateTime receivedAt) {
         this.id = id;

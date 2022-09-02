@@ -37,6 +37,11 @@
           <Messages ref="messagesRef" :current-user-prop="profile"/>
         </template>
       </e-tabitem>
+      <e-tabitem v-if="isAuthorized" :header="{text: 'Notifications'}" :content="'notificationsTemplate'">
+        <template v-slot:notificationsTemplate="{}">
+          <Notifications ref="notificationsRef"/>
+        </template>
+      </e-tabitem>
       <e-tabitem v-if="isAuthorized" :header="{text: 'Settings'}" :content="'settingsTemplate'">
         <template v-slot:settingsTemplate="{}">
           <div class="row">
@@ -212,6 +217,7 @@ import Users from "@/components/Users";
 import FriendRequests from "@/components/FriendRequests";
 import Reviews from "@/components/Reviews";
 import Messages from "@/components/Messages";
+import Notifications from "@/components/Notifications";
 
 
 export default {
@@ -223,6 +229,7 @@ export default {
     ComicProgress,
     FriendRequests,
     Messages,
+    Notifications,
     "ejs-tab": TabComponent,
     "e-tabitems": TabItemsDirective,
     "e-tabitem": TabItemDirective,
@@ -264,7 +271,8 @@ export default {
         ['friends', 3],
         ['friend requests', 4],
         ['messages', 5],
-        ['settings', 6],
+        ['notifications', 6],
+        ['settings', 7],
       ]),
       isTypePassword: true,
       isShowIcon: true,
@@ -313,7 +321,7 @@ export default {
       this.imageInfo.contentType = "." + this.imageInfo.contentType.split('/')[1];
     });
     if(this.$route.query.mode === 'resetPassword' && this.$route.query.oobCode) {
-      this.$refs.tabs.select(6);
+      this.$refs.tabs.select(7);
       this.oobCode = this.$route.query.oobCode;
       const email = await verifyPasswordResetCode(auth, this.oobCode);
       if (!email) return;
@@ -333,7 +341,7 @@ export default {
         }
         await this.getReviews();
       }
-      else if(e.selectedIndex === 6){
+      else if(e.selectedIndex === 7){
         await this.getNotificationSettings();
       }
     },

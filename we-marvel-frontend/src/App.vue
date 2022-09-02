@@ -500,7 +500,7 @@ tr:hover {
 
 .e-listview:not(.e-list-template) .e-list-item {
   height: auto;
-  max-height: 11em;
+  max-height: 13em;
   line-height: 24px;
   padding: 0 14px;
   position: relative;
@@ -528,6 +528,10 @@ tr:hover {
 
 .e-listview .e-icons[data-v-54f74f74]:hover {
   cursor: pointer;
+}
+
+#vac-icon-add {
+  fill: #e54e4e !important;
 }
 
 </style>

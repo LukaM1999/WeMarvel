@@ -9,8 +9,9 @@ public interface NotificationService {
     void sendNotification(NotificationDTO notificationDTO);
     void sendTopicNotification(NotificationDTO notificationDTO);
     void sendFriendNotification(NotificationDTO notificationDTO);
-    List<Notification> getAllNotifications();
+    List<NotificationDTO> getAllNotifications();
     List<NotificationDTO> getAllUnreadNotifications();
     void markAllAsRead();
     void sendMessageNotification(NotificationDTO notificationDTO);
+    void markAsRead(NotificationDTO notificationDTO);
 }

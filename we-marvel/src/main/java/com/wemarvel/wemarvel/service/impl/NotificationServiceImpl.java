@@ -80,8 +80,28 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<Notification> getAllNotifications() {
-        return notificationRepository.getAllNotifications(Objects.requireNonNull(getSignedInUser()).getId());
+    public List<NotificationDTO> getAllNotifications() {
+        List<NotificationDTO> notificationDTOs = new ArrayList<>();
+        List<Notification> notifications = notificationRepository.getAllNotifications(Objects.requireNonNull(getSignedInUser()).getId());
+        for(Notification notification : notifications) {
+            RegisteredUser sender = registeredUserService.getUserById(notification.getSenderId());
+            NotificationDTO notificationDTO = new NotificationDTO(notification.getId(), notification.getType(), notification.getRecipientId(),
+                    sender.getId(), notification.getReceivedAt());
+            notificationDTO.setSenderUsername(sender.getUsername());
+            notificationDTO.setSenderImageUrl(sender.getImageUrl());
+            notificationDTO.setRead(notification.isRead());
+            if(notification instanceof TopicNotification) {
+                TopicNotification topicNotification = (TopicNotification) notification;
+                notificationDTO.setBoardId(topicNotification.getBoardId());
+                notificationDTO.setTopicId(topicNotification.getTopicId());
+                notificationDTO.setTopicTitle(topicNotification.getTopicTitle());
+            } else if(notification instanceof MessageNotification){
+                MessageNotification messageNotification = (MessageNotification) notification;
+                notificationDTO.setMessage(messageNotification.getMessage());
+            }
+            notificationDTOs.add(notificationDTO);
+        }
+        return notificationDTOs;
     }
 
     @Override
@@ -101,6 +121,9 @@ public class NotificationServiceImpl implements NotificationService {
                 notificationDTO.setBoardId(topicNotification.getBoardId());
                 notificationDTO.setTopicId(topicNotification.getTopicId());
                 notificationDTO.setTopicTitle(topicNotification.getTopicTitle());
+            } else if(notification instanceof MessageNotification) {
+                MessageNotification messageNotification = (MessageNotification) notification;
+                notificationDTO.setMessage(messageNotification.getMessage());
             }
             notificationDTOs.add(notificationDTO);
         }
@@ -134,5 +157,18 @@ public class NotificationServiceImpl implements NotificationService {
         notificationDTO.setSenderImageUrl(getSignedInUser().getImageUrl());
         Pusher pusher = pusherConfig.getPusher();
         pusher.trigger("messages", notificationDTO.getType(), notificationDTO, notificationDTO.getSocketId());
+    }
+
+    @Override
+    public void markAsRead(NotificationDTO notificationDTO) {
+        for(Long notificationId : notificationDTO.getToMarkAsRead()){
+            Notification notification = notificationRepository.findById(notificationId).orElse(null);
+            if(notification == null) continue;
+            if(!notification.getRecipientId().equals(Objects.requireNonNull(getSignedInUser()).getId())) {
+                throw new IllegalArgumentException("User does not have permission to mark this notification as read");
+            }
+            notification.setRead(true);
+            notificationRepository.save(notification);
+        }
     }
 }
