@@ -110,7 +110,7 @@
 import axios from "axios";
 import {ListViewComponent} from "@syncfusion/ej2-vue-lists";
 import {PagerComponent} from "@syncfusion/ej2-vue-grids";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import RichTextEditor from "@/components/RichTextEditor";
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import QuotedPost from "@/components/QuotedPost";
@@ -212,7 +212,7 @@ export default {
         boardId: this.topic.boardId,
         topicId: this.topic.id,
         topicTitle: this.topic.title,
-        posterUsername: data.ownerUsername,
+        senderUsername: data.ownerUsername,
         socketId: store.getters.socketId,
       });
     },

@@ -130,7 +130,7 @@ import axios from "axios";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
 import MarvelEntityReview from "@/components/MarvelEntityReview";
 import {onIdTokenChanged, getIdTokenResult} from "firebase/auth";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 
 export default {
   name: "Reviews",

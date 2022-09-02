@@ -29,4 +29,9 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
             "JOIN RegisteredUser u2 ON f.receiverId = u2.id " +
             "WHERE (f.receiverId = ?1 OR f.senderId = ?1) AND f.accepted = false")
     List<FriendRequestDTO> getPendingFriendRequests(Long id);
+
+    @Query("SELECT f FROM FriendRequest f " +
+            "WHERE f.senderId = ?1 OR f.senderId = ?2 " +
+            "AND f.receiverId = ?1 OR f.receiverId = ?2")
+    FriendRequest getAcceptedFriendRequest(Long excludedUserId, Long recipientId);
 }

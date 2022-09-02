@@ -5,10 +5,7 @@ import com.wemarvel.wemarvel.config.PusherConfig;
 import com.wemarvel.wemarvel.model.*;
 import com.wemarvel.wemarvel.model.dto.NotificationDTO;
 import com.wemarvel.wemarvel.repository.NotificationRepository;
-import com.wemarvel.wemarvel.service.NotificationService;
-import com.wemarvel.wemarvel.service.NotificationSettingsService;
-import com.wemarvel.wemarvel.service.RegisteredUserService;
-import com.wemarvel.wemarvel.service.WatchedTopicService;
+import com.wemarvel.wemarvel.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -37,6 +34,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     private PusherConfig pusherConfig;
+
+    @Autowired
+    private FriendService friendService;
 
     @Override
     public void sendNotification(NotificationDTO notificationDTO) {
@@ -115,5 +115,24 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setRead(true);
             notificationRepository.save(notification);
         }
+    }
+
+    @Override
+    public void sendMessageNotification(NotificationDTO notificationDTO) {
+        Long excludedUserId = Objects.requireNonNull(getSignedInUser()).getId();
+        FriendRequest friendRequest = friendService.getAcceptedFriendRequest(excludedUserId, notificationDTO.getRecipientId());
+        if(friendRequest == null) {
+            throw new IllegalArgumentException("User not friends with recipient");
+        }
+        NotificationSettings notificationSettings = notificationSettingsService.getByUserId(notificationDTO.getRecipientId());
+        if(notificationSettings == null || !notificationSettings.isMessages()) {
+            throw new IllegalArgumentException("User does not have message notifications enabled");
+        }
+        MessageNotification messageNotification = new MessageNotification(notificationDTO.getType(),
+                excludedUserId, notificationDTO.getRecipientId(), LocalDateTime.now(), notificationDTO.getMessage());
+        notificationRepository.save(messageNotification);
+        notificationDTO.setSenderImageUrl(getSignedInUser().getImageUrl());
+        Pusher pusher = pusherConfig.getPusher();
+        pusher.trigger("messages", notificationDTO.getType(), notificationDTO, notificationDTO.getSocketId());
     }
 }

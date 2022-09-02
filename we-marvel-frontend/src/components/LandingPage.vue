@@ -143,7 +143,7 @@ import {
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import { store } from '@/main'
 import {DialogComponent, TooltipComponent} from '@syncfusion/ej2-vue-popups';
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import {signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendEmailVerification, signOut, deleteUser, updateProfile} from "firebase/auth";
 import axios from "axios";
@@ -232,6 +232,7 @@ export default {
             {text: 'Reviews'},
             {text: 'Friends'},
             {text: 'Friend requests'},
+            {text: 'Messages'},
             {text: 'Settings'},
             {separator: true},
             {text: 'Sign out'},

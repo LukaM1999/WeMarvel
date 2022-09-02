@@ -1,30 +1,14 @@
-//const path = require('path');
-
 module.exports = {
-    // configureWebpack:{
-    //    module: {
-    //        rules: [
-    //            {
-    //                test: /\.vue$/,
-    //                loader: 'vue-loader',
-    //                options: {
-    //                    loaders: {
-    //                        'scss': [
-    //                            'vue-style-loader',
-    //                            'css-loader',
-    //                            {
-    //                                loader: "sass-loader",
-    //                                options: {
-    //                                    includePaths: [
-    //                                        path.resolve(__dirname,"./node_modules/@syncfusion")
-    //                                    ]
-    //                                }
-    //                            }
-    //                        ]
-    //                    }
-    //                }
-    //            }
-    //        ]
-    //    }
-    // }
+    chainWebpack: config => {
+        config.module
+            .rule('vue')
+            .use('vue-loader')
+            .tap(options => ({
+                ...options,
+                compilerOptions: {
+                    // treat any tag that starts with ion- as custom elements
+                    isCustomElement: tag => tag === 'vue-advanced-chat'
+                }
+            }))
+    }
 }

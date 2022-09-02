@@ -75,7 +75,7 @@ import {
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import axios from "axios";
 import {onIdTokenChanged} from "firebase/auth";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import {router} from "@/main";
 
 export default {

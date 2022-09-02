@@ -2,7 +2,9 @@
 <div id="usersContainer">
   <ejs-listview v-if="users.length > 0" :cssClass="'e-list-template'" :dataSource="users"
                 :template="'userTemplate'" :fields="fields"
-                :headerTemplate="'headerTemplate'" :showHeader="true" ref="list">
+                :headerTemplate="'headerTemplate'"
+                :showHeader="true" ref="list"
+                @select="userSelected">
     <template v-slot:headerTemplate="{}">
       <div class="row">
         <div class="col align-self-center">
@@ -38,16 +40,14 @@
           <div class="e-card-header">
             <div class="e-card-header-text">
               <div class="e-card-header-title">
-                <a class="custom-link" :href="`/profile/${data.username}`"
-                   @click.prevent="openProfile(data.username)">
+                <a class="custom-link" :href="`/profile/${data.username}`">
                   {{data.username}}
                 </a>
               </div>
             </div>
           </div>
           <div class="e-card-content mt-2">
-            <a :href="`/profile/${data.username}`" style="max-width: inherit;"
-               @click.prevent="openProfile(data.username)">
+            <a :href="`/profile/${data.username}`" style="max-width: inherit;">
               <img style="box-shadow: 0px 0px 10px 1px black"
                    :src="data.imageUrl ? data.imageUrl : '/placeholder.jpg'"
                    :alt="data.username" :title="data.username"/>
@@ -102,6 +102,7 @@ import {ComboBoxComponent} from "@syncfusion/ej2-vue-dropdowns";
 import axios from "axios";
 import {PagerComponent} from "@syncfusion/ej2-vue-grids";
 import {capitalize} from "eslint-plugin-vue/lib/utils/casing";
+import {router} from "@/main";
 
 export default {
   name: "Users",
@@ -110,6 +111,7 @@ export default {
     'ejs-pager': PagerComponent,
     'ejs-combobox': ComboBoxComponent
   },
+  emits: ['user-selected'],
   props: {
     username: {
       type: String,
@@ -155,7 +157,7 @@ export default {
       this.users = data;
     },
     openProfile(username){
-      this.$router.push({name: 'profile', params: {username: username}});
+      router.push({name: 'profile', params: {username: username}});
     },
     searchUsers(){
       this.$refs.list.ej2Instances.dataSource = new DataManager(this.users).executeLocal(
@@ -176,6 +178,9 @@ export default {
     changeSortOrder(){
       this.sortOrder = this.sortOrder === 'ascending' ? 'descending' : 'ascending';
       this.searchUsers();
+    },
+    userSelected(e){
+      this.$emit('user-selected', e.data);
     }
   },
 }

@@ -32,6 +32,11 @@
           <FriendRequests ref="friendRequestsRef"/>
         </template>
       </e-tabitem>
+      <e-tabitem v-if="isAuthorized" :header="{text: 'Messages'}" :content="'messagesTemplate'">
+        <template v-slot:messagesTemplate="{}">
+          <Messages ref="messagesRef" :current-user-prop="profile"/>
+        </template>
+      </e-tabitem>
       <e-tabitem v-if="isAuthorized" :header="{text: 'Settings'}" :content="'settingsTemplate'">
         <template v-slot:settingsTemplate="{}">
           <div class="row">
@@ -190,7 +195,7 @@
 import {TabComponent, TabItemDirective, TabItemsDirective} from "@syncfusion/ej2-vue-navigations";
 import {ButtonComponent, SwitchComponent} from "@syncfusion/ej2-vue-buttons";
 import axios from "axios";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
 import {
   verifyPasswordResetCode, sendPasswordResetEmail,
@@ -206,6 +211,7 @@ import ProfileOverview from "@/components/ProfileOverview";
 import Users from "@/components/Users";
 import FriendRequests from "@/components/FriendRequests";
 import Reviews from "@/components/Reviews";
+import Messages from "@/components/Messages";
 
 
 export default {
@@ -216,6 +222,7 @@ export default {
     ProfileOverview,
     ComicProgress,
     FriendRequests,
+    Messages,
     "ejs-tab": TabComponent,
     "e-tabitems": TabItemsDirective,
     "e-tabitem": TabItemDirective,
@@ -256,7 +263,8 @@ export default {
         ['reviews', 2],
         ['friends', 3],
         ['friend requests', 4],
-        ['settings', 5],
+        ['messages', 5],
+        ['settings', 6],
       ]),
       isTypePassword: true,
       isShowIcon: true,
@@ -305,7 +313,7 @@ export default {
       this.imageInfo.contentType = "." + this.imageInfo.contentType.split('/')[1];
     });
     if(this.$route.query.mode === 'resetPassword' && this.$route.query.oobCode) {
-      this.$refs.tabs.select(5);
+      this.$refs.tabs.select(6);
       this.oobCode = this.$route.query.oobCode;
       const email = await verifyPasswordResetCode(auth, this.oobCode);
       if (!email) return;
@@ -325,7 +333,7 @@ export default {
         }
         await this.getReviews();
       }
-      else if(e.selectedIndex === 5){
+      else if(e.selectedIndex === 6){
         await this.getNotificationSettings();
       }
     },

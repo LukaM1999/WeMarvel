@@ -2,35 +2,46 @@
 <div id="comicProgressContainer">
   <div class="row">
     <div class="col">
-      <ComicProgressForm ref="comicProgress" v-if="showForm" :key="comicProgressKey" :comic-progress="selectedRow"
-                         @comic-progress-created="comicProgressCreated"/>
-      <ejs-grid :dataSource='comics' :allowPaging='true' :pageSettings="pageSettings"
-                :editSettings='editSettings' :toolbar="authorized ? toolbar : ''" height='273px'
-                :allowFiltering='true' :filterSettings="filterSettings" :allowSorting="true"
-                :beginEdit="beforeEdit" :beforeDelete="beforeDelete" :actionBegin="actionBegin"
-                :allowResizing="true">
-        <e-columns>
-          <e-column field="index" :allowFiltering="false" :allowSorting="false" headerText="#" width="40" textAlign="Center" :template="'indexTemplate'"></e-column>
-          <e-column field="comicUrl" :allowFiltering="false" :allowSorting="false" headerText="Image" width="70" textAlign="Center" :template="'imageTemplate'"></e-column>
-          <e-column field='comicTitle' headerText='Title' textAlign='Center' width="150"></e-column>
-          <e-column field='firstRating' headerText='Rating' textAlign="Center" width=80></e-column>
-          <e-column field='firstPagesRead' headerText='Pages read' textAlign="Center" width=100></e-column>
-          <e-column field='firstStatus' :filter="{type: 'CheckBox'}" textAlign="Center" headerText='Status' width="100" :template="'statusTemplate'"></e-column>
-        </e-columns>
-        <template v-slot:imageTemplate="{data}">
-          <a :href="data.comicUrl" target="_blank" style="max-width: inherit;">
-            <img style="box-shadow: 0px 0px 10px 1px black"
-                 :src="data.comicThumbnail"
-                 :alt="data.comicTitle" :title="data.comicTitle"/>
-          </a>
-        </template>
-        <template v-slot:indexTemplate="{data}">
-          {{getRowIndex(data)}}
-        </template>
-        <template v-slot:statusTemplate="{data}">
-          {{formatStatus(data.firstStatus)}}
-        </template>
-      </ejs-grid>
+      <div class="row mb-3">
+        <div class="col">
+          <ComicProgressForm ref="comicProgress" v-if="showForm" :key="comicProgressKey" :comic-progress="selectedRow"
+                             @comic-progress-created="comicProgressCreated"/>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <ejs-grid :dataSource='comics' :allowPaging='true' :pageSettings="pageSettings"
+                    :editSettings='editSettings' :toolbar="authorized ? toolbar : ''" height='273px'
+                    :allowFiltering='true' :filterSettings="filterSettings" :allowSorting="true"
+                    :beginEdit="beforeEdit" :beforeDelete="beforeDelete" :actionBegin="actionBegin"
+                    :allowResizing="true" :allowTextWrap="true" :rowDeselected="rowDeselected">
+            <e-columns>
+              <e-column field="index" :allowFiltering="false" :allowSorting="false" headerText="#" width="40" textAlign="Center" :template="'indexTemplate'"></e-column>
+              <e-column field="comicUrl" :allowFiltering="false" :allowSorting="false" headerText="Image" width="70" textAlign="Center" :template="'imageTemplate'"></e-column>
+              <e-column field='comicTitle' headerText='Title' textAlign='Center' width="150" :template="'titleTemplate'"></e-column>
+              <e-column field='firstRating' headerText='Rating' textAlign="Center" width=80></e-column>
+              <e-column field='firstPagesRead' headerText='Pages read' textAlign="Center" width=100></e-column>
+              <e-column field='firstStatus' :filter="{type: 'CheckBox'}" textAlign="Center" headerText='Status' width="100" :template="'statusTemplate'"></e-column>
+            </e-columns>
+            <template v-slot:imageTemplate="{data}">
+              <a :href="data.comicUrl" target="_blank" style="max-width: inherit;">
+                <img style="box-shadow: 0px 0px 10px 1px black"
+                     :src="data.comicThumbnail"
+                     :alt="data.comicTitle" :title="data.comicTitle"/>
+              </a>
+            </template>
+            <template v-slot:titleTemplate="{data}">
+              <a style="font-size: 18px;" class="custom-link" :href="`/comic/${data.comicId}`">{{data.comicTitle}}</a>
+            </template>
+            <template v-slot:indexTemplate="{data}">
+              {{getRowIndex(data)}}
+            </template>
+            <template v-slot:statusTemplate="{data}">
+              {{formatStatus(data.firstStatus)}}
+            </template>
+          </ejs-grid>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -48,7 +59,7 @@ import {
   Sort, Resize
 } from "@syncfusion/ej2-vue-grids";
 import axios from "axios";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import {DialogUtility} from "@syncfusion/ej2-vue-popups";
 import ComicProgressForm from "@/components/ComicProgressForm";
 
@@ -184,6 +195,11 @@ export default {
           document.getElementById('addContainer').scrollIntoView({behavior: 'smooth'});
         })
       }
+    },
+    rowDeselected(e){
+      if(!this.selectedRow.comicId) return;
+      this.selectedRow = {};
+      this.showForm = false;
     },
     async comicProgressCreated(){
       await this.getUserComics();

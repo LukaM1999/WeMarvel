@@ -114,4 +114,9 @@ public class FriendServiceImpl implements FriendService {
             throw new IllegalArgumentException("You can't remove friends from other users");
         friendRequestRepository.delete(friendRequest);
     }
+
+    @Override
+    public FriendRequest getAcceptedFriendRequest(Long excludedUserId, Long recipientId) {
+        return friendRequestRepository.getAcceptedFriendRequest(excludedUserId, recipientId);
+    }
 }

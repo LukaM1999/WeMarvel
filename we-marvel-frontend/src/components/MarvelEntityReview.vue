@@ -97,7 +97,7 @@ import {
   Toolbar
 } from "@syncfusion/ej2-vue-grids";
 import axios from "axios";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import {TextBoxComponent} from "@syncfusion/ej2-vue-inputs";
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";

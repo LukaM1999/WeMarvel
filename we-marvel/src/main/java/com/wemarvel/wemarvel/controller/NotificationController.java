@@ -49,6 +49,12 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/message")
+    public ResponseEntity<?> sendMessageNotification(@RequestBody NotificationDTO notificationDTO) {
+        notificationService.sendMessageNotification(notificationDTO);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("")
     public ResponseEntity<List<Notification>> getAllNotifications() {
         return ResponseEntity.ok(notificationService.getAllNotifications());

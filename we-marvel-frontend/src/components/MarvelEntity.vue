@@ -148,7 +148,7 @@ import axios from "axios";
 import MarvelEntityOverview from "@/components/MarvelEntityOverview";
 import Reviews from "@/components/Reviews";
 import {getIdTokenResult, onIdTokenChanged} from "firebase/auth";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import {capitalize} from "eslint-plugin-vue/lib/utils/casing";
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";

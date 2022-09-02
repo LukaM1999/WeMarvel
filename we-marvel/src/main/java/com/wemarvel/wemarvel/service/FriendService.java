@@ -12,4 +12,5 @@ public interface FriendService {
     void sendFriendRequest(String username);
     void acceptFriendRequest(Long requestId);
     void removeFriend(Long requestId);
+    FriendRequest getAcceptedFriendRequest(Long excludedUserId, Long recipientId);
 }

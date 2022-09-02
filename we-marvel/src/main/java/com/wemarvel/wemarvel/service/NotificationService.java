@@ -12,4 +12,5 @@ public interface NotificationService {
     List<Notification> getAllNotifications();
     List<NotificationDTO> getAllUnreadNotifications();
     void markAllAsRead();
+    void sendMessageNotification(NotificationDTO notificationDTO);
 }

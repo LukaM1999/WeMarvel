@@ -220,7 +220,7 @@ import {PagerComponent} from "@syncfusion/ej2-vue-grids";
 import {ComboBoxComponent} from "@syncfusion/ej2-vue-dropdowns";
 import {capitalize} from "eslint-plugin-vue/lib/utils/casing";
 import axios from "axios";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import {DataManager, Query} from "@syncfusion/ej2-data";
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";

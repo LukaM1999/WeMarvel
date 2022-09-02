@@ -5,7 +5,7 @@
 <script>
 
 import {onAuthStateChanged, onIdTokenChanged} from "firebase/auth";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import {pusher} from "@/main";
 import axios from "axios";
 import {store} from "@/main";
@@ -124,6 +124,37 @@ export default {
           });
         });
       }
+      if(notificationSettings.messages) {
+        messagesChannel = pusher.subscribe('messages');
+        messagesChannel.bind('new_message', (data) => {
+          this.notifications.unshift(data);
+          if(this.$route.name === 'profile' && this.$route.params.username === data.recipientUsername
+              && this.$route.query.tab === 'messages') {
+            return;
+          }
+          ToastObj = ToastUtility.show({
+            title: `New message from ${data.senderUsername}`,
+            content: data.message,
+            cssClass: 'e-toast-info',
+            icon: 'e-comment-2 e-icons',
+            position: {X: 'Right', Y: 'Top'},
+            showCloseButton: true,
+            buttons: [{
+              click: this.openMessage(data.recipientUsername),
+              model: {
+                content: 'Open message',
+              }
+            }],
+            timeOut: 7000,
+            extendedTimeout: 5000,
+            target: '#container',
+            animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
+            click: arg => {
+              console.log(arg);
+            }
+          });
+        });
+      }
     })
   },
   methods: {
@@ -148,6 +179,12 @@ export default {
       return () => {
         ToastObj.hide();
         this.$router.push({name: 'profile', params: {username: senderUsername}});
+      }
+    },
+    openMessage(recipientUsername) {
+      return () => {
+        ToastObj.hide();
+        this.$router.push({name: 'profile', params: {username: recipientUsername}, query: {tab: 'messages'}});
       }
     }
   },

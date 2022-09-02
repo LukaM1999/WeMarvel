@@ -98,7 +98,7 @@ import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import RichTextEditor from "@/components/RichTextEditor";
 import {store} from "@/main";
 import {onIdTokenChanged} from "firebase/auth";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 
 export default {
   name: "BoardTopics",

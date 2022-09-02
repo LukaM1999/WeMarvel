@@ -30,7 +30,7 @@ import {
   Toolbar
 } from "@syncfusion/ej2-vue-richtexteditor";
 import axios from "axios";
-import {auth} from "@/firebaseConfig";
+import {auth} from "@/firebaseServices/firebaseConfig";
 import { getStorage, ref, getDownloadURL, deleteObject } from "firebase/storage";
 
 export default {
