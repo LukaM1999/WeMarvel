@@ -50,4 +50,20 @@ public class SeriesController {
     public List<SeriesDTO> getSeriesWithCharacter(@PathVariable Long characterId){
         return seriesService.getSeriesWithCharacter(characterId);
     }
+
+    @GetMapping("/{seriesId}/withRating")
+    public SeriesDTO getSeriesWithRating(@PathVariable Long seriesId){
+        return seriesService.getSeriesWithRating(seriesId);
+    }
+
+    @GetMapping("/topRated")
+    public List<SeriesDTO> getTopRatedSeries(){
+        return seriesService.getTopRatedSeries();
+    }
+
+    @GetMapping("/popular")
+    public List<SeriesDTO> getPopularSeries(){
+        return seriesService.getPopularSeries();
+    }
+
 }

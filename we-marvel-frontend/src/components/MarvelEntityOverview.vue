@@ -59,6 +59,30 @@
         {{entity.endYear}}
       </div>
     </div>
+    <div class="row justify-content-center mt-2">
+      <div class="col-1 d-flex justify-content-start">
+        <b class="label text-nowrap">Average rating:</b>
+      </div>
+      <div class="col-1 align-self-center">
+        {{entity.averageRating || 0}}/10
+      </div>
+    </div>
+    <div v-if="entity.ratingCount" class="row justify-content-center mt-2">
+      <div class="col-1 d-flex justify-content-start">
+        <b class="label">Raters:</b>
+      </div>
+      <div class="col-1 align-self-center">
+        {{entity.ratingCount}}
+      </div>
+    </div>
+    <div v-if="entity.readingCount" class="row justify-content-center mt-2">
+      <div class="col-1 d-flex justify-content-start">
+        <b class="label">Readers:</b>
+      </div>
+      <div class="col-1 align-self-center">
+        {{entity.readingCount}}
+      </div>
+    </div>
   </div>
 </div>
 </template>

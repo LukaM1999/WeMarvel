@@ -112,7 +112,8 @@ export default {
     },
     formatStatus(status){
       let lowerStatus = status.toLowerCase();
-      return lowerStatus.charAt(0).toUpperCase() + lowerStatus.slice(1)
+      lowerStatus = lowerStatus.charAt(0).toUpperCase() + lowerStatus.slice(1)
+      return lowerStatus.replaceAll("_", " ");
     },
     beforeEdit(e){
       e.cancel = true;

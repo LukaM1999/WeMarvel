@@ -32,7 +32,7 @@ public class InitDataTask {
     protected final Log LOGGER = LogFactory.getLog(getClass());
 
     private final String removeSchemaScript = "powershell -Command \"(gc fileName | select -Skip 18) -replace 'INTO public.', " +
-            "'INTO ' -replace ([regex]::Escape('SET.*$')), '' | Out-File -encoding ASCII fileName\"";
+            "'INTO ' -replace ([regex]::Escape('SET.*$')), '' -replace 'average_rating, ', '' | Out-File -encoding ASCII fileName\"";
 
     @Autowired
     private CharacterRepository characterRepository;
@@ -110,7 +110,7 @@ public class InitDataTask {
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
                 characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                        resourceURI, modified, 0.0));
+                        resourceURI, modified));
             }
             total = total - 100;
             int offset = 100;
@@ -138,7 +138,7 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                            resourceURI, modified, 0.0));
+                            resourceURI, modified));
                 }
                 total = total - 100;
                 offset = offset + 100;
@@ -183,7 +183,7 @@ public class InitDataTask {
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
                 comicRepository.save(new Comic(id, seriesId, title, description, variantDescription, thumbnail, comicUrl,
-                        modified, format, pageCount, issueNumber, 0.0));
+                        modified, format, pageCount, issueNumber));
             }
             total = total - 100;
             int offset = 100;
@@ -217,7 +217,7 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     comicRepository.save(new Comic(id, seriesId, title, description, variantDescription, thumbnail, comicUrl,
-                            modified, format, pageCount, issueNumber, 0.0));
+                            modified, format, pageCount, issueNumber));
                 }
                 total = total - 100;
                 offset = offset + 100;
@@ -255,7 +255,7 @@ public class InitDataTask {
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
                 characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                        characterUrl, modified, 0.0));
+                        characterUrl, modified));
                 int availableComics = result.get("comics").get("available").asInt();
                 if(availableComics > 0) {
                     for(JsonNode item : result.get("comics").get("items")){
@@ -308,7 +308,7 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     characterRepository.save(new MarvelCharacter(id, name, description, thumbnail,
-                            characterUrl, modified, 0.0));
+                            characterUrl, modified));
                 }
                 total = total - 100;
                 offset = offset + 100;
@@ -392,7 +392,7 @@ public class InitDataTask {
                 String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                         result.get("thumbnail").get("extension").asText();
                 comicRepository.save(new Comic(id, seriesId, title, description, variantDescription, thumbnail, comicUrl,
-                        modified, format, pageCount, issueNumber, 0.0));
+                        modified, format, pageCount, issueNumber));
             }
             total = total - 100;
             int offset = 100;
@@ -425,7 +425,7 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     comicRepository.save(new Comic(id, seriesId, title, description, variantDescription, thumbnail, comicUrl,
-                            modified, format, pageCount, issueNumber, 0.0));
+                            modified, format, pageCount, issueNumber));
                 }
                 total = total - 100;
                 offset = offset + 100;
@@ -496,7 +496,7 @@ public class InitDataTask {
                     String thumbnail = result.get("thumbnail").get("path").asText() + "." +
                             result.get("thumbnail").get("extension").asText();
                     seriesRepository.save(new Series(id, title, description, thumbnail,
-                            seriesUrl, modified, type, startYear, endYear, 0.0));
+                            seriesUrl, modified, type, startYear, endYear));
                 }
                 total = total - 100;
                 offset = offset + 100;

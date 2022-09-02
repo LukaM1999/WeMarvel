@@ -51,8 +51,4 @@ public class Series {
     @Setter
     private Long endYear;
 
-    @Getter
-    @Setter
-    @Column(columnDefinition = "Decimal(4, 2) default '0.0'")
-    private double averageRating;
 }

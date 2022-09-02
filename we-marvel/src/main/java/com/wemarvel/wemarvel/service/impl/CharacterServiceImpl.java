@@ -70,4 +70,14 @@ public class CharacterServiceImpl implements CharacterService {
     public List<CharacterDTO> getCharactersInSeries(Long seriesId) {
         return characterRepository.getCharactersInSeries(seriesId);
     }
+
+    @Override
+    public CharacterDTO getCharacterWithRating(Long characterId) {
+        return characterRepository.getCharacterWithRating(characterId);
+    }
+
+    @Override
+    public List<CharacterDTO> getPopularCharacters() {
+        return characterRepository.getPopularCharacters();
+    }
 }

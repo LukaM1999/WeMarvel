@@ -18,15 +18,6 @@ public interface ComicRepository extends PagingAndSortingRepository<Comic, Long>
 
     Page<Comic> findAllByTitleContainingIgnoreCase(String title, PageRequest request);
 
-
-    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, c.title, c.description, c.thumbnail, " +
-            "c.url, c.pageCount, c.averageRating, COUNT(r.rating)) " +
-            "FROM Comic c " +
-            "LEFT JOIN Review r ON c.id = r.marvelEntityId " +
-            "GROUP BY c.id, c.seriesId, c.title, c.description, c.thumbnail, c.url " +
-            "ORDER BY c.averageRating DESC, c.title ASC")
-    Page<ComicDTO> findAllByAverageRating(PageRequest pageRequest);
-
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, c.title, c.description, c.thumbnail, " +
             "c.url, c.pageCount, COUNT(p)) " +
             "FROM Comic c " +
@@ -84,4 +75,34 @@ public interface ComicRepository extends PagingAndSortingRepository<Comic, Long>
             "c.variantDescription, c.format, c.issueNumber " +
             "ORDER BY c.title")
     List<ComicDTO> getComicsWithCharacter(Long characterId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, s.title, c.title, " +
+            "c.description, c.thumbnail, " +
+            "c.url, c.pageCount, c.variantDescription, c.format, c.issueNumber, AVG(cp.rating), COUNT(cp.rating)) " +
+            "FROM Comic c " +
+            "LEFT JOIN Series s ON s.id = c.seriesId " +
+            "LEFT JOIN ComicProgress cp ON cp.comicId = c.id AND cp.rating > 0 " +
+            "WHERE c.id = ?1 " +
+            "GROUP BY c.id, s.title")
+    ComicDTO getComicWithRating(Long comicId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, s.title, c.title, " +
+            "c.description, c.thumbnail, " +
+            "c.url, c.pageCount, c.variantDescription, c.format, c.issueNumber, AVG(cp.rating), COUNT(cp.rating)) " +
+            "FROM Comic c " +
+            "LEFT JOIN Series s ON s.id = c.seriesId " +
+            "LEFT JOIN ComicProgress cp ON cp.comicId = c.id AND cp.rating > 0 " +
+            "GROUP BY c.id, s.title " +
+            "ORDER BY COALESCE(AVG(cp.rating), 0) DESC, c.title ASC")
+    List<ComicDTO> getTopRatedComics();
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ComicDTO(c.id, c.seriesId, s.title, c.title, " +
+            "c.description, c.thumbnail, " +
+            "c.url, c.pageCount, c.variantDescription, c.format, c.issueNumber, AVG(cp.rating), COUNT(cp)) " +
+            "FROM Comic c " +
+            "LEFT JOIN Series s ON s.id = c.seriesId " +
+            "LEFT JOIN ComicProgress cp ON cp.comicId = c.id " +
+            "GROUP BY c.id, s.title " +
+            "ORDER BY COUNT(cp) DESC, c.title ASC")
+    List<ComicDTO> getPopularComics();
 }

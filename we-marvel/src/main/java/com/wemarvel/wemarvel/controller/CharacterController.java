@@ -24,6 +24,11 @@ public class CharacterController {
         return characterService.getCharacter(characterId);
     }
 
+    @GetMapping("/{characterId}/withRating")
+    public CharacterDTO getCharacterWithRating(@PathVariable Long characterId) {
+        return characterService.getCharacterWithRating(characterId);
+    }
+
     @GetMapping("")
     public List<MarvelCharacter> getCharacters(@PathParam("name") Optional<String> name, @PathParam("limit") int limit,
                                                @PathParam("offset") int offset,
@@ -42,23 +47,27 @@ public class CharacterController {
         return characterService.getCharactersCount(name.orElse(""));
     }
 
-    @GetMapping("/top-rated")
-    public List<CharacterDTO> getCharactersByAverageRating(@PathParam("limit") int limit,
-                                                           @PathParam("offset") int offset) {
-        if(limit > 0 && offset >= 0) {
-            return characterService.getCharactersByAverageRating(limit, offset);
+    @GetMapping("/topRated")
+    public List<CharacterDTO> getCharactersByAverageRating(@PathParam("limit") Optional<Integer> limit,
+                                                           @PathParam("offset") Optional<Integer> offset) {
+        if(limit.orElse(0) > 0 && offset.orElse(0) >= 0) {
+            return characterService.getCharactersByAverageRating(limit.orElse(100000), offset.orElse(0));
         }
-        return characterService.getCharactersByAverageRating(50, 0);
+        return characterService.getCharactersByAverageRating(100000, 0);
     }
 
     @GetMapping("/popular")
-    public List<CharacterDTO> getCharactersByRatingCount(@PathParam("limit") int limit,
-                                                             @PathParam("offset") int offset) {
-        if(limit > 0 && offset >= 0) {
-            return characterService.getCharactersByRatingCount(limit, offset);
-        }
-        return characterService.getCharactersByRatingCount(50, 0);
+    public List<CharacterDTO> getPopularCharacters() {
+        return characterService.getPopularCharacters();
     }
+//    @GetMapping("/popular")
+//    public List<CharacterDTO> getCharactersByRatingCount(@PathParam("limit") Optional<Integer> limit,
+//                                                             @PathParam("offset") Optional<Integer> offset) {
+//        if(limit.orElse(0) > 0 && offset.orElse(0) >= 0) {
+//            return characterService.getCharactersByRatingCount(limit.orElse(100000), offset.orElse(0));
+//        }
+//        return characterService.getCharactersByRatingCount(100000, 0);
+//    }
 
     @GetMapping("/withPostInfo")
     public List<CharacterDTO> getCharactersWithPostInfo() {

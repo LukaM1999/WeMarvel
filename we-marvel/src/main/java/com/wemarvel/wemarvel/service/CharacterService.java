@@ -14,4 +14,6 @@ public interface CharacterService {
     List<CharacterDTO> getCharactersWithPostInfo();
     List<CharacterDTO> getCharactersInComic(Long comicId);
     List<CharacterDTO> getCharactersInSeries(Long seriesId);
+    CharacterDTO getCharacterWithRating(Long characterId);
+    List<CharacterDTO> getPopularCharacters();
 }

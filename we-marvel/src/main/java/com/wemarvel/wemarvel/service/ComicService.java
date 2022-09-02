@@ -15,4 +15,7 @@ public interface ComicService {
     List<ComicDTO> getComicsWithSeries();
     List<ComicDTO> getBySeriesId(Long seriesId);
     List<ComicDTO> getComicsWithCharacter(Long characterId);
+    ComicDTO getComicWithRating(Long comicId);
+    List<ComicDTO> getTopRatedComics();
+    List<ComicDTO> getPopularComics();
 }

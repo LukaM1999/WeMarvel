@@ -232,8 +232,7 @@ export default {
   },
   methods: {
     async getEntity(){
-      const suffix = this.$route.params.entity === 'comic' ? '/withSeries' : '';
-      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/${this.$route.params.entity}/${this.$route.params.entityId}${suffix}`);
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/${this.$route.params.entity}/${this.$route.params.entityId}/withRating`);
       this.entity = data;
       if(data.name) this.entity.title = data.name;
       this.entity.type = this.$route.params.entity;

@@ -20,12 +20,11 @@ public interface CharacterRepository extends PagingAndSortingRepository<MarvelCh
     int countAllByNameContainingIgnoreCase(String name);
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.description, c.thumbnail, c.url, " +
-            "c.averageRating, COUNT(r.rating)) " +
+            "AVG(r.rating), COUNT(r.rating)) " +
             "FROM MarvelCharacter c " +
-            "LEFT JOIN Review r ON c.id = r.marvelEntityId " +
-            "GROUP BY c.id, c.name, c.description, " +
-            "c.thumbnail, c.url, c.averageRating " +
-            "ORDER BY c.averageRating DESC, c.name ASC")
+            "LEFT JOIN Review r ON c.id = r.marvelEntityId AND r.rating > 0 " +
+            "GROUP BY c.id " +
+            "ORDER BY COALESCE(AVG(r.rating), 0) DESC, c.name ASC")
     Page<CharacterDTO> findAllByAverageRating(PageRequest pageRequest);
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.description, c.thumbnail, " +
@@ -60,4 +59,20 @@ public interface CharacterRepository extends PagingAndSortingRepository<MarvelCh
             "GROUP BY c.id, c.name, c.description, c.thumbnail " +
             "ORDER BY c.name")
     List<CharacterDTO> getCharactersInSeries(Long seriesId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.description, c.thumbnail, c.url, " +
+            "AVG(r.rating), COUNT(r.rating)) " +
+            "FROM MarvelCharacter c " +
+            "LEFT JOIN Review r ON c.id = r.marvelEntityId AND r.rating > 0 " +
+            "WHERE c.id = ?1 " +
+            "GROUP BY c.id")
+    CharacterDTO getCharacterWithRating(Long characterId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.CharacterDTO(c.id, c.name, c.description, c.thumbnail, c.url, " +
+            "AVG(r.rating), COUNT(r)) " +
+            "FROM MarvelCharacter c " +
+            "LEFT JOIN Review r ON c.id = r.marvelEntityId " +
+            "GROUP BY c.id " +
+            "ORDER BY COUNT(r) DESC, c.name ASC")
+    List<CharacterDTO> getPopularCharacters();
 }

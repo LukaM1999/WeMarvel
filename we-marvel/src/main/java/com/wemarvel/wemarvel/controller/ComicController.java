@@ -76,4 +76,20 @@ public class ComicController {
     public List<ComicDTO> getComicsWithCharacter(@PathVariable Long characterId){
         return comicService.getComicsWithCharacter(characterId);
     }
+
+    @GetMapping("/{comicId}/withRating")
+    public ComicDTO getComicWithRating(@PathVariable Long comicId){
+        return comicService.getComicWithRating(comicId);
+    }
+
+    @GetMapping("/topRated")
+    public List<ComicDTO> getTopRatedComics(){
+        return comicService.getTopRatedComics();
+    }
+
+    @GetMapping("/popular")
+    public List<ComicDTO> getPopularComics(){
+        return comicService.getPopularComics();
+    }
+
 }

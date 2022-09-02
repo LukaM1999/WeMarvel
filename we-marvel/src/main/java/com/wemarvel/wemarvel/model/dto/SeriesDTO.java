@@ -25,7 +25,8 @@ public class SeriesDTO {
     private String type;
     private Long startYear;
     private Long endYear;
-    private double averageRating;
+    private Double averageRating;
+    private Long ratingCount;
     private Long topicCount;
     private Long postCount;
     @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
@@ -57,5 +58,20 @@ public class SeriesDTO {
         this.type = type;
         this.startYear = startYear;
         this.endYear = endYear;
+    }
+
+    public SeriesDTO(Long id, String title, String description,
+                     String thumbnail, String url, String type,
+                     Long startYear, Long endYear, Double averageRating, Long ratingCount) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.thumbnail = thumbnail;
+        this.url = url;
+        this.type = type;
+        this.startYear = startYear;
+        this.endYear = endYear;
+        this.averageRating = averageRating;
+        this.ratingCount = ratingCount;
     }
 }

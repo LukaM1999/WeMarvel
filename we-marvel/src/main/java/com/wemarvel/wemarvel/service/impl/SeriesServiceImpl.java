@@ -40,4 +40,19 @@ public class SeriesServiceImpl implements SeriesService {
     public List<SeriesDTO> getAllSeries() {
         return seriesRepository.getAllSeries();
     }
+
+    @Override
+    public SeriesDTO getSeriesWithRating(Long seriesId) {
+        return seriesRepository.getSeriesWithRating(seriesId);
+    }
+
+    @Override
+    public List<SeriesDTO> getTopRatedSeries() {
+        return seriesRepository.getTopRatedSeries();
+    }
+
+    @Override
+    public List<SeriesDTO> getPopularSeries() {
+        return seriesRepository.getPopularSeries();
+    }
 }

@@ -202,7 +202,7 @@ export default {
           text: 'Characters',
           items: [
             { text: 'Search', url: `/character` },
-            { text: 'Most popular', url: `character/popular` },
+            { text: 'Most popular', url: `/character/popular` },
             { text: 'Top rated', url: `/character/top-rated` },
           ]
         },
@@ -217,9 +217,8 @@ export default {
         {
           text: 'Community',
           items: [
-            { text: 'Forum', url: `$/forum` },
-            { text: 'Clubs', url: `/clubs` },
-            { text: 'Users', url: `$/users` },
+            { text: 'Forum', url: `/forum` },
+            { text: 'Users', url: `/users` },
           ]
         }
       ],

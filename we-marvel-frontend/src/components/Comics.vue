@@ -1,11 +1,11 @@
 <template>
-  <div id="comicsContainer">
+  <div id="comicsContainer" style="overflow-x: hidden;">
     <div class="row">
       <div class="col">
         <ejs-grid ref="grid" :dataSource='comics'
                   :allowPaging='true'
                   :pageSettings="pageSettings"
-                  :toolbar="toolbar" height='273px'
+                  :toolbar="toolbar" height='350px'
                   :allowFiltering='true'
                   :filterSettings="filterSettings"
                   :allowSorting="true"

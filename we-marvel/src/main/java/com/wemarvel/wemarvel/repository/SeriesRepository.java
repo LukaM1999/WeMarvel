@@ -1,6 +1,7 @@
 package com.wemarvel.wemarvel.repository;
 
 import com.wemarvel.wemarvel.model.Series;
+import com.wemarvel.wemarvel.model.dto.CharacterDTO;
 import com.wemarvel.wemarvel.model.dto.ComicDTO;
 import com.wemarvel.wemarvel.model.dto.SeriesDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,4 +39,28 @@ public interface SeriesRepository extends JpaRepository<Series, Long> {
             "GROUP BY s.id, s.title, s.description, s.thumbnail, s.type, s.startYear, s.endYear " +
             "ORDER BY s.title")
     List<SeriesDTO> getAllSeries();
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.SeriesDTO(s.id, s.title, s.description, s.thumbnail, s.url, " +
+            "s.type, s.startYear, s.endYear, AVG(r.rating), COUNT(r.rating)) " +
+            "FROM Series s " +
+            "LEFT JOIN Review r ON s.id = r.marvelEntityId AND r.rating > 0 " +
+            "WHERE s.id = ?1 " +
+            "GROUP BY s.id")
+    SeriesDTO getSeriesWithRating(Long seriesId);
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.SeriesDTO(s.id, s.title, s.description, s.thumbnail, s.url, " +
+            "s.type, s.startYear, s.endYear, AVG(r.rating), COUNT(r.rating)) " +
+            "FROM Series s " +
+            "LEFT JOIN Review r ON s.id = r.marvelEntityId AND r.rating > 0 " +
+            "GROUP BY s.id " +
+            "ORDER BY COALESCE(AVG(r.rating), 0) DESC, s.title ASC")
+    List<SeriesDTO> getTopRatedSeries();
+
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.SeriesDTO(s.id, s.title, s.description, s.thumbnail, s.url, " +
+            "s.type, s.startYear, s.endYear, AVG(r.rating), COUNT(r)) " +
+            "FROM Series s " +
+            "LEFT JOIN Review r ON s.id = r.marvelEntityId " +
+            "GROUP BY s.id " +
+            "ORDER BY COUNT(r) DESC, s.title ASC")
+    List<SeriesDTO> getPopularSeries();
 }

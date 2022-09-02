@@ -9,19 +9,19 @@ import createPersistedState from 'vuex-persistedstate'
 import {jwtInterceptor} from "@/_helpers/jwtInterceptor";
 import LandingPage from "@/components/LandingPage";
 import Characters from "@/components/Characters";
-import TopRatedCharacters from "@/components/TopRatedCharacters";
 import ForumOverview from "@/components/ForumOverview";
 import Topic from "@/components/Topic";
 import Profile from "@/components/Profile";
 import Pusher from "pusher-js";
 import Users from "@/components/Users";
-import CharacterBoard from "@/components/MarvelEntityBoard";
 import BoardTopics from "@/components/BoardTopics";
 import MarvelEntityBoard from "@/components/MarvelEntityBoard";
 import MarvelEntity from "@/components/MarvelEntity";
 import Comics from "@/components/Comics";
 import Series from "@/components/Series";
 import MarvelCharacters from "@/components/MarvelCharacters";
+import TopRatedMarvelEntities from "@/components/TopRatedMarvelEntities";
+import PopularMarvelEntities from "@/components/PopularMarvelEntities";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -35,11 +35,6 @@ const routes = [
                 path: '/welcome',
                 name: 'welcome',
                 component: Characters
-            },
-            {
-                path: '/characters/top-rated',
-                name: 'top-rated-characters',
-                component: TopRatedCharacters
             },
             {
                 path: '/forum',
@@ -133,7 +128,17 @@ const routes = [
                 path: '/:entity(character|comic|series)/:entityId',
                 name: 'entity',
                 component: MarvelEntity,
-            }
+            },
+            {
+                path: '/:entity(character|comic|series)/top-rated',
+                name: 'top-rated',
+                component: TopRatedMarvelEntities,
+            },
+            {
+                path: '/:entity(character|comic|series)/popular',
+                name: 'popular',
+                component: PopularMarvelEntities,
+            },
         ]
     },
 ]

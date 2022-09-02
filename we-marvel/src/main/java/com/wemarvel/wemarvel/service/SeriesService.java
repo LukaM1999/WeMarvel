@@ -12,4 +12,7 @@ public interface SeriesService {
     List<SeriesDTO> getSeriesWithPostInfo();
     List<SeriesDTO> getSeriesWithCharacter(Long characterId);
     List<SeriesDTO> getAllSeries();
+    SeriesDTO getSeriesWithRating(Long seriesId);
+    List<SeriesDTO> getTopRatedSeries();
+    List<SeriesDTO> getPopularSeries();
 }
