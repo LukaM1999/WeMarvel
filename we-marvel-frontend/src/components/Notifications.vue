@@ -129,10 +129,9 @@ export default {
       });
     },
     rowDataBound(args){
-      if(args.data.read){
-        args.isSelectable = false;
-        args.row.style.opacity = 0.5;
-      }
+      if(!args.data.read) return
+      args.isSelectable = false;
+      args.row.style.opacity = 0.5;
     }
   },
   provide: {

@@ -854,8 +854,10 @@ export default {
     async createRoom() {
       this.disableForm = true
 
-      await firestoreService.addIdentifiedUser(this.newChatUser.id.toString(), {
-        _id: this.newChatUser.id.toString(),
+      const newUserId = this.newChatUser.receiverId.toString() === this.currentUserId ?
+          this.newChatUser.senderId.toString() : this.newChatUser.receiverId.toString()
+      await firestoreService.addIdentifiedUser(newUserId, {
+        _id: newUserId,
         username: this.newChatUser.username,
         profilePicture: this.newChatUser.imageUrl,
       })
@@ -867,7 +869,7 @@ export default {
       })
 
       await firestoreService.addRoom({
-        users: [this.newChatUser.id.toString(), this.currentUserId],
+        users: [newUserId, this.currentUserId],
         lastUpdated: new Date()
       })
 

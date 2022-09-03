@@ -72,14 +72,30 @@ security:
     - /favicon.ico
     - /session/login
     - /public/**
+    - /user
+    - /user/{username}
+    - /user/profile
     - /character/**
-    - /user/**
-    - /forum/**
-    - /notification/**
-    - /comicProgress/**
     - /comic/**
     - /series/**
-    - /friend/**
-    - /review/**
+    - /forum/boards
+    - /forum/topic/{topicId}
+    - /forum/topic/{topicId}/name
+    - /forum/board/{boardId}/name
+    - /forum/board/{boardId}
+    - /forum/character/{characterId}/topic
+    - /forum/comic/{comicId}/topic
+    - /forum/series/{seriesId}/topic
+    - /comicProgress/shared
+    - /comicProgress/unique
+    - /comicProgress/user/{username}
+    - /comicProgress/user/{username}/comic/{comicId}
+    - /friend/{username}/accepted
+    - /review
+    - /review/user/{username}
+    - /review/{entityId}
+    - /review/character/{id}
+    - /review/comic/{id}
+    - /review/series/{id}
   exposed-headers:
     - X-Xsrf-Token

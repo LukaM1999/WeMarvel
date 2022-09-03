@@ -60,14 +60,6 @@ public class CharacterController {
     public List<CharacterDTO> getPopularCharacters() {
         return characterService.getPopularCharacters();
     }
-//    @GetMapping("/popular")
-//    public List<CharacterDTO> getCharactersByRatingCount(@PathParam("limit") Optional<Integer> limit,
-//                                                             @PathParam("offset") Optional<Integer> offset) {
-//        if(limit.orElse(0) > 0 && offset.orElse(0) >= 0) {
-//            return characterService.getCharactersByRatingCount(limit.orElse(100000), offset.orElse(0));
-//        }
-//        return characterService.getCharactersByRatingCount(100000, 0);
-//    }
 
     @GetMapping("/withPostInfo")
     public List<CharacterDTO> getCharactersWithPostInfo() {
