@@ -47,7 +47,7 @@ export default {
       rteValue: '',
       insertImageSettings: {
         allowedTypes: ['.jpg', '.jpeg', '.png', '.gif', '.bmp'],
-        saveUrl: `${process.env.VUE_APP_BACKEND}/forum/post/image`,
+        saveUrl: '',
       },
       imageName: '',
     };
@@ -64,6 +64,9 @@ export default {
       required: false,
       default: "",
     },
+    topic: {
+      type: Object,
+    },
   },
   mounted() {
     this.rteValue = this.initialValue;
@@ -71,13 +74,20 @@ export default {
     document.querySelectorAll('input[id^="rte_toolbar"]').forEach((el) => {
       el.style.visibility = 'hidden';
     });
+    this.setSaveUrl();
   },
   methods: {
+    setSaveUrl(){
+      this.insertImageSettings.saveUrl = this.topic?.boardId ? `${process.env.VUE_APP_BACKEND}/forum/board/${this.topic.boardId}/topic/${this.topic.id}/post/image` :
+          `${process.env.VUE_APP_BACKEND}/forum/post/image`;
+      this.insertImageSettings = {...this.insertImageSettings};
+    },
     actionBegin(args) {
       if(args.requestType === 'Image'){
         const storage = getStorage();
-        if(!this.imageName) return
-        getDownloadURL(ref(storage, this.imageName)).then(url => {
+        if(!this.imageName) return;
+        const url = this.topic?.boardId ? `board/${this.topic.boardId}/topic/${this.topic.id}/${this.imageName}` : this.imageName;
+        getDownloadURL(ref(storage, url)).then(url => {
           const imageElement = document.querySelectorAll(`img[src="${args.itemCollection.url}"]`)[0]
           if(!imageElement) return;
           imageElement.src = url;
@@ -90,7 +100,8 @@ export default {
     imageUploadSuccess(args) {
       this.imageName = args.e.currentTarget?.responseText;
       const storage = getStorage();
-      getDownloadURL(ref(storage, this.imageName)).then(url => {
+      const url = this.topic?.boardId ? `board/${this.topic.boardId}/topic/${this.topic.id}/${this.imageName}` : this.imageName;
+      getDownloadURL(ref(storage, url)).then(url => {
         args.element.src = url;
         args.element.name = this.imageName;
       }).catch(error => {
@@ -100,11 +111,13 @@ export default {
     afterImageDelete(args) {
       if(!args.element.name) return
       const storage = getStorage();
-      deleteObject(ref(storage, args.element.name));
+      const url = this.topic?.boardId ? `board/${this.topic.boardId}/topic/${this.topic.id}/${args.element.name}` : args.element.name;
+      deleteObject(ref(storage, url));
     },
     imageRemoving(args) {
       const storage = getStorage();
-      deleteObject(ref(storage, this.imageName));
+      const url = this.topic?.boardId ? `board/${this.topic.boardId}/topic/${this.topic.id}/${this.imageName}` : this.imageName;
+      deleteObject(ref(storage, url));
     },
     onChange(){
       this.$emit('value-changed', this.rteValue);

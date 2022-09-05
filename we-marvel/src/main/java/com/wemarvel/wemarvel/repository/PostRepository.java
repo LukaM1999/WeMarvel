@@ -5,6 +5,7 @@ import com.wemarvel.wemarvel.model.dto.PostDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -24,4 +25,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "INNER JOIN Topic t ON t.boardId = ?1 " +
             "AND p.topicId = t.id")
     List<Post> findByBoardId(Long boardId);
+
+    @Transactional
+    void deleteAllByTopicId(Long topicId);
 }

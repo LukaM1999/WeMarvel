@@ -1,7 +1,14 @@
 <template>
   <div id="topicContainer">
     <h1>{{ topic?.title }}</h1>
-    <ejs-button @click="togglePostForm" class="mb-3">{{showNewPostForm ? 'Cancel' : 'New post'}}</ejs-button>
+    <div class="row justify-content-center">
+      <div :class="[admin ? 'col-2 d-flex justify-content-end' : 'col']">
+        <ejs-button @click="togglePostForm" class="mb-3">{{showNewPostForm ? 'Cancel' : 'New post'}}</ejs-button>
+      </div>
+      <div v-if="admin" class="col-2 d-flex">
+        <ejs-button isPrimary="true" iconCss="e-icons e-delete-1" @click="openDeleteDialog" class="mb-3">Delete topic</ejs-button>
+      </div>
+    </div>
     <div id="quoteContent" class="row mt-5 justify-content-center" v-if="quotedPost">
       <h3>Quoted post</h3>
       <div class="col-8 quoted-post">
@@ -23,7 +30,7 @@
     <div id="newPostContainer" v-if="showNewPostForm" class="row mb-5">
       <div class="col">
         <h3>{{postToEdit ? 'Edit post' : 'New post'}}</h3>
-        <RichTextEditor :initialValue="rteValue" @value-changed="updateRteValue"/>
+        <RichTextEditor :topic="{id: topic.id, boardId: topic.boardId}" :initialValue="rteValue" @value-changed="updateRteValue"/>
         <ejs-button  v-if="!postToEdit" @click="createNewPost" class="mt-4"
                     :content="'Create post'"></ejs-button>
         <ejs-button  v-if="postToEdit" @click="saveEditedPost" class="mt-4"
@@ -114,10 +121,12 @@ import {auth} from "@/firebaseServices/firebaseConfig";
 import RichTextEditor from "@/components/RichTextEditor";
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import QuotedPost from "@/components/QuotedPost";
-import {deleteObject, getStorage, ref} from "firebase/storage";
+import {deleteObject, getStorage, listAll, ref} from "firebase/storage";
 import {Query} from "@syncfusion/ej2-data";
 import {store} from "@/main";
 import {onAuthStateChanged} from "firebase/auth";
+import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
+import {DialogUtility} from "@syncfusion/ej2-vue-popups";
 export default {
   name: "Topic",
   components: {
@@ -279,7 +288,69 @@ export default {
         behavior: 'smooth'
       });
       this.postToEdit = null;
-    }
+    },
+    openDeleteDialog(){
+      let dialog = DialogUtility.confirm({
+        title: 'Delete topic',
+        showCloseIcon: true,
+        closeOnEscape: true,
+        position: {X: 'center', Y: 'center'},
+        target: document.body,
+        content: 'Are you sure you want to delete this topic?',
+        okButton: {
+          text: 'Yes',
+          click: async () => {
+            await this.deleteTopic();
+            dialog.hide();
+          }
+        },
+        cancelButton: {
+          text: 'No',
+          click: function() {
+            this.hide();
+          }
+        }
+      });
+
+    },
+    async deleteTopic(){
+      await axios.delete(`${process.env.VUE_APP_BACKEND}/forum/topic/${this.topic.id}`);
+      try {
+        const filesDeleted = await this.deleteFolderRecursive(`board/${this.topic.boardId}/topic/${this.topic.id}`);
+        console.log(`${filesDeleted} files has been deleted`);
+      } catch(err){
+        console.error(err);
+      }
+      ToastUtility.show({
+        title: 'Topic deleted',
+        content: 'Topic deleted successfully',
+        position: {X: document.body.offsetWidth - 360, Y: 80},
+        cssClass: 'e-toast-success',
+        showCloseButton: true,
+        timeOut: 5000,
+        extendedTimeout: 5000,
+      });
+      if(this.topic.boardId > 3)
+        this.$router.push({name: 'board', params: {boardId: this.topic.boardId}});
+      else this.$router.push({name: 'entity-board', boardId: this.topic.boardId});
+    },
+    async deleteFile(filePath){
+      const reference = ref(getStorage(), filePath);
+      return await deleteObject(reference);
+    },
+    async deleteFolderRecursive(folderPath){
+      const list = await listAll(ref(getStorage(), folderPath));
+      let filesDeleted = 0;
+
+      for await (const fileRef of list.items) {
+        await this.deleteFile(fileRef.fullPath);
+        filesDeleted++;
+      }
+      for await (const folderRef of list.prefixes) {
+        filesDeleted += await this.deleteFolderRecursive(folderRef.fullPath);
+      }
+      return filesDeleted;
+    },
   },
 }
 </script>

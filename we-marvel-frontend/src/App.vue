@@ -22,11 +22,11 @@ export default {
   data(){
     return {
       notifications: [],
+      watchedTopics: [],
     }
   },
   async mounted() {
     onIdTokenChanged(auth, async (user) => {
-      console.log('onIdTokenChanged');
       user?.getIdToken().then(token => {
         store.commit('setToken', token);
       });
@@ -40,12 +40,14 @@ export default {
       }
       await this.getNotificationSettings();
       await this.getAllUnreadNotifications();
+      await this.getWatchedTopics();
       if(!notificationSettings.topics) topicsChannel = pusher.unsubscribe('topics');
       if(!notificationSettings.messages) messagesChannel = pusher.unsubscribe('messages');
       if(!notificationSettings.friendRequests) friendRequestsChannel = pusher.unsubscribe('friend-requests');
       if(notificationSettings.topics) {
         topicsChannel = pusher.subscribe('topics');
         topicsChannel.bind('new_topic_post', (data) => {
+          if(!this.watchedTopics.find(t => t.id === data.topicId)) return;
           this.notifications.unshift(data);
           if(this.$route.path === `/forum/board/${data.boardId}/topic/${data.topicId}`) {
             return;
@@ -104,7 +106,8 @@ export default {
             content: 'Click button below to see their profile!',
             cssClass: 'e-toast-info',
             icon: 'e-check-circle e-icons',
-            position: {X: document.body.offsetWidth - 360, Y: 80},            showCloseButton: true,
+            position: {X: document.body.offsetWidth - 360, Y: 80},
+            showCloseButton: true,
             buttons: [{
               click: this.goToProfile(data.senderUsername),
               model: {
@@ -166,6 +169,13 @@ export default {
     async getAllUnreadNotifications(){
       await axios.get(`${process.env.VUE_APP_BACKEND}/notification/unread`).then(({data}) => {
         this.notifications = data;
+      }).catch(error => {
+        alert(error.message)
+      })
+    },
+    async getWatchedTopics() {
+      await axios.get(`${process.env.VUE_APP_BACKEND}/forum/watchedTopic`).then(({data}) => {
+        this.watchedTopics = data;
       }).catch(error => {
         alert(error.message)
       })
@@ -407,7 +417,7 @@ td {
   padding: 10px 2px 10px 4px;
 }
 
-tr:nth-child(even) {
+tr:nth-child(even):not(.sticky) {
   background-color: #f2f2f2;
 }
 
@@ -527,6 +537,10 @@ tr:hover {
 
 #vac-icon-add {
   fill: #e54e4e !important;
+}
+
+.sticky {
+  background: pink;
 }
 
 </style>

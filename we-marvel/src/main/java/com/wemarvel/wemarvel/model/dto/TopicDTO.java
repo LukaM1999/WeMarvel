@@ -80,7 +80,7 @@ public class TopicDTO {
 
     public TopicDTO(Long id, String title, Long posts, LocalDateTime lastPostDate,
                     LocalDateTime createdAt, Long ownerId, String ownerUsername,
-                    Long marvelEntityId, String marvelEntityName) {
+                    Long marvelEntityId, String marvelEntityName, boolean sticky) {
         this.id = id;
         this.title = title;
         this.postCount = posts;
@@ -90,10 +90,11 @@ public class TopicDTO {
         this.ownerUsername = ownerUsername;
         this.marvelEntityId = marvelEntityId;
         this.marvelEntityName = marvelEntityName;
+        this.sticky = sticky;
     }
 
     public TopicDTO(Long id, String title, Long posts, LocalDateTime lastPostDate,
-                    LocalDateTime createdAt, Long ownerId, String ownerUsername) {
+                    LocalDateTime createdAt, Long ownerId, String ownerUsername, boolean sticky) {
         this.id = id;
         this.title = title;
         this.postCount = posts;
@@ -101,5 +102,6 @@ public class TopicDTO {
         this.createdAt = createdAt;
         this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
+        this.sticky = sticky;
     }
 }

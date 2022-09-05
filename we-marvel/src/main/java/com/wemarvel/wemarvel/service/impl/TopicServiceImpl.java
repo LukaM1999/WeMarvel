@@ -17,6 +17,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,8 +71,8 @@ public class TopicServiceImpl implements TopicService {
         List<TopicDTO> topics;
         if(boardId == 1) topics = topicRepository.getCharacterBoardTopics(PageRequest.of(0, 100));
         else if(boardId == 2) topics = topicRepository.getComicBoardTopics(PageRequest.of(0, 100));
+        else if(boardId == 3) topics = topicRepository.getSeriesBoardTopics(PageRequest.of(0, 100));
         else topics = topicRepository.getBoardTopics(boardId);
-        topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
         RegisteredUser user = getSignedInUser();
         if(user == null) return topics;
         for (TopicDTO topic : topics) {
@@ -103,7 +105,7 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public List<TopicDTO> getByCharacterId(Long id) {
         List<TopicDTO> topics = topicRepository.getAllByCharacterId(id);
-        topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
+        //topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
         RegisteredUser user = getSignedInUser();
         if(user == null) return topics;
         for (TopicDTO topic : topics) {
@@ -116,7 +118,7 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public List<TopicDTO> getByComicId(Long comicId) {
         List<TopicDTO> topics = topicRepository.getAllByComicId(comicId);
-        topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
+        //topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
         RegisteredUser user = getSignedInUser();
         if(user == null) return topics;
         for (TopicDTO topic : topics) {
@@ -129,7 +131,7 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public List<TopicDTO> getBySeriesId(Long seriesId) {
         List<TopicDTO> topics = topicRepository.getAllBySeriesId(seriesId);
-        topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
+        //topics.sort((o1, o2) -> o2.getLastPostDate().compareTo(o1.getLastPostDate()));
         RegisteredUser user = getSignedInUser();
         if(user == null) return topics;
         for (TopicDTO topic : topics) {
@@ -143,6 +145,21 @@ public class TopicServiceImpl implements TopicService {
     public void deleteBoardTopics(Long boardId) {
         postService.deleteBoardPosts(boardId);
         topicRepository.deleteAllByBoardId(boardId);
+    }
+
+    @Override
+    public void toggleSticky(Long topicId) {
+        Topic topic = topicRepository.findById(topicId).orElse(null);
+        if(topic == null) throw new EntityNotFoundException("Topic not found");
+        topic.setSticky(!topic.isSticky());
+        topicRepository.save(topic);
+    }
+
+    @Override
+    @Transactional
+    public void deleteTopic(Long topicId) {
+        postService.deleteTopicPosts(topicId);
+        topicRepository.deleteById(topicId);
     }
 
 }

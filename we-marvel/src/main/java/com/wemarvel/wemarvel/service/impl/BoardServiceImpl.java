@@ -1,5 +1,7 @@
 package com.wemarvel.wemarvel.service.impl;
 
+import com.google.cloud.storage.Bucket;
+import com.google.firebase.cloud.StorageClient;
 import com.wemarvel.wemarvel.model.Board;
 import com.wemarvel.wemarvel.model.RegisteredUser;
 import com.wemarvel.wemarvel.model.Topic;
@@ -13,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class BoardServiceImpl implements BoardService {

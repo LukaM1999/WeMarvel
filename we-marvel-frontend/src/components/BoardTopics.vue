@@ -32,50 +32,41 @@
                   :dataSource="topics"
                   :editSettings="editSettings"
                   :pageSettings="pageSettings"
-                  :rowTemplate="'rowTemplate'"
                   :toolbar="toolbarOptions"
-                  :actionBegin="actionBegin">
+                  :actionBegin="actionBegin"
+                  :rowDataBound="rowDataBound"
+                  :toolbarClick="toolbarClicked">
           <e-columns>
-            <e-column headerText="Watched" field="watched" width="50" textAlign="Center"></e-column>
-            <e-column headerText="Topic title" field="title" width="200" textAlign="Center"></e-column>
+            <e-column headerText="Watched" field="watched" width="50" :template="'watchedTemplate'" textAlign="Center"></e-column>
+            <e-column headerText="Topic title" field="title" width="200" :template="'titleTemplate'" textAlign="Center"></e-column>
             <e-column headerText='Posts' field="postCount" textAlign='Center' width=80></e-column>
             <e-column headerText='Last post' field="lastPostDate" textAlign='Center' width=80></e-column>
           </e-columns>
-          <template v-slot:rowTemplate="{data}">
-            <tr :id="'topic' + data.id">
-              <td>
-                <div v-if="isAuthorized" class="row">
-                  <div class="col-1 align-self-center">
-                    <ejs-button :iconCss="[data.watched ? 'e-icons e-eye-slash' : 'e-icons e-eye']"
-                                iconPosition="Right" :isPrimary="!data.watched" @click.stop="toggleWatchTopic(data)"
-                                :title="data.watched ? 'Unwatch topic' : 'Watch topic'">
-                      {{data.watched ? 'Unwatch' : 'Watch'}}
-                    </ejs-button>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="row">
-                  <div class="col">
-                    <h3><a class="custom-link" :href="`./${data.marvelEntityId ? data.marvelEntityId : $route.params.boardId}/topic/${data.id}`"
-                           @click.prevent="openTopic(data.id)">{{ data.title }}</a></h3>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col">
-                      <a class="custom-link" :href="`/profile/${data.ownerUsername}`"
-                                                        @click.prevent="openProfile(data.ownerUsername)">
-                        {{data.ownerUsername}}</a> - {{data.createdAt}}
-                  </div>
-                </div>
-              </td>
-              <td>
-                {{ data.postCount }}
-              </td>
-              <td>
-                {{ data.lastPostDate }}
-              </td>
-            </tr>
+          <template v-slot:watchedTemplate="{data}">
+            <div v-if="isAuthorized" class="row">
+              <div class="col-1 align-self-center">
+                <ejs-button :iconCss="[data.watched ? 'e-icons e-eye-slash' : 'e-icons e-eye']"
+                            iconPosition="Right" :isPrimary="!data.watched" @click.stop="toggleWatchTopic(data)"
+                            :title="data.watched ? 'Unwatch topic' : 'Watch topic'">
+                  {{data.watched ? 'Unwatch' : 'Watch'}}
+                </ejs-button>
+              </div>
+            </div>
+          </template>
+          <template v-slot:titleTemplate="{data}">
+            <div class="row">
+              <div class="col">
+                <b v-if="data.sticky">Sticky</b> <h3><a class="custom-link" :href="`./${data.marvelEntityId ? data.marvelEntityId : $route.params.boardId}/topic/${data.id}`"
+                       @click.prevent="openTopic(data.id)">{{ data.title }}</a></h3>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <a class="custom-link" :href="`/profile/${data.ownerUsername}`"
+                   @click.prevent="openProfile(data.ownerUsername)">
+                  {{data.ownerUsername}}</a> - {{data.createdAt}}
+              </div>
+            </div>
           </template>
         </ejs-grid>
       </div>
@@ -97,8 +88,10 @@ import {
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import RichTextEditor from "@/components/RichTextEditor";
 import {store} from "@/main";
-import {onIdTokenChanged} from "firebase/auth";
+import {getIdTokenResult, onIdTokenChanged} from "firebase/auth";
 import {auth} from "@/firebaseServices/firebaseConfig";
+import {DialogUtility} from "@syncfusion/ej2-vue-popups";
+import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
 
 export default {
   name: "BoardTopics",
@@ -117,7 +110,8 @@ export default {
       tableKey: 0,
       toolbarOptions: ['Search'],
       editSettings: {
-        allowAdding: true,
+        allowAdding: false,
+        allowDeleting: false,
         mode: 'Dialog',
       },
       pageSettings: {
@@ -132,15 +126,32 @@ export default {
         content: ''
       },
       isAuthorized: false,
+      isAdmin: false,
       newTopicKey: 0,
     }
   },
   async mounted() {
-    onIdTokenChanged(auth, (user) => {
+    onIdTokenChanged(auth, async (user) => {
       this.isAuthorized = !!user;
       this.toolbarOptions = ['Search'];
       if (this.isAuthorized && !this.toolbarOptions[1]) {
-        this.toolbarOptions.push('Add');
+        this.toolbarOptions = ['Search', 'Add'];
+        this.editSettings = {
+          allowAdding: true,
+          allowDeleting: false,
+          mode: 'Dialog',
+        };
+      }
+      const tokenResult = await getIdTokenResult(user);
+      this.isAdmin = tokenResult.claims.admin;
+      if(this.isAdmin){
+        this.toolbarOptions = ['Search', 'Add', 'Delete', {text: 'Toggle stick to top', disabled: false,
+          tooltipText: 'Stick to top', prefixIcon: 'e-icons e-chevron-up-double', id: 'stickToTop'}];
+        this.editSettings = {
+          allowAdding: true,
+          allowDeleting: true,
+          mode: 'Dialog',
+        };
       }
     })
     if(this.$route.params.entity){
@@ -206,7 +217,46 @@ export default {
       this.newTopic.content = '';
       this.toggleTopicForm();
     },
+    async deleteTopic(topicId){
+      await axios.delete(`${process.env.VUE_APP_BACKEND}/forum/topic/${topicId}`);
+      ToastUtility.show({
+        title: 'Topic deleted',
+        content: 'Topic deleted successfully',
+        position: {X: document.body.offsetWidth - 360, Y: 80},
+        cssClass: 'e-toast-success',
+        showCloseButton: true,
+        timeOut: 5000,
+        extendedTimeout: 5000,
+      });
+      this.topics = this.topics.filter(t => t.id !== topicId);
+    },
     actionBegin(e){
+      if(e.requestType === 'delete'){
+        e.cancel = true;
+        let dialog = DialogUtility.confirm({
+          title: 'Delete topic',
+          showCloseIcon: true,
+          closeOnEscape: true,
+          position: {X: 'center', Y: 'center'},
+          target: document.body,
+          content: 'Are you sure you want to delete this topic?',
+          okButton: {
+            text: 'Yes',
+            click: async () => {
+              await this.deleteTopic(e.data[0]?.id);
+              e.cancel = false;
+              dialog.hide();
+            }
+          },
+          cancelButton: {
+            text: 'No',
+            click: function() {
+              this.hide();
+            }
+          }
+        });
+        return;
+      }
       if(e.requestType === 'add'){
         e.cancel = true;
         this.newTopic.content = '';
@@ -220,6 +270,23 @@ export default {
         })
       }
     },
+    rowDataBound(e){
+      if(e.data.sticky){
+        e.row.classList.add('sticky');
+      }
+    },
+    async toolbarClicked(e){
+      if(e.item.id !== 'stickToTop') return;
+      const selectedTopic =  this.$refs.grid.getSelectedRecords()[0];
+      if(!selectedTopic) return;
+      await axios.patch(`${process.env.VUE_APP_BACKEND}/forum/topic/${selectedTopic.id}/sticky`);
+      if(this.$route.params.entity){
+        await this.getEntityTopics();
+      }
+      else if(this.$route.params.boardId) {
+        await this.getBoard();
+      }
+    }
   },
   provide: {
     grid: [Sort, Toolbar, Search, Filter, Page, Edit, Resize]

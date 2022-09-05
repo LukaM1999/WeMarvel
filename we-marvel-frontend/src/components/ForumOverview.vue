@@ -171,6 +171,7 @@ import {DialogUtility} from "@syncfusion/ej2-vue-popups";
 import {TextBoxComponent} from "@syncfusion/ej2-vue-inputs";
 import {ButtonComponent} from "@syncfusion/ej2-vue-buttons";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
+import {getStorage, listAll, ref, deleteObject} from "firebase/storage";
 
 export default {
   name: "ForumOverview",
@@ -258,6 +259,12 @@ export default {
     },
     async deleteBoard(boardId){
       await axios.delete(`${process.env.VUE_APP_BACKEND}/forum/board/${boardId}`);
+      try {
+        const filesDeleted = await this.deleteFolderRecursive(`board/${boardId}`);
+        console.log(`${filesDeleted} files has been deleted`);
+      } catch(err){
+        console.error(err);
+      }
       ToastUtility.show({
         title: 'Board deleted',
         content: 'Board deleted successfully',
@@ -267,6 +274,23 @@ export default {
         extendedTimeout: 5000,
       });
       this.boards = this.boards.filter(board => board.id !== boardId);
+    },
+    async deleteFile(filePath){
+      const reference = ref(getStorage(), filePath);
+      return await deleteObject(reference);
+    },
+    async deleteFolderRecursive(folderPath){
+      const list = await listAll(ref(getStorage(), folderPath));
+      let filesDeleted = 0;
+
+      for await (const fileRef of list.items) {
+        await this.deleteFile(fileRef.fullPath);
+        filesDeleted++;
+      }
+      for await (const folderRef of list.prefixes) {
+        filesDeleted += await this.deleteFolderRecursive(folderRef.fullPath);
+      }
+      return filesDeleted;
     },
     beforeEdit(e){
       e.cancel = true;

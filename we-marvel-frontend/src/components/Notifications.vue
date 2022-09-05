@@ -125,6 +125,7 @@ export default {
         title: 'Notifications read',
         content: 'Successfully marked selected notifications as read',
         cssClass: 'e-toast-success',
+        showCloseButton: true,
         position: {X: document.body.offsetWidth - 360, Y: 80},
       });
     },

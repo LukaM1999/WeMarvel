@@ -51,14 +51,21 @@ public class ForumController {
         return topicService.getTopicWithPosts(topicId);
     }
 
+    @PatchMapping("/topic/{topicId}/sticky")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void toggleSticky(@PathVariable Long topicId) {
+        topicService.toggleSticky(topicId);
+    }
+
     @PostMapping("/post")
     public Post createPost(@RequestBody Post post) {
         return postService.createPost(post);
     }
 
-    @PostMapping("/post/image")
-    public String uploadImage(@RequestParam MultipartFile UploadFiles) {
-        return postService.uploadImage(UploadFiles);
+    @PostMapping("/board/{boardId}/topic/{topicId}/post/image")
+    public String uploadImage(@PathVariable Long boardId, @PathVariable Long topicId,
+                              @RequestParam MultipartFile UploadFiles) {
+        return postService.uploadImage(boardId, topicId, UploadFiles);
     }
 
     @DeleteMapping("/post/{postId}")
@@ -89,6 +96,12 @@ public class ForumController {
     @PostMapping("/topic/{topicId}/watch")
     public WatchedTopic watchTopic(@PathVariable Long topicId) {
         return watchedTopicService.watchTopic(topicId);
+    }
+
+    @DeleteMapping("/topic/{topicId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void deleteTopic(@PathVariable Long topicId) {
+        topicService.deleteTopic(topicId);
     }
 
     @PostMapping("/board/{boardId}/topic")

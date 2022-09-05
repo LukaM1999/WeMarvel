@@ -193,10 +193,7 @@ export default {
       ToastUtility.show({
         title: 'Review deleted',
         content: 'Review deleted successfully',
-        position: {
-          X: 'Right',
-          Y: 'Top'
-        },
+        position: {X: document.body.offsetWidth - 360, Y: 80},
         showCloseButton: true,
         cssClass: 'e-toast-success',
         timeOut: 5000,

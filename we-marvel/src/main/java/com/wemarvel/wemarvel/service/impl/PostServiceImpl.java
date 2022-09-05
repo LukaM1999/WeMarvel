@@ -43,11 +43,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public String uploadImage(MultipartFile image) {
+    public String uploadImage(Long boardId, Long topicId, MultipartFile image) {
         Bucket bucket = StorageClient.getInstance().bucket();
         String imageName = UUID.randomUUID().toString().replace("-", "");
         try {
-            bucket.create(imageName, image.getBytes(), image.getContentType());
+            bucket.create("board/" + boardId + "/topic/" + topicId + "/" + imageName, image.getBytes(), image.getContentType());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -84,5 +84,10 @@ public class PostServiceImpl implements PostService {
     public void deleteBoardPosts(Long boardId) {
         List<Post> posts = postRepository.findByBoardId(boardId);
         postRepository.deleteAll(posts);
+    }
+
+    @Override
+    public void deleteTopicPosts(Long topicId) {
+        postRepository.deleteAllByTopicId(topicId);
     }
 }

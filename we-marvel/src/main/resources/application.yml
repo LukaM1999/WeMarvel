@@ -86,6 +86,7 @@ security:
     - /forum/character/{characterId}/topic
     - /forum/comic/{comicId}/topic
     - /forum/series/{seriesId}/topic
+    - /forum/board/{boardId}/topic/{topicId}/post/image
     - /comicProgress/shared
     - /comicProgress/unique
     - /comicProgress/user/{username}

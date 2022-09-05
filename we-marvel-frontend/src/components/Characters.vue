@@ -57,7 +57,6 @@
             </div>
           </div>
       </template>
-
     </ejs-listview>
 
     <ejs-pager ref="pager" :totalRecordsCount="totalCharacters" :pageSize="pageSize"

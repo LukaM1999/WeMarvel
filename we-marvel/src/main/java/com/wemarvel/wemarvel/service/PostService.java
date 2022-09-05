@@ -9,8 +9,9 @@ import java.util.List;
 public interface PostService {
     List<PostDTO> getPostsByTopicId(Long topicId);
     Post createPost(Post post);
-    String uploadImage(MultipartFile image);
+    String uploadImage(Long boardId, Long topicId, MultipartFile image);
     void deletePost(Long postId);
     Post updatePost(Long postId, String content);
     void deleteBoardPosts(Long boardId);
+    void deleteTopicPosts(Long topicId);
 }

@@ -90,12 +90,12 @@ const routes = [
                 component: Topic,
             },
             {
-                path: '/forum/board/:boardId([^123])',
+                path: '/forum/board/:boardId([^123]|[0-9]{2,})',
                 name: 'board',
                 component: BoardTopics,
             },
             {
-                path: '/forum/board/:boardId([^123])/topic/:id',
+                path: '/forum/board/:boardId([^123]|[0-9]{2,})/topic/:id',
                 name: 'topic',
                 component: Topic,
             },
