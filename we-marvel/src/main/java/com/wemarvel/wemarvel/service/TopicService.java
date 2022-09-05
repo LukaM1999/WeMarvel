@@ -14,4 +14,5 @@ public interface TopicService {
     List<TopicDTO> getByCharacterId(Long id);
     List<TopicDTO> getByComicId(Long comicId);
     List<TopicDTO> getBySeriesId(Long seriesId);
+    void deleteBoardTopics(Long boardId);
 }

@@ -79,4 +79,10 @@ public class PostServiceImpl implements PostService {
         post.setModifications(post.getModifications() + 1);
         return postRepository.save(post);
     }
+
+    @Override
+    public void deleteBoardPosts(Long boardId) {
+        List<Post> posts = postRepository.findByBoardId(boardId);
+        postRepository.deleteAll(posts);
+    }
 }

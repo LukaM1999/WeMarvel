@@ -12,6 +12,7 @@ import com.wemarvel.wemarvel.service.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,5 +76,17 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public String getBoardName(Long boardId) {
        return boardRepository.getBoardName(boardId);
+    }
+
+    @Override
+    public Board createBoard(Board board) {
+        return boardRepository.save(board);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBoard(Long id) {
+        topicService.deleteBoardTopics(id);
+        boardRepository.deleteById(id);
     }
 }

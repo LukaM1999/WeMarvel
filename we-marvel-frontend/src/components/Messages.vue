@@ -503,6 +503,7 @@ export default {
     },
 
     formatMessage(room, message) {
+      console.log(message);
       const formattedMessage = {
         ...message,
         ...{
@@ -513,7 +514,7 @@ export default {
           date: parseTimestamp(message.timestamp, 'DD MMMM YYYY'),
           username: room.users.find(user => message.sender_id === user._id)
               ?.username,
-          // avatar: senderUser ? senderUser.avatar : null,
+          avatar: room.users.find(user => message.sender_id === user._id)?.profilePicture || '/placeholder.jpg',
           distributed: true,
           lastMessage: { ...message.lastMessage, senderId: message.sender_id }
         }

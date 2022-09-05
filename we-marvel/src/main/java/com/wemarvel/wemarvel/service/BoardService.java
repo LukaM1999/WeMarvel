@@ -10,4 +10,6 @@ public interface BoardService {
     List<BoardDTO> getAllBoards();
     BoardTopicsDTO getBoardWithTopics(Long id);
     String getBoardName(Long boardId);
+    Board createBoard(Board board);
+    void deleteBoard(Long id);
 }

@@ -55,7 +55,7 @@ export default {
             content: 'Click button below to see it!',
             cssClass: 'e-toast-info',
             icon: 'e-comment-add e-icons',
-            position: {X: 'Right', Y: 'Top'},
+            position: {X: document.body.offsetWidth - 360, Y: 80},
             showCloseButton: true,
             buttons: [{
               click: this.goToTopic(data.boardId, data.topicId),
@@ -65,7 +65,6 @@ export default {
             }],
             timeOut: 7000,
             extendedTimeout: 5000,
-            target: '#container',
             animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
             click: arg => {
               console.log(arg);
@@ -82,7 +81,7 @@ export default {
             content: 'Click button below to see it!',
             cssClass: 'e-toast-info',
             icon: 'e-people e-icons',
-            position: {X: 'Right', Y: 'Top'},
+            position: {X: document.body.offsetWidth - 360, Y: 80},
             showCloseButton: true,
             buttons: [{
               click: this.goToProfile(data.senderUsername),
@@ -92,7 +91,6 @@ export default {
             }],
             timeOut: 7000,
             extendedTimeout: 5000,
-            target: '#container',
             animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
             click: arg => {
               console.log(arg);
@@ -106,8 +104,7 @@ export default {
             content: 'Click button below to see their profile!',
             cssClass: 'e-toast-info',
             icon: 'e-check-circle e-icons',
-            position: {X: 'Right', Y: 'Top'},
-            showCloseButton: true,
+            position: {X: document.body.offsetWidth - 360, Y: 80},            showCloseButton: true,
             buttons: [{
               click: this.goToProfile(data.senderUsername),
               model: {
@@ -116,7 +113,6 @@ export default {
             }],
             timeOut: 7000,
             extendedTimeout: 5000,
-            target: '#container',
             animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
             click: arg => {
               console.log(arg);
@@ -137,7 +133,7 @@ export default {
             content: data.message,
             cssClass: 'e-toast-info',
             icon: 'e-comment-2 e-icons',
-            position: {X: 'Right', Y: 'Top'},
+            position: {X: document.body.offsetWidth - 360, Y: 80},
             showCloseButton: true,
             buttons: [{
               click: this.openMessage(data.recipientUsername),
@@ -147,7 +143,6 @@ export default {
             }],
             timeOut: 7000,
             extendedTimeout: 5000,
-            target: '#container',
             animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
             click: arg => {
               console.log(arg);

@@ -144,7 +144,6 @@ export default {
     onAuthStateChanged(auth, async user => {
       if (user) {
         await user.getIdTokenResult(true).then(idTokenResult => {
-          console.log(idTokenResult)
           this.admin = !!idTokenResult.claims.admin;
         });
       }

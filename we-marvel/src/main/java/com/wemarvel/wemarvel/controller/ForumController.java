@@ -1,10 +1,12 @@
 package com.wemarvel.wemarvel.controller;
 
+import com.wemarvel.wemarvel.model.Board;
 import com.wemarvel.wemarvel.model.Post;
 import com.wemarvel.wemarvel.model.WatchedTopic;
 import com.wemarvel.wemarvel.model.dto.*;
 import com.wemarvel.wemarvel.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +32,18 @@ public class ForumController {
     @GetMapping("/boards")
     public List<BoardDTO> getAllBoards() {
         return boardService.getAllBoards();
+    }
+
+    @PostMapping("/board")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public Board createBoard(@RequestBody Board board) {
+        return boardService.createBoard(board);
+    }
+
+    @DeleteMapping("/board/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void deleteBoard(@PathVariable Long id) {
+        boardService.deleteBoard(id);
     }
 
     @GetMapping("/topic/{topicId}")

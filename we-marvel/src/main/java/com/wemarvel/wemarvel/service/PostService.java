@@ -12,4 +12,5 @@ public interface PostService {
     String uploadImage(MultipartFile image);
     void deletePost(Long postId);
     Post updatePost(Long postId, String content);
+    void deleteBoardPosts(Long boardId);
 }

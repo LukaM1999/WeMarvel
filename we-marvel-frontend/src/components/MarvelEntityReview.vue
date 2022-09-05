@@ -194,8 +194,7 @@ export default {
       ToastUtility.show({
         title: 'Review Submitted',
         content: 'Review submitted successfully!',
-        position: {X: 'Right', Y: 'Top'},
-        cssClass: 'e-toast-success',
+        position: {X: document.body.offsetWidth - 360, Y: 80},        cssClass: 'e-toast-success',
         timeOut: 5000,
         extendedTimeout: 5000,
       });

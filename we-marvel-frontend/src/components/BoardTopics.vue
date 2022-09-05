@@ -2,20 +2,20 @@
   <div id="boardContainer">
     <h1>{{marvelEntity.title || board.title}}</h1>
     <p>{{marvelEntity.description || board.description}}</p>
-<!--    <ejs-button @click="toggleTopicForm" class="mb-3 mt-2">{{showNewTopicForm ? 'Cancel' : 'New topic'}}</ejs-button>-->
     <div :key="newTopicKey" id="newTopicContainer" v-if="showNewTopicForm" class="row mb-5">
       <div class="col">
-        <h3>New topic</h3>
+        <h2>New topic</h2>
         <div class="row mb-3 justify-content-center">
           <div class="col">
             <div class="e-control e-lib e-primary">
               <div class="e-input-group w-50 e-float-input">
                 <input type="text" v-model="newTopic.title" required />
-                <label class="e-float-text e-label">Title</label>
+                <label class="e-float-text e-label">Title*</label>
               </div>
             </div>
           </div>
         </div>
+        <h3>First topic post*</h3>
         <RichTextEditor ref="rte" @value-changed="updateTopicContent"/>
         <ejs-button  @click="createNewTopic" class="mt-4"
                      :content="'Create topic'"></ejs-button>

@@ -19,4 +19,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "WHERE p.topicId = ?1 " +
             "ORDER BY p.createdAt ASC")
     List<PostDTO> getPostsByTopicId(Long topicId);
+
+    @Query("SELECT p FROM Post p " +
+            "INNER JOIN Topic t ON t.boardId = ?1 " +
+            "AND p.topicId = t.id")
+    List<Post> findByBoardId(Long boardId);
 }

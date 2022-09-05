@@ -100,4 +100,6 @@ public interface TopicRepository extends PagingAndSortingRepository<Topic, Long>
             "WHERE t.boardId = 3 AND t.marvelEntityId = s.id " +
             "GROUP BY t.id, t.title, u.username, s.id, s.title")
     List<TopicDTO> getAllBySeriesId(Long seriesId);
+
+    void deleteAllByBoardId(Long boardId);
 }

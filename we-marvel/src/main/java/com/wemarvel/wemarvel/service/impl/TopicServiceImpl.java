@@ -138,4 +138,11 @@ public class TopicServiceImpl implements TopicService {
         }
         return topics;
     }
+
+    @Override
+    public void deleteBoardTopics(Long boardId) {
+        postService.deleteBoardPosts(boardId);
+        topicRepository.deleteAllByBoardId(boardId);
+    }
+
 }
