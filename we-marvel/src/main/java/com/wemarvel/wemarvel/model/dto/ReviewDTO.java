@@ -22,6 +22,7 @@ public class ReviewDTO {
     private Long ownerId;
     private String ownerUsername;
     private String ownerImageUrl;
+    private boolean ownerEnabled;
     private ReviewType type;
     private Recommendation recommendation;
     private Integer rating;
@@ -30,7 +31,7 @@ public class ReviewDTO {
     private LocalDate createdAt;
 
     public ReviewDTO(Long id, Long marvelEntityId, Long ownerId,
-                     String ownerUsername, String ownerImageUrl,
+                     String ownerUsername, boolean ownerEnabled, String ownerImageUrl,
                      ReviewType type, Recommendation recommendation,
                      Integer rating, String text, LocalDate createdAt) {
         this.id = id;
@@ -38,6 +39,7 @@ public class ReviewDTO {
         this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
         this.ownerImageUrl = ownerImageUrl;
+        this.ownerEnabled = ownerEnabled;
         this.type = type;
         this.recommendation = recommendation;
         this.rating = rating;

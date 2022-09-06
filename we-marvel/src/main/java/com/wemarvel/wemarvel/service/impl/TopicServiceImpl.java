@@ -55,6 +55,7 @@ public class TopicServiceImpl implements TopicService {
             profileDTO.setUsername(profile.getUsername());
             profileDTO.setRole(profile.getRole().getAuthority());
             profileDTO.setDeleted(profile.isDeleted());
+            profileDTO.setEnabled(profile.isEnabled());
             post.setOwner(profileDTO);
             topicDTO.getPosts().add(post);
         }

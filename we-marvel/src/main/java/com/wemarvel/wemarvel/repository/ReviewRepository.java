@@ -9,21 +9,21 @@ import java.util.List;
 
 public interface ReviewRepository extends PagingAndSortingRepository<Review, Long> {
 
-    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ReviewDTO(r.id, r.marvelEntityId, u.id, u.username, " +
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ReviewDTO(r.id, r.marvelEntityId, u.id, u.username, u.enabled, " +
             "u.imageUrl, r.type, r.recommendation, r.rating, r.text, r.createdAt) " +
             "FROM Review r " +
             "INNER JOIN RegisteredUser u ON r.ownerId = u.id " +
             "WHERE u.id = ?1")
     List<ReviewDTO> findByOwnerId(Long id);
 
-    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ReviewDTO(r.id, r.marvelEntityId, u.id, u.username, " +
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ReviewDTO(r.id, r.marvelEntityId, u.id, u.username, u.enabled, " +
             "u.imageUrl, r.type, r.recommendation, r.rating, r.text, r.createdAt) " +
             "FROM Review r " +
             "INNER JOIN RegisteredUser u ON r.ownerId = u.id")
     List<ReviewDTO> getAll();
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.ReviewDTO(r.id, r.marvelEntityId, c.name, c.thumbnail, u.id, u.username, " +
-            "u.imageUrl, r.type, r.recommendation, r.rating, r.text, r.createdAt) " +
+            "u.imageUrl, u.enabled, r.type, r.recommendation, r.rating, r.text, r.createdAt) " +
             "FROM Review r " +
             "INNER JOIN RegisteredUser u ON r.ownerId = u.id " +
             "INNER JOIN MarvelCharacter c ON r.marvelEntityId = c.id " +
@@ -31,7 +31,7 @@ public interface ReviewRepository extends PagingAndSortingRepository<Review, Lon
     List<ReviewDTO> findByCharacterId(Long id);
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.ReviewDTO(r.id, r.marvelEntityId, c.title, c.thumbnail, u.id, u.username, " +
-            "u.imageUrl, r.type, r.recommendation, r.rating, r.text, r.createdAt) " +
+            "u.imageUrl, u.enabled, r.type, r.recommendation, r.rating, r.text, r.createdAt) " +
             "FROM Review r " +
             "INNER JOIN RegisteredUser u ON r.ownerId = u.id " +
             "INNER JOIN Comic c ON r.marvelEntityId = c.id " +
@@ -39,7 +39,7 @@ public interface ReviewRepository extends PagingAndSortingRepository<Review, Lon
     List<ReviewDTO> findByComicId(Long id);
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.ReviewDTO(r.id, r.marvelEntityId, s.title, s.thumbnail, u.id, u.username, " +
-            "u.imageUrl, r.type, r.recommendation, r.rating, r.text, r.createdAt) " +
+            "u.imageUrl, u.enabled, r.type, r.recommendation, r.rating, r.text, r.createdAt) " +
             "FROM Review r " +
             "INNER JOIN RegisteredUser u ON r.ownerId = u.id " +
             "INNER JOIN Series s ON r.marvelEntityId = s.id " +
@@ -47,7 +47,7 @@ public interface ReviewRepository extends PagingAndSortingRepository<Review, Lon
     List<ReviewDTO> findBySeriesId(Long id);
 
 
-    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ReviewDTO(r.id, r.marvelEntityId, u.id, u.username, " +
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ReviewDTO(r.id, r.marvelEntityId, u.id, u.username, u.enabled," +
             "u.imageUrl, r.type, r.recommendation, r.rating, r.text, r.createdAt) " +
             "FROM Review r " +
             "INNER JOIN RegisteredUser u ON r.ownerId = u.id " +

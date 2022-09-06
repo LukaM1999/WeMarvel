@@ -26,4 +26,10 @@ public interface RegisteredUserService extends UserDetailsService {
     void updateProfile(ProfileDTO profile);
 
     List<ProfileDTO> getProfiles();
+
+    void disableUser(Long userId);
+
+    void enableUser(Long userId);
+
+    String updateEmail(String email);
 }

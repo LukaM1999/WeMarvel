@@ -42,7 +42,7 @@
                     </div>
                   </div>
                   <div style="font-size: 16px;" class="row">
-                    <div class="col-1">
+                    <div v-if="data.ownerEnabled" class="col-1">
                       <a :href="`/profile/${data.ownerUsername}`">
                         <img :src="data.ownerImageUrl || '/placeholder.jpg'"
                              :alt="data.ownerUsername"
@@ -50,12 +50,19 @@
                              width="100" height="100">
                       </a>
                     </div>
+                    <div v-else class="col-1">
+                      <img :src="'/placeholder.jpg'"
+                           alt="removed"
+                           title="removed"
+                           width="100" height="100">
+                    </div>
                     <div class="col-1">
                       <div class="row">
                         <div class="col">
-                          <a class="custom-link" :href="`/profile/${data.ownerUsername}`">
+                          <a v-if="data.ownerEnabled" class="custom-link" :href="`/profile/${data.ownerUsername}`">
                             {{data.ownerUsername}}
                           </a>
+                          <span v-else>[removed user]</span>
                         </div>
                       </div>
                       <div v-if="data.rating" class="row">

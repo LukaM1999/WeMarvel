@@ -39,6 +39,9 @@ public class NotificationDTO {
     private String senderImageUrl;
     @Getter
     @Setter
+    private boolean senderEnabled;
+    @Getter
+    @Setter
     private Long boardId;
     @Getter
     @Setter

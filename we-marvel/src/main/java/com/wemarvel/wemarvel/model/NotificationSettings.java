@@ -28,4 +28,8 @@ public class NotificationSettings {
     @Setter
     @Column(columnDefinition = "Boolean default true")
     private boolean friendRequests;
+
+    public NotificationSettings(Long userId) {
+        this.userId = userId;
+    }
 }

@@ -25,12 +25,17 @@
                 </div>
               </div>
               <div class="row mt-2">
-                <div class="col">
+                <div v-if="data.senderEnabled" class="col">
                   <a :href="`/profile/${data.senderUsername}`" style="max-width: inherit;">
                     <img width="100" height="100" style="box-shadow: 0px 0px 10px 1px black"
                          :src="data.senderImageUrl || '/placeholder.jpg'"
                          :alt="data.senderUsername" :title="data.senderUsername"/>
                   </a>
+                </div>
+                <div v-else class="col">
+                  <img width="100" height="100" style="box-shadow: 0px 0px 10px 1px black"
+                       :src="'/placeholder.jpg'"
+                       alt="removed" title="removed"/>
                 </div>
               </div>
             </div>

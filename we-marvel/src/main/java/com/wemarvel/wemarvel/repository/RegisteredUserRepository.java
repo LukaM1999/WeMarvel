@@ -14,8 +14,8 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
 
     RegisteredUser getByUsername(String username);
 
-    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ProfileDTO(u.id, u.username, u.imageUrl, " +
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.ProfileDTO(u.id, u.username, u.imageUrl, u.enabled, " +
             "u.location, u.gender, u.birthday) " +
-            "FROM RegisteredUser u")
+            "FROM RegisteredUser u WHERE u.enabled = true")
     List<ProfileDTO> getProfiles();
 }

@@ -20,6 +20,9 @@ public class ProfileDTO {
     private String username;
     @Getter
     @Setter
+    private String email;
+    @Getter
+    @Setter
     private boolean deleted;
     @Getter
     @Setter
@@ -27,6 +30,9 @@ public class ProfileDTO {
     @Getter
     @Setter
     private String imageUrl;
+    @Getter
+    @Setter
+    private boolean enabled;
     @Getter
     @Setter
     private String location;
@@ -38,10 +44,11 @@ public class ProfileDTO {
     @JsonFormat(pattern = "dd.MM.yyyy.")
     private LocalDate birthday;
 
-    public ProfileDTO(Long id, String username, String imageUrl, String location, Gender gender, LocalDate birthday) {
+    public ProfileDTO(Long id, String username, String imageUrl, boolean enabled, String location, Gender gender, LocalDate birthday) {
         this.id = id;
         this.username = username;
         this.imageUrl = imageUrl;
+        this.enabled = enabled;
         this.location = location;
         this.gender = gender;
         this.birthday = birthday;

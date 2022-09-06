@@ -89,6 +89,7 @@ public class NotificationServiceImpl implements NotificationService {
                     sender.getId(), notification.getReceivedAt());
             notificationDTO.setSenderUsername(sender.getUsername());
             notificationDTO.setSenderImageUrl(sender.getImageUrl());
+            notificationDTO.setSenderEnabled(sender.isEnabled());
             notificationDTO.setRead(notification.isRead());
             if(notification instanceof TopicNotification) {
                 TopicNotification topicNotification = (TopicNotification) notification;
@@ -116,6 +117,7 @@ public class NotificationServiceImpl implements NotificationService {
             RegisteredUser sender = registeredUserService.getUserById(notification.getSenderId());
             notificationDTO.setSenderUsername(sender.getUsername());
             notificationDTO.setSenderImageUrl(sender.getImageUrl());
+            notificationDTO.setSenderEnabled(sender.isEnabled());
             if(notification instanceof TopicNotification) {
                TopicNotification topicNotification = (TopicNotification) notification;
                 notificationDTO.setBoardId(topicNotification.getBoardId());

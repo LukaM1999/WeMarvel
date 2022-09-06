@@ -1,6 +1,11 @@
 <template>
 <div class="row">
   <div class="col">
+    <div v-if="!isSelf" class="row me-2 mt-2 mb-2">
+      <div class="col d-flex justify-content-end">
+        <ejs-button @click="openReportForm()" iconCss="e-icons e-description" content="Report"></ejs-button>
+      </div>
+    </div>
     <div class="row justify-content-center">
       <div class="col">
         <img width="300" height="300" :src="profile.imageUrl ? profile.imageUrl : '/placeholder.jpg'"
@@ -47,6 +52,28 @@
                     @click="removeFriend" :iconCss="'e-icons e-close'"></ejs-button>
       </div>
     </div>
+    <ejs-dialog ref="reportForm" header="Report user" :showCloseIcon="true" :visible="showReportForm"
+                :width="'500px'" :height="'400px'" :isModal="true" :closeOnEscape="true"
+                :position="{ X: 'center', Y: 'center' }"
+                :content="'contentTemplate'"
+                :footerTemplate="'footerTemplate'"
+                @close="dialogClosed">
+      <template v-slot:contentTemplate>
+        <ejs-textbox ref="reportExplanation" v-model="reportExplanation" :placeholder="'Report explanation*'"
+                     :multiline="true" :rows="10" :floatLabelType="'Auto'"></ejs-textbox>
+      </template>
+      <template v-slot:footerTemplate>
+        <div class="row justify-content-end">
+          <div class="col-3">
+            <ejs-button ref="reportButton" isPrimary="true" :enabled="reportExplanation"
+                        @click="reportUser" :content="'Submit'"></ejs-button>
+          </div>
+          <div class="col-3">
+            <ejs-button @click="dialogClosed" :content="'Cancel'"></ejs-button>
+          </div>
+        </div>
+      </template>
+    </ejs-dialog>
   </div>
 </div>
 </template>
@@ -59,11 +86,15 @@ import {auth} from "@/firebaseServices/firebaseConfig";
 import {onIdTokenChanged} from "firebase/auth";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
 import {store} from "@/main";
+import {DialogComponent} from "@syncfusion/ej2-vue-popups";
+import {TextBoxComponent} from "@syncfusion/ej2-vue-inputs";
 
 export default {
   name: "ProfileOverview",
   components: {
     "ejs-button": ButtonComponent,
+    'ejs-dialog': DialogComponent,
+    'ejs-textbox': TextBoxComponent
   },
   props: {
     profile: {
@@ -75,6 +106,8 @@ export default {
     return {
       friend: null,
       isSelf: false,
+      showReportForm: false,
+      reportExplanation: '',
     }
   },
   async mounted(){
@@ -142,6 +175,32 @@ export default {
     formatGender(gender){
       if(!gender) return 'Unknown';
       return capitalize(gender.toLowerCase().replace('_', '-'));
+    },
+    openReportForm(postId){
+      this.showReportForm = true;
+      this.reportedPostId = postId;
+    },
+    dialogClosed(){
+      this.showReportForm = false;
+      this.reportExplanation = '';
+    },
+    async reportUser(){
+      await axios.post(`${process.env.VUE_APP_BACKEND}/report/user`, {
+        reportedUsername: this.profile.username,
+        explanation: this.reportExplanation,
+      });
+      this.showReportForm = false;
+      this.reportedPostId = '';
+      this.reportExplanation = '';
+      ToastUtility.show({
+        title: 'Report sent',
+        content: 'Report sent successfully',
+        position: {X: document.body.offsetWidth - 360, Y: 80},
+        cssClass: 'e-toast-success',
+        showCloseButton: true,
+        timeOut: 5000,
+        extendedTimeout: 5000,
+      });
     }
   }
 }

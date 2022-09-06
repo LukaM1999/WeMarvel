@@ -224,7 +224,7 @@ export default {
             { text: 'Forum', url: `/forum` },
             { text: 'Users', url: `/users` },
           ]
-        }
+        },
       ],
       profileMenuItems: [
         {
@@ -285,6 +285,7 @@ export default {
       imageSpan.style.height = '50px';
       imageSpan.style.backgroundSize = 'contain';
       imageSpan.style.backgroundRepeat = 'no-repeat';
+      imageSpan.style.marginRight = '10px';
       imageSpan.classList.remove('e-menu-icon');
     });
   },
@@ -336,6 +337,9 @@ export default {
         });
         this.$refs.signInDialog.hide();
         this.signedInUser = userCredentials.user;
+        this.username = '';
+        this.password = '';
+        this.email = '';
       }).catch(error => {
         alert(error.message)
       })

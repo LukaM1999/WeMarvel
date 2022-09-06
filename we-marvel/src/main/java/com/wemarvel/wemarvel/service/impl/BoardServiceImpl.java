@@ -50,6 +50,7 @@ public class BoardServiceImpl implements BoardService {
                 boardDTO.setFirstTopicUsername(user.getUsername());
                 boardDTO.setFirstTopicUserId(user.getEmail());
                 boardDTO.setFirstTopicUserImageUrl(user.getImageUrl());
+                boardDTO.setFirstTopicUserEnabled(user.isEnabled());
             }
             if(topics.size() > 1) {
                 boardDTO.setSecondTopicId(topics.get(1).getId());
@@ -59,6 +60,7 @@ public class BoardServiceImpl implements BoardService {
                 boardDTO.setSecondTopicUsername(user.getUsername());
                 boardDTO.setSecondTopicUserId(user.getEmail());
                 boardDTO.setSecondTopicUserImageUrl(user.getImageUrl());
+                boardDTO.setSecondTopicUserEnabled(user.isEnabled());
             }
             boardDTOs.add(boardDTO);
         }

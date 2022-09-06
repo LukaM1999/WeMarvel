@@ -12,10 +12,11 @@
     <div id="quoteContent" class="row mt-5 justify-content-center" v-if="quotedPost">
       <h3>Quoted post</h3>
       <div class="col-8 quoted-post">
-        <a class="custom-link mt-2 e-bold"
+        <a v-if="quotedPost.ownerEnabled" class="custom-link mt-2 e-bold"
            :href="`/profile/${quotedPost.ownerUsername}`"
            @click.prevent="openProfile(quotedPost.ownerUsername)">
           {{ quotedPost.ownerUsername }} said:</a>
+        <span v-else>[removed user]</span>
         <div class="row">
           <div class="col">
             <span v-html="quotedPost.content"></span>
@@ -54,12 +55,13 @@
             <div class="col-3 ms-3 p-3 profile-info">
               <div class="row">
                 <div class="col">
-                  <a class="custom-link e-bold" :href="`/profile/${data.ownerUsername}`"
+                  <a v-if="data.ownerEnabled" class="custom-link e-bold" :href="`/profile/${data.ownerUsername}`"
                      @click.prevent="openProfile(data.ownerUsername)">{{ data.ownerUsername }}</a>
+                  <span v-else>[removed user]</span>
                 </div>
               </div>
               <div class="row mt-3">
-                <div class="col">
+                <div v-if="data.ownerEnabled" class="col">
                   <a :href="`/profile/${data.ownerUsername}`" style="max-width: inherit;"
                   @click.prevent="openProfile(data.ownerUsername)">
                     <img style="max-width: inherit; box-shadow: 0px 0px 10px 1px black"
@@ -67,9 +69,19 @@
                        :alt="data.ownerUsername"/>
                   </a>
                 </div>
+                <div v-else class="col">
+                  <img style="max-width: inherit; box-shadow: 0px 0px 10px 1px black"
+                       :src="'/placeholder.jpg'"
+                       :alt="'removed'"/>
+                </div>
               </div>
             </div>
             <div class="col">
+              <div v-if="!data.deleted" class="row me-2 mt-2 mb-2">
+                <div class="col d-flex justify-content-end">
+                  <ejs-button @click.stop="openReportForm(data.id)" iconCss="e-icons e-description" content="Report"></ejs-button>
+                </div>
+              </div>
               <div class="row">
                 <div class="col">
                   <div v-if="data.quotedPostId && !data.deleted" class="quoted-post">
@@ -110,6 +122,28 @@
     <ejs-pager ref="pager" :click="changePage" :totalRecordsCount="topic.posts.length" :pageSize="10"
                :pageCount="5" :query="query"></ejs-pager>
 
+    <ejs-dialog ref="reportForm" header="Report post" :showCloseIcon="true" :visible="showReportForm"
+                :width="'500px'" :height="'400px'" :isModal="true" :closeOnEscape="true"
+                :position="{ X: 'center', Y: 'center' }"
+                :content="'contentTemplate'"
+                :footerTemplate="'footerTemplate'"
+                @close="dialogClosed">
+      <template v-slot:contentTemplate>
+        <ejs-textbox ref="reportExplanation" v-model="reportExplanation" :placeholder="'Report explanation*'"
+                     :multiline="true" :rows="10" :floatLabelType="'Auto'"></ejs-textbox>
+      </template>
+      <template v-slot:footerTemplate>
+        <div class="row justify-content-end">
+          <div class="col-3">
+            <ejs-button ref="reportButton" isPrimary="true" :enabled="reportExplanation"
+                        @click="reportPost" :content="'Submit'"></ejs-button>
+          </div>
+          <div class="col-3">
+            <ejs-button @click="dialogClosed" :content="'Cancel'"></ejs-button>
+          </div>
+        </div>
+      </template>
+    </ejs-dialog>
   </div>
 </template>
 
@@ -126,7 +160,8 @@ import {Query} from "@syncfusion/ej2-data";
 import {store} from "@/main";
 import {onAuthStateChanged} from "firebase/auth";
 import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
-import {DialogUtility} from "@syncfusion/ej2-vue-popups";
+import {DialogComponent, DialogUtility} from "@syncfusion/ej2-vue-popups";
+import {TextBoxComponent} from "@syncfusion/ej2-vue-inputs";
 export default {
   name: "Topic",
   components: {
@@ -135,6 +170,8 @@ export default {
     'ejs-listview': ListViewComponent,
     'ejs-pager': PagerComponent,
     'ejs-button': ButtonComponent,
+    'ejs-dialog': DialogComponent,
+    'ejs-textbox': TextBoxComponent,
   },
   data() {
     return {
@@ -147,6 +184,8 @@ export default {
       quotedPost: null,
       postToEdit: null,
       admin: false,
+      showReportForm: false,
+      reportExplanation: '',
     };
   },
   async mounted() {
@@ -276,12 +315,9 @@ export default {
       this.postToEdit.content = data.content;
       this.postToEdit.modifiedByUsername = data.modifiedByUsername;
       this.postToEdit.modifiedAt = data.modifiedAt;
-      this.postToEdit.modifications = data.modifications;
-      this.$refs.postList.updated();
-      this.$refs.pager.refresh();
-      this.listKey += 1;
-      this.rteValue = '';
+      this.postToEdit.modifications++;
       this.showNewPostForm = false;
+      this.topic.posts = [...this.topic.posts];
       const postOffset = document.getElementById('post' + this.postToEdit.id)?.offsetTop
       window.scroll({
         top: postOffset,
@@ -351,6 +387,33 @@ export default {
       }
       return filesDeleted;
     },
+    openReportForm(postId){
+      this.showReportForm = true;
+      this.reportedPostId = postId;
+    },
+    dialogClosed(){
+      this.showReportForm = false;
+      this.reportedPostId = '';
+      this.reportExplanation = '';
+    },
+    async reportPost(){
+      await axios.post(`${process.env.VUE_APP_BACKEND}/report/post`, {
+        postId: this.reportedPostId,
+        explanation: this.reportExplanation,
+      });
+      this.showReportForm = false;
+      this.reportedPostId = '';
+      this.reportExplanation = '';
+      ToastUtility.show({
+        title: 'Report sent',
+        content: 'Report sent successfully',
+        position: {X: document.body.offsetWidth - 360, Y: 80},
+        cssClass: 'e-toast-success',
+        showCloseButton: true,
+        timeOut: 5000,
+        extendedTimeout: 5000,
+      });
+    }
   },
 }
 </script>

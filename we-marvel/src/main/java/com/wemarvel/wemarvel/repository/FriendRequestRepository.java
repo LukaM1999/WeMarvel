@@ -10,8 +10,8 @@ import java.util.List;
 public interface FriendRequestRepository extends JpaRepository<FriendRequest, Long> {
 
     @Query("SELECT f FROM FriendRequest f " +
-            "WHERE f.senderId = ?1 OR f.senderId = ?2 " +
-            "AND f.receiverId = ?1 OR f.receiverId = ?2")
+            "WHERE (f.senderId = ?1 AND f.receiverId = ?2) " +
+            "OR (f.receiverId = ?1 AND f.senderId = ?2)")
     FriendRequest findBySenderAndReceiver(Long senderId, Long receiverId);
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.FriendRequestDTO(" +
@@ -31,7 +31,7 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
     List<FriendRequestDTO> getPendingFriendRequests(Long id);
 
     @Query("SELECT f FROM FriendRequest f " +
-            "WHERE f.senderId = ?1 OR f.senderId = ?2 " +
-            "AND f.receiverId = ?1 OR f.receiverId = ?2")
+            "WHERE (f.senderId = ?1 AND f.receiverId = ?2) " +
+            "OR (f.receiverId = ?1 AND f.senderId = ?2) AND f.accepted = true")
     FriendRequest getAcceptedFriendRequest(Long excludedUserId, Long recipientId);
 }

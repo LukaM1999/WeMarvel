@@ -25,6 +25,9 @@ public class PostDTO {
     private String ownerImageUrl;
     @Getter
     @Setter
+    private boolean ownerEnabled;
+    @Getter
+    @Setter
     private Long topicId;
     @Getter
     @Setter
@@ -59,14 +62,15 @@ public class PostDTO {
     @Setter
     private ProfileDTO owner;
 
-    public PostDTO(Long id, Long ownerId, String ownerUsername, String ownerImageUrl, Long topicId, String topicTitle,
-                   Long quotedPostId,
+    public PostDTO(Long id, Long ownerId, String ownerUsername, String ownerImageUrl,
+                   boolean ownerEnabled, Long topicId, String topicTitle, Long quotedPostId,
                    LocalDateTime createdAt, String content, LocalDateTime modifiedAt, Long modifiedById,
                    String modifiedByUsername, int modifications, boolean deleted) {
         this.id = id;
         this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
         this.ownerImageUrl = ownerImageUrl;
+        this.ownerEnabled = ownerEnabled;
         this.topicId = topicId;
         this.topicTitle = topicTitle;
         this.quotedPostId = quotedPostId;

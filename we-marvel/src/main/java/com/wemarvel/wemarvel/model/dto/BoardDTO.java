@@ -63,7 +63,15 @@ public class BoardDTO {
 
     @Getter
     @Setter
+    private boolean firstTopicUserEnabled;
+
+    @Getter
+    @Setter
     private String secondTopicUsername;
+
+    @Getter
+    @Setter
+    private boolean secondTopicUserEnabled;
 
     @Getter
     @Setter

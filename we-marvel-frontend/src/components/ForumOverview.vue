@@ -86,10 +86,11 @@
           <template v-slot:topicsTemplate="{data}">
             <div style="font-size: 16px;" v-if="data.firstTopicId" class="row">
               <div class="col-2 d-flex justify-content-end">
-                <a :href="`/profile/${data.firstTopicUsername}`"
+                <a v-if="data.firstTopicUserEnabled" :href="`/profile/${data.firstTopicUsername}`"
                    @click.prevent="openProfile(data.firstTopicUsername)">
                   <img width="50" height="50" :src="data.firstTopicUserImageUrl || '/placeholder.jpg'" :alt="data.firstTopicUsername" />
                 </a>
+                <img v-else width="50" height="50" :src="'/placeholder.jpg'" alt="removed" />
               </div>
               <div class="col justify-content-start d-grid">
                 <div class="row">
@@ -104,9 +105,9 @@
                 <div class="row">
                   <div class="col">
                     <div class="topic-details">
-                      <i>{{ data.firstTopicDate }}, by <a class="custom-link" :href="`/profile/${data.firstTopicUsername}`"
+                      <i>{{ data.firstTopicDate }}, by <a v-if="data.firstTopicUserEnabled" class="custom-link" :href="`/profile/${data.firstTopicUsername}`"
                                                           @click.prevent="openProfile(data.firstTopicUsername)">
-                        {{data.firstTopicUsername}}</a></i>
+                        {{data.firstTopicUsername}}</a><span v-else>[removed user]</span></i>
                     </div>
                   </div>
                 </div>
@@ -114,11 +115,12 @@
             </div>
             <div style="font-size: 16px;" v-if="data.secondTopicId" class="row">
               <div class="col-2 d-flex justify-content-end">
-                <a :href="`/profile/${data.secondTopicUsername}`"
+                <a v-if="data.secondTopicUserEnabled" :href="`/profile/${data.secondTopicUsername}`"
                    @click.prevent="openProfile(data.secondTopicUsername)">
                   <img width="50" height="50" :src="data.secondTopicUserImageUrl || '/placeholder.jpg'"
                        :alt="data.secondTopicUsername" />
                 </a>
+                <img v-else width="50" height="50" :src="'/placeholder.jpg'" alt="removed" />
               </div>
               <div class="col justify-content-start d-grid">
                 <div class="row">
@@ -133,9 +135,9 @@
                 <div class="row">
                   <div class="col">
                     <div class="topic-details">
-                      <i>{{ data.secondTopicDate }}, by <a class="custom-link" :href="`/profile/${data.secondTopicUsername}`"
+                      <i>{{ data.secondTopicDate }}, by <a v-if="data.secondTopicUserEnabled" class="custom-link" :href="`/profile/${data.secondTopicUsername}`"
                                                            @click.prevent="openProfile(data.secondTopicUsername)">
-                        {{data.secondTopicUsername}}</a></i>
+                        {{data.secondTopicUsername}}</a><span v-else>[removed user]</span></i>
                     </div>
                   </div>
                 </div>

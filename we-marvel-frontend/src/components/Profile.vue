@@ -1,7 +1,13 @@
 <template>
 <div id="profileContainer" style="overflow-x: hidden">
   <h1>{{profile.username}}'s Profile</h1>
-  <ejs-tab v-if="profile.username" ref="tabs" :selected="tabSelected" class="e-fill">
+  <div v-if="isAdmin" class="row me-2 mt-2 mb-2">
+    <div class="col d-flex justify-content-end">
+      <ejs-button v-if="profile.enabled" isPrimary="true" @click="openDisableDialog" iconCss="e-icons e-circle-remove" content="Disable user"></ejs-button>
+      <ejs-button v-else isPrimary="true" @click="enableUser" iconCss="e-icons e-circle-check" content="Enable user"></ejs-button>
+    </div>
+  </div>
+  <ejs-tab v-if="profile.username && profile.enabled" ref="tabs" :selected="tabSelected" class="e-fill">
     <e-tabitems>
       <e-tabitem :header="{text: 'Overview'}" :content="'overviewTemplate'">
         <template v-slot:overviewTemplate="{}">
@@ -87,6 +93,20 @@
                         </div>
                       </div>
                       <ejs-button :disabled="!isUsernameFormValid()" class="mt-3" @click="changeUsername">Change username</ejs-button>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <b class="label">Change email</b>
+                    </div>
+                    <div class="col">
+                      <div class="e-control e-lib e-primary">
+                        <div class="e-input-group e-float-input">
+                          <input v-model="email" required />
+                          <label class="e-float-text e-label">Email</label>
+                        </div>
+                      </div>
+                      <ejs-button :disabled="!isEmailFormValid()" class="mt-3" @click="changeEmail">Change email</ejs-button>
                     </div>
                   </div>
                 </div>
@@ -193,6 +213,7 @@
       </e-tabitem>
     </e-tabitems>
   </ejs-tab>
+  <h2 v-else>User not found</h2>
 </div>
 </template>
 
@@ -218,6 +239,7 @@ import FriendRequests from "@/components/FriendRequests";
 import Reviews from "@/components/Reviews";
 import Messages from "@/components/Messages";
 import Notifications from "@/components/Notifications";
+import {DialogUtility} from "@syncfusion/ej2-vue-popups";
 
 
 export default {
@@ -281,6 +303,7 @@ export default {
       password: '',
       confirmPassword: '',
       username: '',
+      email: '',
       imageUrl: '',
       path:  {
         saveUrl: 'https://ej2.syncfusion.com/services/api/uploadbox/Save',
@@ -305,6 +328,7 @@ export default {
   async mounted() {
     await this.getProfileInfo();
     onIdTokenChanged(auth, async (user) => {
+      if(!user) return;
       this.isAuthorized = user.displayName === this.$route.params.username;
       getIdTokenResult(user).then((idTokenResult) => {
         this.isAdmin = idTokenResult.claims.admin;
@@ -312,7 +336,7 @@ export default {
       this.imageUrl = user.photoURL;
       if(this.$route.query.tab) {
         await this.$nextTick(() => {
-          this.$refs.tabs.select(this.tabs.get(this.$route.query.tab));
+          this.$refs.tabs?.select(this.tabs.get(this.$route.query.tab));
         });
       }
       if(!this.imageUrl) return;
@@ -321,7 +345,7 @@ export default {
       this.imageInfo.contentType = "." + this.imageInfo.contentType.split('/')[1];
     });
     if(this.$route.query.mode === 'resetPassword' && this.$route.query.oobCode) {
-      this.$refs.tabs.select(7);
+      this.$refs.tabs?.select(7);
       this.oobCode = this.$route.query.oobCode;
       const email = await verifyPasswordResetCode(auth, this.oobCode);
       if (!email) return;
@@ -369,6 +393,7 @@ export default {
       this.gender = newData.gender;
       this.birthday = newData.birthday;
       this.location = newData.location;
+      this.email = newData.email;
     },
     replaceNullWithEmpty(obj){
       const newObj = {}
@@ -401,6 +426,9 @@ export default {
     },
     isUsernameFormValid(){
       return this.username.length > 0 && this.username !== auth.currentUser.displayName;
+    },
+    isEmailFormValid(){
+      return this.email.length > 0 && this.email !== auth.currentUser?.email;
     },
     isProfileInfoFormValid(){
       if(!moment(this.profile.birthday).isValid()) return false;
@@ -457,6 +485,24 @@ export default {
         extendedTimeout: 5000,
         animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
       });
+    },
+    async changeEmail(){
+      await axios.patch(`${process.env.VUE_APP_BACKEND}/user/email`, {email: this.email});
+      this.profile.email = this.email;
+      this.email = '';
+      ToastUtility.show({
+        title: 'Email changed',
+        content: 'Email changed successfully',
+        cssClass: 'e-toast-success',
+        icon: 'e-success e-icons',
+        position: {X: document.body.offsetWidth - 360, Y: 80},
+        showCloseButton: true,
+        timeOut: 7000,
+        extendedTimeout: 5000,
+        animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
+      });
+      this.$parent.$parent.signOut();
+      this.$parent.$parent.openSignIn();
     },
     imageSelected(e){
       const reader = new FileReader();
@@ -536,6 +582,57 @@ export default {
       await axios.patch(`${process.env.VUE_APP_BACKEND}/user/image`, {imageUrl: ''});
       this.imageUrl = '';
       this.imageInfo = {size: 0, contentType: '.png'};
+    },
+    openDisableDialog(){
+      let dialog = DialogUtility.confirm({
+        title: 'Disable account',
+        content: 'Are you sure you want to disable this account?',
+        showCloseIcon: true,
+        position: {X: 'center', Y: 'center'},
+        closeOnEscape: true,
+        target: document.body,
+        cancelButton: {
+          text: 'Cancel',
+          click: () => {
+            dialog.hide();
+          },
+        },
+        okButton:  {
+          click: async () => {
+            await axios.patch(`${process.env.VUE_APP_BACKEND}/user/${this.profile.id}/disable`);
+            ToastUtility.show({
+              title: 'Account disabled',
+              content: 'Selected account has been disabled',
+              cssClass: 'e-toast-success',
+              icon: 'e-success e-icons',
+              position: {X: document.body.offsetWidth - 360, Y: 80},
+              showCloseButton: true,
+              timeOut: 7000,
+              extendedTimeout: 5000,
+              animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
+            });
+            this.profile.enabled = false;
+            dialog.hide();
+          },
+          text: 'Disable',
+          cssClass: 'e-primary',
+        }
+      });
+    },
+    async enableUser(){
+      await axios.patch(`${process.env.VUE_APP_BACKEND}/user/${this.profile.id}/enable`);
+      ToastUtility.show({
+        title: 'Account enabled',
+        content: 'Selected account has been successfully enabled',
+        cssClass: 'e-toast-success',
+        icon: 'e-success e-icons',
+        position: {X: document.body.offsetWidth - 360, Y: 80},
+        showCloseButton: true,
+        timeOut: 7000,
+        extendedTimeout: 5000,
+        animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
+      });
+      this.profile.enabled = true;
     }
   },
   provide: {

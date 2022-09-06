@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    @Query("SELECT new com.wemarvel.wemarvel.model.dto.PostDTO(p.id, u.id, u.username, u.imageUrl, p.topicId, t.title, " +
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.PostDTO(p.id, u.id, u.username, u.imageUrl, u.enabled, p.topicId, t.title, " +
             "p.quotedPostId, p.createdAt, p.content, p.modifiedAt, p.modifiedById, modified.username, " +
             "p.modifications, p.deleted) " +
             "FROM Post p " +

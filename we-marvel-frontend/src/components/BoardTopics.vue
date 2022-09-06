@@ -62,9 +62,9 @@
             </div>
             <div class="row">
               <div class="col">
-                <a class="custom-link" :href="`/profile/${data.ownerUsername}`"
+                <a v-if="data.ownerEnabled" class="custom-link" :href="`/profile/${data.ownerUsername}`"
                    @click.prevent="openProfile(data.ownerUsername)">
-                  {{data.ownerUsername}}</a> - {{data.createdAt}}
+                  {{data.ownerUsername}}</a><span v-else>[removed user]</span> - {{data.createdAt}}
               </div>
             </div>
           </template>

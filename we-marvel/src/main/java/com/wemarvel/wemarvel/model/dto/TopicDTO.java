@@ -24,6 +24,9 @@ public class TopicDTO {
     private String ownerUsername;
     @Getter
     @Setter
+    private boolean ownerEnabled;
+    @Getter
+    @Setter
     private Long boardId;
     @Getter
     @Setter
@@ -64,12 +67,14 @@ public class TopicDTO {
     @Setter
     private String firstPostContent;
 
-    public TopicDTO(Long id, Long ownerId, String ownerUsername, Long boardId, String boardTitle,
+    public TopicDTO(Long id, Long ownerId, String ownerUsername,
+                    boolean ownerEnabled, Long boardId, String boardTitle,
                     LocalDateTime createdAt,
                     String title, boolean sticky, boolean locked) {
         this.id = id;
         this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
+        this.ownerEnabled = ownerEnabled;
         this.boardId = boardId;
         this.boardTitle = boardTitle;
         this.createdAt = createdAt;
@@ -79,7 +84,7 @@ public class TopicDTO {
     }
 
     public TopicDTO(Long id, String title, Long posts, LocalDateTime lastPostDate,
-                    LocalDateTime createdAt, Long ownerId, String ownerUsername,
+                    LocalDateTime createdAt, Long ownerId, String ownerUsername, boolean ownerEnabled,
                     Long marvelEntityId, String marvelEntityName, boolean sticky) {
         this.id = id;
         this.title = title;
@@ -88,13 +93,15 @@ public class TopicDTO {
         this.createdAt = createdAt;
         this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
+        this.ownerEnabled = ownerEnabled;
         this.marvelEntityId = marvelEntityId;
         this.marvelEntityName = marvelEntityName;
         this.sticky = sticky;
     }
 
     public TopicDTO(Long id, String title, Long posts, LocalDateTime lastPostDate,
-                    LocalDateTime createdAt, Long ownerId, String ownerUsername, boolean sticky) {
+                    LocalDateTime createdAt, Long ownerId,
+                    String ownerUsername, boolean ownerEnabled, boolean sticky) {
         this.id = id;
         this.title = title;
         this.postCount = posts;
@@ -102,6 +109,7 @@ public class TopicDTO {
         this.createdAt = createdAt;
         this.ownerId = ownerId;
         this.ownerUsername = ownerUsername;
+        this.ownerEnabled = ownerEnabled;
         this.sticky = sticky;
     }
 }

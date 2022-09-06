@@ -22,6 +22,9 @@ import Series from "@/components/Series";
 import MarvelCharacters from "@/components/MarvelCharacters";
 import TopRatedMarvelEntities from "@/components/TopRatedMarvelEntities";
 import PopularMarvelEntities from "@/components/PopularMarvelEntities";
+import Reports from "@/components/Reports";
+import {getIdTokenResult, onIdTokenChanged} from "firebase/auth";
+import {auth} from "@/firebaseServices/firebaseConfig";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -139,6 +142,26 @@ const routes = [
                 name: 'popular',
                 component: PopularMarvelEntities,
             },
+            {
+                path: '/reports',
+                name: 'reports',
+                component: Reports,
+                beforeEnter: (to, from, next) => {
+                    onIdTokenChanged(auth, (user) => {
+                        if(!user) {
+                            next({name: 'welcome'});
+                            return;
+                        }
+                        getIdTokenResult(user).then((idTokenResult) => {
+                            if(idTokenResult.claims.admin) {
+                                next();
+                            } else {
+                                next({name: 'welcome'});
+                            }
+                        });
+                    });
+                }
+            }
         ]
     },
 ]

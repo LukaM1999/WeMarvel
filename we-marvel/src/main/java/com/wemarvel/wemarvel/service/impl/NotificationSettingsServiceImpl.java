@@ -1,10 +1,12 @@
 package com.wemarvel.wemarvel.service.impl;
 
 import com.wemarvel.wemarvel.model.NotificationSettings;
+import com.wemarvel.wemarvel.model.RegisteredUser;
 import com.wemarvel.wemarvel.model.dto.NotificationSettingsDTO;
 import com.wemarvel.wemarvel.repository.NotificationSettingsRepository;
 import com.wemarvel.wemarvel.service.NotificationSettingsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,17 +31,22 @@ public class NotificationSettingsServiceImpl implements NotificationSettingsServ
     }
 
     @Override
+    public NotificationSettings createNotificationSettings(Long userId) {
+        return notificationSettingsRepository.save(new NotificationSettings(userId));
+    }
+
+    @Override
     public List<Long> getUsersWithEnabledTopics(Long excludedUserId) {
         return notificationSettingsRepository.getUsersWithEnabledTopics(excludedUserId);
     }
 
     @Override
     public void updateNotificationSettings(NotificationSettingsDTO notificationSettings) {
-        String username = Objects.requireNonNull(getSignedInUser()).getUsername();
-        if(!username.equals(notificationSettings.getUsername())) {
-            throw new IllegalArgumentException("Username in notification settings does not match username in security context");
+        RegisteredUser user = getSignedInUser();
+        if(user == null) {
+            throw new UsernameNotFoundException("User not logged in");
         }
-        notificationSettingsRepository.save(new NotificationSettings(notificationSettings.getUserId(),
+        notificationSettingsRepository.save(new NotificationSettings(user.getId(),
                 notificationSettings.isTopics(), notificationSettings.isMessages(),
                 notificationSettings.isFriendRequests()));
     }

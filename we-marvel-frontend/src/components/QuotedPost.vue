@@ -1,8 +1,9 @@
 <template>
-  <a class="custom-link mt-2 e-bold"
+  <a v-if="quotedPost.ownerEnabled" class="custom-link mt-2 e-bold"
      :href="`/profile/${quotedPost.ownerUsername}`"
      @click.prevent="openProfile(quotedPost.ownerUsername)">
     {{ quotedPost.ownerUsername }} said:</a>
+  <span v-else class="mt-2 e-bold">[removed user] said:</span>
   <div v-if="level > 2" id="toggleQuote" class="row mt-3 mb-3">
     <div class="col">
       <ejs-button @click="changeQuoteVisibility"

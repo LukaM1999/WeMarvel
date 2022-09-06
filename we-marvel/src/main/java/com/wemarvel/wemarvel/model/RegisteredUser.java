@@ -53,6 +53,7 @@ public class RegisteredUser implements UserDetails {
     private String imageUrl;
 
     @Column(name = "enabled")
+    @Setter
     private boolean enabled;
 
     @Getter
@@ -61,7 +62,7 @@ public class RegisteredUser implements UserDetails {
     private boolean deleted;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="roleName")
+    @JoinColumn(name="role_name")
     private Role role;
 
     public Role getRole() {
@@ -103,7 +104,6 @@ public class RegisteredUser implements UserDetails {
     public RegisteredUser(String email, String username) {
         this.email = email;
         this.username = username;
-        this.role = new Role("USER");
         this.enabled = true;
     }
 
