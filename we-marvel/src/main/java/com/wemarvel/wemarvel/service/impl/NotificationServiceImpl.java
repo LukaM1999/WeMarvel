@@ -154,7 +154,7 @@ public class NotificationServiceImpl implements NotificationService {
             throw new IllegalArgumentException("User does not have message notifications enabled");
         }
         MessageNotification messageNotification = new MessageNotification(notificationDTO.getType(),
-                excludedUserId, notificationDTO.getRecipientId(), LocalDateTime.now(), notificationDTO.getMessage());
+                notificationDTO.getRecipientId(), excludedUserId, LocalDateTime.now(), notificationDTO.getMessage());
         notificationRepository.save(messageNotification);
         notificationDTO.setSenderImageUrl(getSignedInUser().getImageUrl());
         Pusher pusher = pusherConfig.getPusher();

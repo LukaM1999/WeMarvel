@@ -4,7 +4,7 @@
       <e-items>
         <e-item :template="'menuTemplate'" align="Center">
           <template v-slot:menuTemplate="{}">
-            <ejs-menu :items="menuItems"></ejs-menu>
+            <ejs-menu :items="menuItems" @select="menuItemSelected"></ejs-menu>
           </template>
         </e-item>
         <e-item v-if="!signedInUser" :template="'signInTemplate'" align="Right">
@@ -17,7 +17,8 @@
             <div id="notifications" title="View notifications" class="row h-100 align-items-center">
               <ejs-tooltip :isSticky="false" position="TopLeft" :content="'tooltipTemplate'">
                 <template v-slot:tooltipTemplate="{}">
-                  <ejs-listview id="notificationsList" :dataSource="notifications"
+                  <ejs-listview id="notificationsList" 
+                                :dataSource="notifications"
                                 :headerTemplate="'notificationsHeaderTemplate'"
                                 :template="'notificationsTemplate'"
                                 :showHeader="true"
@@ -52,7 +53,7 @@
                             <div class="col">
                               <a :href="`/profile/${data.senderUsername}`">
                                 <img v-if="data.senderUsername" :src="data.senderImageUrl || '/placeholder.jpg'"
-                                     width="50" height="50" :alt="data.senderUsername"/>
+                                    width="50" height="50" :alt="data.senderUsername"/>
                               </a>
                             </div>
                           </div>
@@ -222,7 +223,8 @@ export default {
           text: 'Community',
           items: [
             { text: 'Forum', url: `/forum` },
-            { text: 'Users', url: `/users` },
+            { text: 'Users', url: `/profile` },
+            { text: 'Reviews', url: `/reviews` },
           ]
         },
       ],
@@ -269,7 +271,6 @@ export default {
       const toolbarItems = document.querySelectorAll('.e-toolbar .e-toolbar-items .e-toolbar-item > *');
       for(let i of toolbarItems) {
         i.style.display = 'contents';
-        console.log(i);
       }
       const dialogOverlay = document.getElementsByClassName("e-dlg-overlay")[0];
       dialogOverlay.style.position = 'fixed';
@@ -301,17 +302,9 @@ export default {
           continue;
         }
         if (Number.isInteger(parseInt(item.text))) {
-          if(prevText === 'topic' || prevText === 'board'){
-            const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/forum/${prevText}/${item.text}/name`)
-            store.commit('setBreadcrumb', {id: `${prevText}_${item.text}`, name: data});
-            item.text = data;
-            return;
-          } else {
-            const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/${prevText}/${item.text}/name`)
-            store.commit('setBreadcrumb', {id: `${prevText}_${item.text}`, name: data});
-            item.text = data;
-            return;
-          }
+          const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/${prevText === 'topic' || prevText === 'board' ? 'forum/' : ''}${prevText}/${item.text}/name`)
+          store.commit('setBreadcrumb', {id: `${prevText}_${item.text}`, name: data});
+          item.text = data;
         }
         item.text = this.$filters.capitalize(item.text);
       }
@@ -340,6 +333,16 @@ export default {
         this.username = '';
         this.password = '';
         this.email = '';
+        const imageSpan = document.getElementsByClassName("profile-image")[0];
+        if(!imageSpan) return;
+        imageSpan.style.backgroundImage = `url(${this.signedInUser?.photoURL || '/placeholder.jpg'})`;
+        imageSpan.style.width = '50px';
+        imageSpan.style.height = '50px';
+        imageSpan.style.backgroundSize = 'contain';
+        imageSpan.style.backgroundRepeat = 'no-repeat';
+        imageSpan.style.marginRight = '10px';
+        imageSpan.classList.remove('e-menu-icon');
+        this.profileMenuItems[0].text = this.signedInUser?.displayName || 'Profile';
       }).catch(error => {
         alert(error.message)
       })
@@ -368,6 +371,7 @@ export default {
         store.commit('setToken', null);
         store.commit('setUser', null);
         self.signedInUser = null;
+        this.$router.replace({name: 'welcome'});
       }).catch(error => {
         alert(error.message)
       })
@@ -379,6 +383,7 @@ export default {
       }
       this.openProfile(e.item.text.toLowerCase());
     },
+  
     openTopic(topic){
       this.$router.push({name: 'topic', params: {boardId: topic.boardId, topicId: topic.topicId}});
     },

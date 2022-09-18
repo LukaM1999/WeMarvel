@@ -8,6 +8,7 @@
                   :toolbar="toolbar" height='273px'
                   :allowFiltering='true'
                   :filterSettings="filterSettings"
+                  :allowTextWrap="true"
                   :allowSorting="true"
                   :allowResizing="true"
                   :editSettings="editSettings"
@@ -28,8 +29,7 @@
                      :alt="data.title" :title="data.title"/>
               </div>
               <div class="col">
-                <b style="font-size: 14px"><a class="custom-link" :href="`./${type.name}/${data.id}`"
-                                              @click.prevent="openEntity(data.id)">{{data.title}}</a></b>
+                <b style="font-size: 14px"><a class="custom-link" :href="`./${type.name}/${data.id}`">{{data.title}}</a></b>
               </div>
             </div>
           </template>
@@ -105,9 +105,6 @@ export default {
         const lastDot = e.thumbnail.lastIndexOf(".");
         e.thumbnail = e.thumbnail.substring(0, lastDot) + "/portrait_small" + e.thumbnail.substring(lastDot);
       }
-    },
-    openEntity(id){
-      router.push(`./${this.type.name}/${id}`);
     },
   },
   provide: {

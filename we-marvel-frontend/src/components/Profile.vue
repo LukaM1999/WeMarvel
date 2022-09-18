@@ -22,7 +22,7 @@
       <e-tabitem :header="{text: 'Reviews'}" :content="'reviewsTemplate'">
         <template v-slot:reviewsTemplate="{}">
           <Reviews :key="reviewsKey" @review-submitted="reviewSubmitted"
-                   v-if="editSettings"
+                   v-if="editSettings && reviews"
                    :edit-settings="editSettings"
                    :toolbar="toolbar"
                    :reviews="reviews"/>
@@ -63,7 +63,7 @@
                       <div v-if="showPasswordResetForm" class="e-control e-lib e-primary">
                         <div class="e-input-group e-float-input">
                           <input :type="isTypePassword ? 'password' : 'text'"
-                                 v-model="password" required />
+                                  v-model="password" required />
                           <label class="e-float-text e-label">Password</label>
                           <span class="e-input-group-icon e-password" @click="changeIcon">
                             <span :class="isShowIcon ? 'e-icons e-eye' : 'e-icons e-eye-slash'" style="color: gray"></span>
@@ -73,7 +73,7 @@
                       <div v-if="showPasswordResetForm" class="e-control e-lib e-primary mt-3">
                         <div class="e-input-group e-float-input">
                           <input :type="isTypePassword ? 'password' : 'text'"
-                                 v-model="confirmPassword" required />
+                                  v-model="confirmPassword" required />
                           <label class="e-float-text e-label">Confirm password</label>
                         </div>
                       </div>
@@ -113,28 +113,22 @@
               </div>
               <h2>Picture</h2>
               <div class="row mb-3">
-                <div class="col">
-                  <div class="row">
-                    <div class="col">
-                      <img width="300" height="300" :src="imageUrl ? imageUrl : '/placeholder.jpg'" alt="Profile picture">
-                    </div>
-                  </div>
-                  <div class="row justify-content-center mt-3">
-                    <div class="col-6">
-                      <ejs-uploader ref="uploader"
-                                    allowedExtensions=".jpg, .jpeg, .bmp, .png, .gif"
-                                    :autoUpload="false" maxFileSize="5000000"
-                                    :multiple="false" :selected="imageSelected"
-                                    :asyncSettings="path"
-                                    :beforeUpload="beforeUpload"
-                                    :clearing="clearingFile" :removing="removing">
-                        <e-files v-if="imageInfo.size > 0">
-                          <e-uploadedfiles name='profile-picture' :size="imageInfo.size"
-                                           :type="imageInfo.contentType"></e-uploadedfiles>
-                        </e-files>
-                      </ejs-uploader>
-                    </div>
-                  </div>
+                <div class="col d-flex justify-content-end">
+                      <img width="200" height="200" :src="imageUrl ? imageUrl : '/placeholder.jpg'" alt="Profile picture">
+                </div>
+                <div class="col d-flex">
+                  <ejs-uploader ref="uploader"
+                                allowedExtensions=".jpg, .jpeg, .bmp, .png, .gif"
+                                :autoUpload="false" maxFileSize="5000000"
+                                :multiple="false" :selected="imageSelected"
+                                :asyncSettings="path"
+                                :beforeUpload="beforeUpload"
+                                :clearing="clearingFile" :removing="removing">
+                    <e-files v-if="imageInfo.size > 0">
+                      <e-uploadedfiles name='profile-picture' :size="imageInfo.size"
+                                        :type="imageInfo.contentType"></e-uploadedfiles>
+                    </e-files>
+                  </ejs-uploader>
                 </div>
               </div>
             </div>
@@ -318,7 +312,7 @@ export default {
         contentType: 'png'
       },
       maskPlaceholder: {day: 'dd', month: 'mm', year: 'yyyy'},
-      reviews: [],
+      reviews: null,
       toolbar: ['Search'],
       editSettings: {},
       reviewsKey: 0,
@@ -431,8 +425,8 @@ export default {
       return this.email.length > 0 && this.email !== auth.currentUser?.email;
     },
     isProfileInfoFormValid(){
-      if(!moment(this.profile.birthday).isValid()) return false;
-      const newBirthday = moment(this.profile.birthday).format('DD.MM.yyyy.');
+      if(!moment(this.profile.birthday, 'DD.MM.yyyy.').isValid()) return false;
+      const newBirthday = moment(this.profile.birthday, 'DD.MM.yyyy.').format('DD.MM.yyyy.');
       return newBirthday !== String(this.birthday) ||
           this.profile.location !== String(this.location) ||
           this.profile.gender !== String(this.gender);
@@ -537,11 +531,13 @@ export default {
       });
     },
     async changeProfileInfo(){
-      await axios.patch(`${process.env.VUE_APP_BACKEND}/user/profile`, {
-        gender: this.profile.gender,
-        birthday: this.profile.birthday,
+      const profileInfo = {
+        gender: this.profile.gender || undefined,
+        birthday: moment(this.profile.birthday).format('DD.MM.yyyy.'),
         location: this.profile.location,
-      });
+      }
+      profileInfo.birthday = profileInfo.birthday === 'Invalid date' ? this.birthday : profileInfo.birthday;
+      await axios.patch(`${process.env.VUE_APP_BACKEND}/user/profile`, profileInfo);
       ToastUtility.show({
         title: 'Profile info changed',
         content: 'Profile info changed successfully',

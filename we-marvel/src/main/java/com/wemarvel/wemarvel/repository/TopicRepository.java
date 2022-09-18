@@ -13,14 +13,16 @@ import java.util.List;
 
 public interface TopicRepository extends PagingAndSortingRepository<Topic, Long> {
 
-    @Query("SELECT new com.wemarvel.wemarvel.model.Topic(t.id, p.ownerId, t.id, t.boardId, t.id, " +
-            "p.createdAt, t.title, false, false) " +
+    @Query("SELECT new com.wemarvel.wemarvel.model.dto.TopicDTO(t.id, u.username, u.imageUrl, u.enabled, t.boardId, p.createdAt, " +
+            "t.title, t.marvelEntityId) " +
             "FROM Topic t " +
-            "INNER JOIN Post p ON t.id = p.topicId " +
+            "LEFT JOIN Post p ON t.id = p.topicId " +
+            "INNER JOIN RegisteredUser u ON u.id = p.ownerId " +
             "WHERE t.boardId = ?1 " +
-            "GROUP BY t.id, p.ownerId, t.boardId, p.createdAt, t.title " +
+            "GROUP BY t.id, u.username, u.imageUrl, u.enabled, " +
+            "t.boardId, p.createdAt, t.title, t.marvelEntityId " +
             "ORDER BY p.createdAt DESC")
-    List<Topic> getRecentBoardTopics(Long id, PageRequest pageRequest);
+    List<TopicDTO> getRecentBoardTopics(Long id, PageRequest pageRequest);
 
     @Query("SELECT new com.wemarvel.wemarvel.model.dto.TopicDTO(t.id, u.id, u.username, u.enabled, t.boardId, b.title, " +
             "t.createdAt, t.title, t.sticky, t.locked) " +

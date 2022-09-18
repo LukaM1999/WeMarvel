@@ -56,23 +56,26 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void deletePost(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(postId).orElseThrow(() ->
+                new RuntimeException("Post not found"));
         RegisteredUser registeredUser = getSignedInUser();
-        if(registeredUser == null || !registeredUser.getId().equals(post.getOwnerId())
-                || !registeredUser.getRole().getAuthority().equals("ADMIN"))
-            throw new RuntimeException("You are not authorized to delete this post");
+        if(registeredUser == null) throw new UsernameNotFoundException("User not logged in");
+        if(!registeredUser.getId().equals(post.getOwnerId())
+                && !registeredUser.getRole().getAuthority().equals("ADMIN"))
+            throw new RuntimeException("Not authorized to delete this post");
         post.setDeleted(true);
         postRepository.save(post);
     }
 
     @Override
     public Post updatePost(Long postId, String content) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(postId).orElseThrow(() ->
+                new RuntimeException("Post not found"));
         RegisteredUser registeredUser = getSignedInUser();
         if(registeredUser == null) throw new UsernameNotFoundException("User not logged in");
         if(!registeredUser.getId().equals(post.getOwnerId())
                 && !registeredUser.getRole().getAuthority().equals("ADMIN"))
-            throw new RuntimeException("You are not authorized to modify this post");
+            throw new RuntimeException("Not authorized to modify this post");
         post.setContent(content);
         post.setModifiedAt(LocalDateTime.now());
         post.setModifiedById(registeredUser.getId());

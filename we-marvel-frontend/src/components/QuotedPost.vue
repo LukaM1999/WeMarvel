@@ -1,12 +1,11 @@
 <template>
   <a v-if="quotedPost.ownerEnabled" class="custom-link mt-2 e-bold"
-     :href="`/profile/${quotedPost.ownerUsername}`"
-     @click.prevent="openProfile(quotedPost.ownerUsername)">
+     :href="`/profile/${quotedPost.ownerUsername}`">
     {{ quotedPost.ownerUsername }} said:</a>
   <span v-else class="mt-2 e-bold">[removed user] said:</span>
   <div v-if="level > 2" id="toggleQuote" class="row mt-3 mb-3">
     <div class="col">
-      <ejs-button @click="changeQuoteVisibility"
+      <ejs-button @click="hideQuote = !hideQuote"
                   :iconCss="[hideQuote ? 'e-icons e-eye' : 'e-icons e-eye-slash']"
                   :iconPosition="'Right'"
                   class="e-primary"
@@ -14,7 +13,7 @@
     </div>
   </div>
   <span v-if="!hideQuote" v-html="quotedPost.content"></span>
-  <div v-if="quotedPost.quotedPostId" class="quoted-post">
+  <div v-if="quotedPost.quotedPostId && !hideQuote" class="quoted-post">
     <QuotedPost v-if="!getPostById(quotedPost.quotedPostId).deleted"
                 :quoted-post="getPostById(quotedPost.quotedPostId)"
                 :posts="posts" :level="level + 1"/>
@@ -49,15 +48,12 @@ export default {
       hideQuote: false,
     };
   },
+  mounted(){
+    if(this.level > 2) this.hideQuote = true;
+  },
   methods: {
     getPostById(id){
       return this.posts.find(post => post.id === id);
-    },
-    openProfile(username){
-      this.$router.push({name: 'profile', params: {username: username}});
-    },
-    changeQuoteVisibility(){
-      this.hideQuote = !this.hideQuote;
     },
   },
 }

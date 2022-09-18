@@ -1,7 +1,11 @@
 <template>
 <div style="overflow-x: hidden;">
   <h1>{{board?.title}}</h1>
-  <p>{{board?.description}}</p>
+  <div class="row mb-2 justify-content-center">
+    <div class="col-8">
+      <p>{{board?.description}}</p>
+    </div>
+  </div>
   <ejs-tab v-if="type.id" ref="tabs" :selected="tabSelected" class="e-fill">
     <e-tabitems>
       <e-tabitem :header="{text: 'Recent'}" :content="'recentTemplate'">

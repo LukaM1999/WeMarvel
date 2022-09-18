@@ -19,11 +19,10 @@
           <label for="sort" class="e-label">Sort by</label>
         </div>
         <div class="col align-self-center" style="width: 50%; justify-self: left" @click.stop>
-          <ejs-combobox :value="sort"
+          <ejs-combobox id="sortBy" :value="sort"
                         v-model="sort"
                         :dataSource="sortOptions"
                         @change="searchUsers">
-
           </ejs-combobox>
         </div>
         <div class="col align-self-center" @click.stop>
@@ -142,6 +141,7 @@ export default {
     } else {
       await this.getUsers();
     }
+    if(!this.$refs.list) return;
     this.$refs.list.ej2Instances.dataSource = new DataManager(this.users).executeLocal(
         new Query().search(this.search, ['username', 'location', 'gender', 'birthday'], 'contains', true).
         sortBy(this.sort.toLowerCase(), this.sortOrder).range(0, 20));

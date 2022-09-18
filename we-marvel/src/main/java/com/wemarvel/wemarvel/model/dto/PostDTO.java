@@ -10,56 +10,26 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class PostDTO {
-    @Getter
-    @Setter
     private Long id;
-    @Getter
-    @Setter
     private Long ownerId;
-    @Getter
-    @Setter
     private String ownerUsername;
-    @Getter
-    @Setter
     private String ownerImageUrl;
-    @Getter
-    @Setter
     private boolean ownerEnabled;
-    @Getter
-    @Setter
     private Long topicId;
-    @Getter
-    @Setter
     private String topicTitle;
-    @Getter
-    @Setter
     private Long quotedPostId;
-    @Getter
-    @Setter
     @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime createdAt;
-    @Getter
-    @Setter
     private String content;
-    @Getter
-    @Setter
     @JsonFormat(pattern = "dd.MM.yyyy. HH:mm:ss", timezone = "Europe/Belgrade")
     private LocalDateTime modifiedAt;
-    @Getter
-    @Setter
     private Long modifiedById;
-    @Getter
-    @Setter
     private String modifiedByUsername;
-    @Getter
-    @Setter
     private int modifications;
-    @Getter
-    @Setter
     private boolean deleted;
-    @Getter
-    @Setter
     private ProfileDTO owner;
 
     public PostDTO(Long id, Long ownerId, String ownerUsername, String ownerImageUrl,

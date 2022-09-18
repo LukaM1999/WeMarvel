@@ -7,15 +7,15 @@
   <div class="row">
     <div class="col">
       <ejs-grid :key="tableKey" :allowSorting="true"
-                :dataSource="reviews"
+                :dataSource="reviewRecords"
                 :allowPaging="true"
                 :pageSettings="{pageSize: 20, pageSizes: [10, 20, 50, 100]}"
                 :allowSelection="true"
                 :allowFiltering="true"
                 :filterSettings="filterSettings"
                 :rowTemplate="'rowTemplate'"
-                :toolbar="toolbar" ref="grid"
-                :editSettings="editSettings"
+                :toolbar="tb" ref="grid"
+                :editSettings="edit"
                 :actionBegin="actionBegin">
         <e-columns>
           <e-column field="marvelEntityTitle" headerText="Review" textAlign="Center"></e-column>
@@ -138,13 +138,15 @@ import {ToastUtility} from "@syncfusion/ej2-vue-notifications";
 import MarvelEntityReview from "@/components/MarvelEntityReview";
 import {onIdTokenChanged, getIdTokenResult} from "firebase/auth";
 import {auth} from "@/firebaseServices/firebaseConfig";
+import {router} from "@/main";
+import {computed} from "vue";
+import {useRoute} from "vue-router";
 
 export default {
   name: "Reviews",
   props: {
     reviews: {
       type: Array,
-      required: true,
     },
     toolbar: {
       type: Array,
@@ -182,12 +184,26 @@ export default {
       isAdmin: false,
       username: '',
       reviewFormKey: 0,
+      reviewRecords: [],
+      tb: ['Search'],
+      edit: {},
     }
   },
-  mounted() {
+  async mounted() {
+    this.reviewRecords = this.reviews;
+    this.tb = this.toolbar;
+    this.edit = this.editSettings;
+    if(router.currentRoute.value.path.indexOf('reviews') !== -1){
+      this.reviewRecords = await this.getAllReviews();
+    }
     onIdTokenChanged(auth, (user) => {
       this.username = user?.displayName;
       if (user) {
+        this.tb = ['Search', 'Add'];
+        this.edit = {
+          allowAdding: true,
+          mode: 'Dialog',
+        };
         getIdTokenResult(user).then((idTokenResult) => {
           this.isAdmin = idTokenResult.claims.admin;
         });
@@ -195,6 +211,14 @@ export default {
     });
   },
   methods: {
+    async getAllReviews(){
+      const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/review`);
+      for(let r of data){
+        const lastDot = r.marvelEntityThumbnail.lastIndexOf('.');
+        r.marvelEntityThumbnail = r.marvelEntityThumbnail.substring(0, lastDot) + '/portrait_small' + r.marvelEntityThumbnail.substring(lastDot);
+      }
+      return data;
+    },
     async deleteReview(review){
       await axios.delete(`${process.env.VUE_APP_BACKEND}/review/${review.id}`);
       ToastUtility.show({

@@ -5,14 +5,15 @@
                 :allowResizing="true"
                 :dataSource="topics"
                 :allowFiltering="true"
+                :allowTextWrap="true"
                 :filterSettings="filterSettings"
                 :rowTemplate="'rowTemplate'"
                 :toolbar="toolbar" ref="grid">
         <e-columns>
           <e-column field="marvelEntityName" :visible="false"></e-column>
           <e-column field="ownerUsername" :visible="false"></e-column>
-          <e-column headerText="Watched" field="watched" width="50" textAlign="Right"></e-column>
-          <e-column headerText="Topic title" field="title" width="200" textAlign="Center"></e-column>
+          <e-column headerText="Watched" field="watched" width="80" textAlign="Right"></e-column>
+          <e-column headerText="Topic" field="title" textAlign="Center"></e-column>
           <e-column headerText='Posts' field="postCount" textAlign='Center' width=80></e-column>
           <e-column headerText='Last post' field="lastPostDate" textAlign='Center' width=80></e-column>
         </e-columns>
@@ -39,10 +40,8 @@
                   </div>
                   <div class="row">
                     <div class="col">
-                      <a class="custom-link" :href="`/${type.name}/${data.marvelEntityId}`"
-                         @click.prevent="openMarvelEntity(data.marvelEntityId)">
-                        {{data.marvelEntityName}}</a> - <a class="custom-link" :href="`/profile/${data.ownerUsername}`"
-                                                           @click.prevent="openProfile(data.ownerUsername)">
+                      <a class="custom-link" :href="`/${type.name}/${data.marvelEntityId}`">
+                        {{data.marvelEntityName}}</a> - <a class="custom-link" :href="`/profile/${data.ownerUsername}`">
                       {{data.ownerUsername}}</a> - {{data.createdAt}}
                     </div>
                   </div>

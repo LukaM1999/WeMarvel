@@ -1,7 +1,11 @@
 <template>
   <div id="boardContainer">
     <h1>{{marvelEntity.title || board.title}}</h1>
-    <p>{{marvelEntity.description || board.description}}</p>
+    <div v-if="marvelEntity.description || board.description" class="row mb-2 justify-content-center">
+      <div class="col-8">
+        <p>{{marvelEntity.description || board.description}}</p>
+      </div>
+    </div>
     <div :key="newTopicKey" id="newTopicContainer" v-if="showNewTopicForm" class="row mb-5">
       <div class="col">
         <h2>New topic</h2>
@@ -17,8 +21,8 @@
         </div>
         <h3>First topic post*</h3>
         <RichTextEditor ref="rte" @value-changed="updateTopicContent"/>
-        <ejs-button  @click="createNewTopic" class="mt-4"
-                     :content="'Create topic'"></ejs-button>
+        <ejs-button :disabled="!isNewTopicValid()" @click="createNewTopic" class="mt-4"
+                      :content="'Create topic'"></ejs-button>
       </div>
     </div>
     <div class="row">
@@ -28,6 +32,7 @@
                   :allowPaging="true"
                   :allowResizing="true"
                   :allowFiltering="true"
+                  :allowTextWrap="true"
                   :filterSettings="filterSettings"
                   :dataSource="topics"
                   :editSettings="editSettings"
@@ -37,8 +42,8 @@
                   :rowDataBound="rowDataBound"
                   :toolbarClick="toolbarClicked">
           <e-columns>
-            <e-column headerText="Watched" field="watched" width="50" :template="'watchedTemplate'" textAlign="Center"></e-column>
-            <e-column headerText="Topic title" field="title" width="200" :template="'titleTemplate'" textAlign="Center"></e-column>
+            <e-column headerText="Watched" field="watched" width="80" :template="'watchedTemplate'" textAlign="Center"></e-column>
+            <e-column headerText="Topic" field="title" :template="'titleTemplate'" textAlign="Center"></e-column>
             <e-column headerText='Posts' field="postCount" textAlign='Center' width=80></e-column>
             <e-column headerText='Last post' field="lastPostDate" textAlign='Center' width=80></e-column>
           </e-columns>
@@ -56,14 +61,14 @@
           <template v-slot:titleTemplate="{data}">
             <div class="row">
               <div class="col">
-                <b v-if="data.sticky">Sticky</b> <h3><a class="custom-link" :href="`./${data.marvelEntityId ? data.marvelEntityId : $route.params.boardId}/topic/${data.id}`"
-                       @click.prevent="openTopic(data.id)">{{ data.title }}</a></h3>
+                <b v-if="data.sticky">Sticky</b><h3><a class="custom-link" 
+                :href="`./${data.marvelEntityId ? data.marvelEntityId : $route.params.boardId}/topic/${data.id}`">
+                {{ data.title }}</a></h3>
               </div>
             </div>
             <div class="row">
               <div class="col">
-                <a v-if="data.ownerEnabled" class="custom-link" :href="`/profile/${data.ownerUsername}`"
-                   @click.prevent="openProfile(data.ownerUsername)">
+                <a v-if="data.ownerEnabled" class="custom-link" :href="`/profile/${data.ownerUsername}`">
                   {{data.ownerUsername}}</a><span v-else>[removed user]</span> - {{data.createdAt}}
               </div>
             </div>
@@ -128,9 +133,17 @@ export default {
       isAuthorized: false,
       isAdmin: false,
       newTopicKey: 0,
+      toastUtility: ToastUtility,
     }
   },
   async mounted() {
+    if(this.$route.params.entity){
+      await this.getEntity();
+      await this.getEntityTopics();
+    }
+    else if(this.$route.params.boardId) {
+      await this.getBoard();
+    }
     onIdTokenChanged(auth, async (user) => {
       this.isAuthorized = !!user;
       this.toolbarOptions = ['Search'];
@@ -144,23 +157,21 @@ export default {
       }
       const tokenResult = await getIdTokenResult(user);
       this.isAdmin = tokenResult.claims.admin;
-      if(this.isAdmin){
-        this.toolbarOptions = ['Search', 'Add', 'Delete', {text: 'Toggle stick to top', disabled: false,
-          tooltipText: 'Stick to top', prefixIcon: 'e-icons e-chevron-up-double', id: 'stickToTop'}];
-        this.editSettings = {
-          allowAdding: true,
-          allowDeleting: true,
-          mode: 'Dialog',
-        };
-      }
+      if(!this.isAdmin) return;
+      this.toolbarOptions = ['Search', 'Add', 'Delete', {
+          text: 'Toggle stick to top', 
+          disabled: false, 
+          tooltipText: 'Stick to top', 
+          prefixIcon: 'e-icons e-chevron-up-double', 
+          id: 'stickToTop'
+        }
+      ];
+      this.editSettings = {
+        allowAdding: true,
+        allowDeleting: true,
+        mode: 'Dialog',
+      };
     })
-    if(this.$route.params.entity){
-      await this.getEntity();
-      await this.getEntityTopics();
-    }
-    else if(this.$route.params.boardId) {
-      await this.getBoard();
-    }
   },
   methods: {
     async getBoard(){
@@ -180,27 +191,27 @@ export default {
       this.topics = data;
       this.tableKey++;
     },
-    openTopic(topicId){
-      this.$router.push(`./${this.marvelEntity.id ? this.marvelEntity.id : this.$route.params.boardId}/topic/${topicId}`);
-    },
-    openProfile(username){
-      this.$router.push({name: 'profile', params: {username: username}});
-    },
     async toggleWatchTopic(topic){
       const {data} = await axios.post(`${process.env.VUE_APP_BACKEND}/forum/topic/${topic.id}/watch`);
       this.topics.find(t => t.id === topic.id).watched = !!data;
       this.tableKey++;
     },
     updateTopicContent(value){
-      this.newTopic.content = value;
+      console.log(value);
+      this.newTopic = {
+        title: this.newTopic.title,
+        content: value
+      }
     },
     toggleTopicForm(){
       this.showNewTopicForm = !this.showNewTopicForm;
     },
+    isNewTopicValid(){
+      console.log(this.newTopic);
+      return this.newTopic.title.length > 0;
+    },
     async createNewTopic(){
-      if(!this.newTopic.title.length || !this.newTopic.content.length){
-        return;
-      }
+      if(!this.isNewTopicValid()) return;
       const newTopic = {
         title: this.newTopic.title,
         firstPostContent: this.newTopic.content,
@@ -209,6 +220,24 @@ export default {
         marvelEntityId: this.$route.params.entityId,
       }
       const {data} = await axios.post(`${process.env.VUE_APP_BACKEND}/forum/board/${this.$route.params.boardId}/topic`, newTopic);
+      const toast = ToastUtility.show({
+        title: 'Topic successfully created!',
+        content: `New topic '${data.title}' created successfully!`,
+        position: {X: document.body.offsetWidth - 360, Y: 80},
+        cssClass: 'e-toast-success',
+        showCloseButton: true,
+        timeOut: 5000,
+        extendedTimeout: 5000,
+        buttons: [{
+          click: () => {
+            this.$router.push(`/forum/board/${data.boardId}/topic/${data.id}`);
+            toast.hide();
+          },
+          model: {
+            content: 'Open new topic',
+          }
+        }],
+      });
       data.postCount = 1;
       data.lastPostDate = data.createdAt;
       this.topics.push(data);
@@ -230,7 +259,7 @@ export default {
       });
       this.topics = this.topics.filter(t => t.id !== topicId);
     },
-    actionBegin(e){
+    async actionBegin(e){
       if(e.requestType === 'delete'){
         e.cancel = true;
         let dialog = DialogUtility.confirm({
@@ -244,7 +273,6 @@ export default {
             text: 'Yes',
             click: async () => {
               await this.deleteTopic(e.data[0]?.id);
-              e.cancel = false;
               dialog.hide();
             }
           },
@@ -264,10 +292,8 @@ export default {
         this.showNewTopicForm = false;
         this.newTopicKey++;
         this.showNewTopicForm = true
-        this.newTopicKey++;
-        this.$nextTick(() => {
-          document.getElementById('newTopicContainer').scrollIntoView({behavior: 'smooth'});
-        })
+        await this.$nextTick;
+        document.getElementById('newTopicContainer').scrollIntoView({behavior: 'smooth'});
       }
     },
     rowDataBound(e){

@@ -125,8 +125,9 @@ export default {
       await axios.post(`${process.env.VUE_APP_BACKEND}/friend/${this.profile.username}`);
       await this.getFriend();
       ToastUtility.show({
-        icon: 'e-icons e-success toast-icon',
+        icon: 'e-icons e-people',
         title: 'Request sent',
+        cssClass: 'e-toast-success',
         content: 'Friend request successfully sent',
         position: {X: document.body.offsetWidth - 360, Y: 80},
         showCloseButton: true,

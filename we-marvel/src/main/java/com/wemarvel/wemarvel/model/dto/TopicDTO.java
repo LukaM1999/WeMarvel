@@ -24,6 +24,9 @@ public class TopicDTO {
     private String ownerUsername;
     @Getter
     @Setter
+    private String ownerImageUrl;
+    @Getter
+    @Setter
     private boolean ownerEnabled;
     @Getter
     @Setter
@@ -66,6 +69,20 @@ public class TopicDTO {
     @Getter
     @Setter
     private String firstPostContent;
+
+    public TopicDTO(Long id, String ownerUsername, String ownerImageUrl,
+                    boolean ownerEnabled, Long boardId,
+                    LocalDateTime createdAt, String title,
+                    Long marvelEntityId) {
+        this.id = id;
+        this.ownerUsername = ownerUsername;
+        this.ownerImageUrl = ownerImageUrl;
+        this.ownerEnabled = ownerEnabled;
+        this.boardId = boardId;
+        this.createdAt = createdAt;
+        this.title = title;
+        this.marvelEntityId = marvelEntityId;
+    }
 
     public TopicDTO(Long id, Long ownerId, String ownerUsername,
                     boolean ownerEnabled, Long boardId, String boardTitle,

@@ -54,12 +54,6 @@
           <e-columns>
             <e-column field="title" headerText="Board" width="80" :template="'titleTemplate'" textAlign="Center"></e-column>
             <e-column field="description" :visible="false"></e-column>
-            <e-column field="firstTopicDate" :visible="false"></e-column>
-            <e-column field="firstTopicTitle" :visible="false"></e-column>
-            <e-column field="firstTopicUsername" :visible="false"></e-column>
-            <e-column field="secondTopicDate" :visible="false"></e-column>
-            <e-column field="secondTopicTitle" :visible="false"></e-column>
-            <e-column field="secondTopicUsername" :visible="false"></e-column>
             <e-column headerText='Recent active topics' textAlign='Center' :template="'topicsTemplate'" width=100></e-column>
           </e-columns>
           <template v-slot:titleTemplate="{data}">
@@ -68,8 +62,7 @@
                 <div class="row">
                   <div class="col">
                     <h2>
-                      <a class="custom-link" :href="`/forum/board/${data.id}`"
-                         @click.prevent="openBoard(data.id)">{{ data.title }}</a>
+                      <a class="custom-link" :href="`/forum/board/${data.id}`">{{ data.title }}</a>
                     </h2>
                   </div>
                 </div>
@@ -84,11 +77,10 @@
             </div>
           </template>
           <template v-slot:topicsTemplate="{data}">
-            <div style="font-size: 16px;" v-if="data.firstTopicId" class="row">
+            <div style="font-size: 16px;" v-for="(topic, i) in data.topics" :key="i" class="row">
               <div class="col-2 d-flex justify-content-end">
-                <a v-if="data.firstTopicUserEnabled" :href="`/profile/${data.firstTopicUsername}`"
-                   @click.prevent="openProfile(data.firstTopicUsername)">
-                  <img width="50" height="50" :src="data.firstTopicUserImageUrl || '/placeholder.jpg'" :alt="data.firstTopicUsername" />
+                <a v-if="topic.ownerEnabled" :href="`/profile/${topic.ownerUsername}`">
+                  <img width="50" height="50" :src="topic.ownerImageUrl || '/placeholder.jpg'" :alt="topic.ownerUsername" />
                 </a>
                 <img v-else width="50" height="50" :src="'/placeholder.jpg'" alt="removed" />
               </div>
@@ -96,55 +88,18 @@
                 <div class="row">
                   <div class="col d-flex">
                     <a class="custom-link"
-                       :href="`/forum/topic/${data.firstTopicId}`"
-                       @click.prevent="openRecentTopic(data.firstTopicId, data.id)">
-                      {{ data.firstTopicTitle }}
+                       :href="getTopicUrl(topic.boardId, topic.id, topic.marvelEntityId)">
+                      {{ topic.title }}
                     </a>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col">
                     <div class="topic-details">
-                      <i>{{ data.firstTopicDate }}, by <a v-if="data.firstTopicUserEnabled" class="custom-link" :href="`/profile/${data.firstTopicUsername}`"
-                                                          @click.prevent="openProfile(data.firstTopicUsername)">
-                        {{data.firstTopicUsername}}</a><span v-else>[removed user]</span></i>
+                      <i>{{ topic.createdAt }}, by <a v-if="topic.ownerEnabled" class="custom-link" :href="`/profile/${topic.ownerUsername}`">
+                        {{topic.ownerUsername}}</a><span v-else>[removed user]</span></i>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div style="font-size: 16px;" v-if="data.secondTopicId" class="row">
-              <div class="col-2 d-flex justify-content-end">
-                <a v-if="data.secondTopicUserEnabled" :href="`/profile/${data.secondTopicUsername}`"
-                   @click.prevent="openProfile(data.secondTopicUsername)">
-                  <img width="50" height="50" :src="data.secondTopicUserImageUrl || '/placeholder.jpg'"
-                       :alt="data.secondTopicUsername" />
-                </a>
-                <img v-else width="50" height="50" :src="'/placeholder.jpg'" alt="removed" />
-              </div>
-              <div class="col justify-content-start d-grid">
-                <div class="row">
-                  <div class="col d-flex">
-                    <a class="custom-link"
-                       :href="`/forum/topic/${data.secondTopicId}`"
-                       @click.prevent="openRecentTopic(data.secondTopicId, data.id)">
-                      {{ data.secondTopicTitle }}
-                    </a>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col">
-                    <div class="topic-details">
-                      <i>{{ data.secondTopicDate }}, by <a v-if="data.secondTopicUserEnabled" class="custom-link" :href="`/profile/${data.secondTopicUsername}`"
-                                                           @click.prevent="openProfile(data.secondTopicUsername)">
-                        {{data.secondTopicUsername}}</a><span v-else>[removed user]</span></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div v-if="!data.firstTopicId && !data.secondTopicId" class="row">
-                <div class="col">
-                  <h4>No topics</h4>
                 </div>
               </div>
             </div>
@@ -153,7 +108,6 @@
       </div>
     </div>
   </div>
-  <router-view></router-view>
 </template>
 
 <script>
@@ -223,16 +177,12 @@ export default {
     async getBoards(){
       const {data} = await axios.get(`${process.env.VUE_APP_BACKEND}/forum/boards`);
       this.boards = data;
-      this.boards = [...data];
     },
-    openRecentTopic(topicId, boardId){
-      this.$router.push({name: 'topic', params: {id: topicId, boardId: boardId}});
-    },
-    openProfile(username){
-      this.$router.push({name: 'profile', params: {username: username}});
-    },
-    openBoard(boardId){
-      this.$router.push(`/forum/board/${boardId}`);
+    getTopicUrl(boardId, topicId, marvelEntityId){
+      if(!marvelEntityId) return `/forum/board/${boardId}/topic/${topicId}`;
+      if(boardId === 1) return `/forum/board/${boardId}/character/${marvelEntityId}/topic/${topicId}`;
+      if(boardId === 2) return `/forum/board/${boardId}/comic/${marvelEntityId}/topic/${topicId}`;
+      return `/forum/board/${boardId}/series/${marvelEntityId}/topic/${topicId}`;
     },
     isBoardValid(){
       return this.newBoard.title.length > 0 && this.newBoard.description.length > 0;
@@ -298,7 +248,6 @@ export default {
       e.cancel = true;
       this.showForm = false;
       this.boardKey++;
-      console.log(e);
       this.selectedBoard = {
         id: e.rowData.id,
         title: e.rowData.title,
@@ -328,7 +277,6 @@ export default {
             text: 'Yes',
             click: async () => {
               await this.deleteBoard(e.data[0]?.id);
-              e.cancel = false;
               dialog.hide();
             }
           },

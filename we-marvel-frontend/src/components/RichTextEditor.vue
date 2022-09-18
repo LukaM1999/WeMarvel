@@ -40,9 +40,11 @@ export default {
       toolbarSettings: {
         items: ['Bold', 'Italic', 'Underline', 'StrikeThrough',
           'FontName', 'FontSize', 'FontColor', 'BackgroundColor', '|',
-          'Formats', 'Alignments', 'NumberFormatList', 'BulletFormatList',
-          'Outdent', 'Indent', '|',
-          'CreateTable', 'CreateLink', 'Image', '|', 'ClearFormat', 'Undo', 'Redo', '|', 'SourceCode', 'FullScreen']
+          'Formats', 'Alignments', 'NumberFormatList', 
+          'BulletFormatList', 'Outdent', 'Indent', '|',
+          'CreateTable', 'CreateLink', 'Image', '|',
+          'ClearFormat', 'Undo', 'Redo', '|', 
+          'SourceCode', 'FullScreen']
       },
       rteValue: '',
       insertImageSettings: {
@@ -78,35 +80,27 @@ export default {
   },
   methods: {
     setSaveUrl(){
-      this.insertImageSettings.saveUrl = this.topic?.boardId ? `${process.env.VUE_APP_BACKEND}/forum/board/${this.topic.boardId}/topic/${this.topic.id}/post/image` :
-          `${process.env.VUE_APP_BACKEND}/forum/post/image`;
+      this.insertImageSettings.saveUrl = this.topic?.boardId ? 
+      `${process.env.VUE_APP_BACKEND}/forum/board/${this.topic.boardId}/topic/${this.topic.id}/post/image` :
+      `${process.env.VUE_APP_BACKEND}/forum/post/image`;
       this.insertImageSettings = {...this.insertImageSettings};
     },
     actionBegin(args) {
-      if(args.requestType === 'Image'){
-        const storage = getStorage();
-        if(!this.imageName) return;
-        const url = this.topic?.boardId ? `board/${this.topic.boardId}/topic/${this.topic.id}/${this.imageName}` : this.imageName;
-        getDownloadURL(ref(storage, url)).then(url => {
-          const imageElement = document.querySelectorAll(`img[src="${args.itemCollection.url}"]`)[0]
-          if(!imageElement) return;
-          imageElement.src = url;
-          imageElement.name = this.imageName;
-        }).catch(error => {
-          console.log(error);
-        });
-      }
-    },
-    imageUploadSuccess(args) {
-      this.imageName = args.e.currentTarget?.responseText;
+      if(args.requestType !== 'Image') return;
       const storage = getStorage();
+      if(!this.imageName) return;
       const url = this.topic?.boardId ? `board/${this.topic.boardId}/topic/${this.topic.id}/${this.imageName}` : this.imageName;
       getDownloadURL(ref(storage, url)).then(url => {
-        args.element.src = url;
-        args.element.name = this.imageName;
+        const imageElement = document.querySelectorAll(`img[src="${args.itemCollection.url}"]`)[0]
+        if(!imageElement) return;
+        imageElement.src = url;
+        imageElement.name = this.imageName;
       }).catch(error => {
         console.log(error);
       });
+    },
+    imageUploadSuccess(args) {
+      this.imageName = args.e.currentTarget?.responseText;
     },
     afterImageDelete(args) {
       if(!args.element.name) return

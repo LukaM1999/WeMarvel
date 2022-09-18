@@ -38,6 +38,7 @@ export default {
       if(pusher.connection.state === 'disconnected') {
         pusher.connect();
       }
+      console.log(notificationSettings);
       await this.getNotificationSettings();
       await this.getAllUnreadNotifications();
       await this.getWatchedTopics();
@@ -52,105 +53,38 @@ export default {
           if(this.$route.path === `/forum/board/${data.boardId}/topic/${data.topicId}`) {
             return;
           }
-          ToastObj = ToastUtility.show({
-            title: `New post in topic ${data.topicTitle}`,
-            content: 'Click button below to see it!',
-            cssClass: 'e-toast-info',
-            icon: 'e-comment-add e-icons',
-            position: {X: document.body.offsetWidth - 360, Y: 80},
-            showCloseButton: true,
-            buttons: [{
-              click: this.goToTopic(data.boardId, data.topicId),
-              model: {
-                content: 'Go to topic',
-              }
-            }],
-            timeOut: 7000,
-            extendedTimeout: 5000,
-            animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
-            click: arg => {
-              console.log(arg);
-            }
-          });
+          this.showToast(`New post in topic ${data.topicTitle}`, 
+                        'Click button below to see it!', 'e-comment-add', 
+                        this.goToTopic(data.boardId, data.topicId), 'Go to topic');
         });
       }
       if(notificationSettings.friendRequests){
         friendRequestsChannel = pusher.subscribe('friends');
         friendRequestsChannel.bind('new_friend_request', (data) => {
           this.notifications.unshift(data);
-          ToastObj = ToastUtility.show({
-            title: `New friend request from ${data.senderUsername}`,
-            content: 'Click button below to see it!',
-            cssClass: 'e-toast-info',
-            icon: 'e-people e-icons',
-            position: {X: document.body.offsetWidth - 360, Y: 80},
-            showCloseButton: true,
-            buttons: [{
-              click: this.goToProfile(data.senderUsername),
-              model: {
-                content: 'Go to profile',
-              }
-            }],
-            timeOut: 7000,
-            extendedTimeout: 5000,
-            animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
-            click: arg => {
-              console.log(arg);
-            }
-          });
+          this.showToast(`New friend request from ${data.senderUsername}`, 
+                        'Click button below to see it!', 'e-people', 
+                        this.goToProfile(data.senderUsername), 'Go to profile');
         });
         friendRequestsChannel.bind('accepted_friend_request', (data) => {
           this.notifications.unshift(data);
-          ToastObj = ToastUtility.show({
-            title: `${data.senderUsername} accepted your friend request`,
-            content: 'Click button below to see their profile!',
-            cssClass: 'e-toast-info',
-            icon: 'e-check-circle e-icons',
-            position: {X: document.body.offsetWidth - 360, Y: 80},
-            showCloseButton: true,
-            buttons: [{
-              click: this.goToProfile(data.senderUsername),
-              model: {
-                content: 'Go to profile',
-              }
-            }],
-            timeOut: 7000,
-            extendedTimeout: 5000,
-            animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
-            click: arg => {
-              console.log(arg);
-            }
-          });
+          this.showToast(`${data.senderUsername} accepted your friend request`, 
+                        'Click button below to see their profile!', 'e-check-circle', 
+                        this.goToProfile(data.senderUsername), 'Go to profile');
         });
       }
       if(notificationSettings.messages) {
         messagesChannel = pusher.subscribe('messages');
         messagesChannel.bind('new_message', (data) => {
+          if(data.recipientUsername !== user.displayName) return;
           this.notifications.unshift(data);
           if(this.$route.name === 'profile' && this.$route.params.username === data.recipientUsername
               && this.$route.query.tab === 'messages') {
             return;
           }
-          ToastObj = ToastUtility.show({
-            title: `New message from ${data.senderUsername}`,
-            content: data.message,
-            cssClass: 'e-toast-info',
-            icon: 'e-comment-2 e-icons',
-            position: {X: document.body.offsetWidth - 360, Y: 80},
-            showCloseButton: true,
-            buttons: [{
-              click: this.openMessage(data.recipientUsername),
-              model: {
-                content: 'Open message',
-              }
-            }],
-            timeOut: 7000,
-            extendedTimeout: 5000,
-            animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
-            click: arg => {
-              console.log(arg);
-            }
-          });
+          this.showToast(`New message from ${data.senderUsername}`, 
+                        data.message, 'e-comment-2', 
+                        this.openMessage(data.recipientUsername), 'Open message');
         });
       }
     })
@@ -170,15 +104,30 @@ export default {
       await axios.get(`${process.env.VUE_APP_BACKEND}/notification/unread`).then(({data}) => {
         this.notifications = data;
       }).catch(error => {
-        alert(error.message)
-      })
+        console.log(error.message);
+      });
     },
     async getWatchedTopics() {
       await axios.get(`${process.env.VUE_APP_BACKEND}/forum/watchedTopic`).then(({data}) => {
         this.watchedTopics = data;
       }).catch(error => {
-        alert(error.message)
-      })
+        console.log(error.message);
+      });
+    },
+    showToast(title, content, icon, click, buttonContent){
+      ToastObj = ToastUtility.show({title, content, cssClass: 'e-toast-info',
+        icon: `${icon} e-icons`, position: {X: document.body.offsetWidth - 360, Y: 80},
+        showCloseButton: true,
+        buttons: [{
+          click: click,
+          model: {
+            content: buttonContent,
+          }
+        }],
+        timeOut: 7000,
+        extendedTimeout: 5000,
+        animation: {show: {effect: 'SlideRightIn'}, hide: {effect: 'SlideRightOut'}},
+      });
     },
     goToProfile(senderUsername) {
       return () => {
@@ -541,6 +490,18 @@ tr:hover {
 
 .sticky {
   background: pink;
+}
+
+.e-grid .e-toolbar-items .e-toolbar-item.e-search-wrapper .e-search {
+  color: #fff
+}
+
+input[type="search"] {
+  color: #fff;
+}
+
+#sortBy {
+  color: #fff;
 }
 
 </style>

@@ -19,7 +19,7 @@
               <label for="sort" class="e-label">Sort by</label>
             </div>
             <div class="col align-self-center" style="width: 50%; justify-self: left" @click.stop>
-              <ejs-combobox :value="myRequestsSort"
+              <ejs-combobox id="sortBy" :value="myRequestsSort"
                             v-model="myRequestsSort"
                             :dataSource="sortOptions"
                             @change="searchMyRequests">
@@ -120,7 +120,7 @@
               <label for="sort" class="e-label">Sort by</label>
             </div>
             <div class="col align-self-center" style="width: 50%; justify-self: left" @click.stop>
-              <ejs-combobox :value="othersRequestsSort"
+              <ejs-combobox id="sortBy" :value="othersRequestsSort"
                             v-model="othersRequestsSort"
                             :dataSource="sortOptions"
                             @change="searchOthersRequests">

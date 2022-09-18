@@ -1,12 +1,13 @@
 <template>
   <div class="row">
     <div class="col">
-      <ejs-grid ref="grid" :dataSource='characters'
-                :allowPaging='true'
-                :pageSettings="pageSettings"
-                :toolbar="toolbar" height='273px'
-                :allowFiltering='true'
-                :filterSettings="filterSettings"
+      <ejs-grid ref="grid" :dataSource="characters"
+                :allowPaging="true"
+                :pageSettings="{ pageCount: 5, pageSize: 20, pageSizes: [10, 20, 50, 100] }"
+                :toolbar="['Search']" 
+                height="273px"
+                :allowFiltering="true"
+                :filterSettings="{type: 'Menu'}"
                 :allowSorting="true"
                 :allowResizing="true"
                 :allowTextWrap="true">
@@ -59,13 +60,6 @@ export default {
   data() {
     return {
       characters: [],
-      toolbar: ['Search'],
-      filterSettings: {type: 'Menu'},
-      pageSettings: {
-        pageCount: 5,
-        pageSize: 20,
-        pageSizes: [10, 20, 50, 100]
-      },
       capitalize,
     }
   },

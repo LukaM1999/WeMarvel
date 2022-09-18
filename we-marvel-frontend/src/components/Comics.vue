@@ -79,9 +79,7 @@ export default {
     }
   },
   async mounted() {
-    console.log(this.comicsProp);
     this.comics = this.comicsProp;
-    console.log(this.comics);
     if(!this.comics) {
       await this.getComics();
     }

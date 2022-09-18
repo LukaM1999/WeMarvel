@@ -38,7 +38,7 @@ public class TopicServiceImpl implements TopicService {
     private RegisteredUserService registeredUserService;
 
     @Override
-    public List<Topic> getRecentBoardTopics(Long boardId) {
+    public List<TopicDTO> getRecentBoardTopics(Long boardId) {
         return topicRepository.getRecentBoardTopics(boardId, PageRequest.of(0, 2));
     }
 
@@ -96,8 +96,8 @@ public class TopicServiceImpl implements TopicService {
         Topic newTopic = topicRepository.save(topic);
         Post newPost = postService.createPost(new Post(user.getId(), newTopic.getId(),
                 topicDTO.getFirstPostContent()));
-        topic.setFirstPostId(newPost.getId());
-        topicRepository.save(topic);
+        newTopic.setFirstPostId(newPost.getId());
+        topicRepository.save(newTopic);
         topicDTO.setId(newTopic.getId());
         topicDTO.setCreatedAt(newTopic.getCreatedAt());
         return topicDTO;

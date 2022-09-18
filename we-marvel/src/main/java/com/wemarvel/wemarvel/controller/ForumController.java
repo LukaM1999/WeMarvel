@@ -30,7 +30,7 @@ public class ForumController {
 
 
     @GetMapping("/boards")
-    public List<BoardDTO> getAllBoards() {
+    public List<BoardTopicsDTO> getAllBoards() {
         return boardService.getAllBoards();
     }
 

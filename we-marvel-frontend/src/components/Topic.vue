@@ -1,20 +1,23 @@
 <template>
-  <div id="topicContainer">
+  <div id="topicContainer" style="overflow-x: hidden;">
     <h1>{{ topic?.title }}</h1>
     <div class="row justify-content-center">
       <div :class="[admin ? 'col-2 d-flex justify-content-end' : 'col']">
         <ejs-button @click="togglePostForm" class="mb-3">{{showNewPostForm ? 'Cancel' : 'New post'}}</ejs-button>
       </div>
       <div v-if="admin" class="col-2 d-flex">
-        <ejs-button isPrimary="true" iconCss="e-icons e-delete-1" @click="openDeleteDialog" class="mb-3">Delete topic</ejs-button>
+        <ejs-button isPrimary="true" iconCss="e-icons e-delete-1" 
+        @click="openDeleteDialog('Delete topic', 
+        'Are you sure you want to delete this topic?', 
+        async () => {await this.deleteTopic()})" 
+        class="mb-3">Delete topic</ejs-button>
       </div>
     </div>
     <div id="quoteContent" class="row mt-5 justify-content-center" v-if="quotedPost">
       <h3>Quoted post</h3>
       <div class="col-8 quoted-post">
         <a v-if="quotedPost.ownerEnabled" class="custom-link mt-2 e-bold"
-           :href="`/profile/${quotedPost.ownerUsername}`"
-           @click.prevent="openProfile(quotedPost.ownerUsername)">
+           :href="`/profile/${quotedPost.ownerUsername}`">
           {{ quotedPost.ownerUsername }} said:</a>
         <span v-else>[removed user]</span>
         <div class="row">
@@ -38,7 +41,7 @@
                      :content="'Edit post'"></ejs-button>
       </div>
     </div>
-    <ejs-listview :key="listKey" ref="postList" :cssClass="'e-list-template'"
+    <ejs-listview @select="selected" :key="listKey" ref="postList" :cssClass="'e-list-template'"
                   :dataSource="pagedPosts"
                   :template="'template'">
       <template v-slot:template="{data}">
@@ -52,18 +55,17 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-3 ms-3 p-3 profile-info">
+            <div class="col-2 ms-3 p-3 profile-info">
               <div class="row">
                 <div class="col">
-                  <a v-if="data.ownerEnabled" class="custom-link e-bold" :href="`/profile/${data.ownerUsername}`"
-                     @click.prevent="openProfile(data.ownerUsername)">{{ data.ownerUsername }}</a>
+                  <a v-if="data.ownerEnabled" class="custom-link e-bold" 
+                  :href="`/profile/${data.ownerUsername}`">{{ data.ownerUsername }}</a>
                   <span v-else>[removed user]</span>
                 </div>
               </div>
               <div class="row mt-3">
                 <div v-if="data.ownerEnabled" class="col">
-                  <a :href="`/profile/${data.ownerUsername}`" style="max-width: inherit;"
-                  @click.prevent="openProfile(data.ownerUsername)">
+                  <a :href="`/profile/${data.ownerUsername}`" style="max-width: inherit;">
                     <img style="max-width: inherit; box-shadow: 0px 0px 10px 1px black"
                        :src="data.ownerImageUrl ? data.ownerImageUrl : '/placeholder.jpg'"
                        :alt="data.ownerUsername"/>
@@ -108,7 +110,10 @@
                               :content="'Edit'"
                               :iconCss="'e-icons e-edit'" :iconPosition="'Right'"/>
                   <ejs-button v-if="!data.deleted && isAuthorized(data.ownerUsername)"
-                              class="e-primary" @click.stop="deletePost(data)"
+                              class="e-primary" 
+                              @click.stop="openDeleteDialog('Delete post', 
+                              'Are you sure you want to delete this post?', 
+                              async () => {await this.deletePost(data)})"
                               :content="'Delete'"
                               :iconCss="'e-icons e-delete-1'" :iconPosition="'Right'"/>
                 </div>
@@ -225,9 +230,6 @@ export default {
         window.scroll({top: postOffset, behavior: 'smooth'});
       });
     },
-    openProfile(username){
-      this.$router.push({name: 'profile', params: {username: username}});
-    },
     togglePostForm(){
       this.quotedPost = null;
       this.postToEdit = null;
@@ -262,6 +264,10 @@ export default {
         senderUsername: data.ownerUsername,
         socketId: store.getters.socketId,
       });
+    },
+    selected(args){
+      args.cancel.true;
+      args.item.classList.remove('e-active');
     },
     updateRteValue(value){
       this.rteValue = value;
@@ -325,29 +331,33 @@ export default {
       });
       this.postToEdit = null;
     },
-    openDeleteDialog(){
+    openDeleteDialog(title, content, okClick){
       let dialog = DialogUtility.confirm({
-        title: 'Delete topic',
+        title,
         showCloseIcon: true,
         closeOnEscape: true,
         position: {X: 'center', Y: 'center'},
         target: document.body,
-        content: 'Are you sure you want to delete this topic?',
-        okButton: {
-          text: 'Yes',
-          click: async () => {
-            await this.deleteTopic();
+        content,
+        okButton: { text: 'Yes', click: async () => {
+            await okClick();
             dialog.hide();
           }
         },
-        cancelButton: {
-          text: 'No',
-          click: function() {
-            this.hide();
-          }
+        cancelButton: { text: 'No', click: function() { this.hide(); }
         }
       });
-
+    },
+    showToast(title, content){
+      ToastUtility.show({
+        title,
+        content,
+        position: {X: document.body.offsetWidth - 360, Y: 80},
+        cssClass: 'e-toast-success',
+        showCloseButton: true,
+        timeOut: 5000,
+        extendedTimeout: 5000,
+      });
     },
     async deleteTopic(){
       await axios.delete(`${process.env.VUE_APP_BACKEND}/forum/topic/${this.topic.id}`);
@@ -357,15 +367,7 @@ export default {
       } catch(err){
         console.error(err);
       }
-      ToastUtility.show({
-        title: 'Topic deleted',
-        content: 'Topic deleted successfully',
-        position: {X: document.body.offsetWidth - 360, Y: 80},
-        cssClass: 'e-toast-success',
-        showCloseButton: true,
-        timeOut: 5000,
-        extendedTimeout: 5000,
-      });
+      this.showToast('Topic deleted', 'Topic deleted successfully');
       if(this.topic.boardId > 3)
         this.$router.push({name: 'board', params: {boardId: this.topic.boardId}});
       else this.$router.push({name: 'entity-board', boardId: this.topic.boardId});
@@ -404,15 +406,7 @@ export default {
       this.showReportForm = false;
       this.reportedPostId = '';
       this.reportExplanation = '';
-      ToastUtility.show({
-        title: 'Report sent',
-        content: 'Report sent successfully',
-        position: {X: document.body.offsetWidth - 360, Y: 80},
-        cssClass: 'e-toast-success',
-        showCloseButton: true,
-        timeOut: 5000,
-        extendedTimeout: 5000,
-      });
+      this.showToast('Report sent', 'Report sent successfully');
     }
   },
 }
@@ -428,6 +422,7 @@ export default {
 .profile-info{
   background-color: #f2f2f2;
   border-right: 1px solid #e5e5e5;
+  min-width: 100px;
 }
 
 .e-icons.e-delete-1:before, .e-icons .e-edit:before {

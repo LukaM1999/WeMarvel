@@ -1,7 +1,11 @@
 <template>
 <div id="entityContainer" style="overflow-x: hidden">
   <h1>{{entity.title}}</h1>
-  <p>{{entity.description}}</p>
+  <div class="row mb-2 justify-content-center">
+    <div class="col-5">
+      <p>{{entity.description}}</p>
+    </div>
+  </div>
   <ejs-tab v-if="entity.id" ref="tabs" :selected="tabSelected" class="e-fill">
     <e-tabitems>
       <e-tabitem :header="{text: 'Overview'}" :content="'overviewTemplate'">
@@ -87,7 +91,8 @@
               </div>
             </div>
           </div>
-          <Reviews :key="reviewsKey" v-if="entity.id" :entity="entity"
+          <Reviews :key="reviewsKey" v-if="entity.id && reviews"
+                   :entity="entity"
                    :edit-settings="editSettings"
                    :reviews="reviews"
                    :toolbar="toolbar"
@@ -178,7 +183,7 @@ export default {
       username: undefined,
       isAuthorized: false,
       isAdmin: false,
-      reviews: [],
+      reviews: null,
       tabs: new Map([
           ['overview', 0],
           ['reviews', 1],
@@ -336,6 +341,7 @@ export default {
       if (e.selectedIndex === 1){
         this.getEntityReviews();
         this.getMyReview();
+        this.reviewsKey++;
       }
       if(e.selectedIndex === 2){
         if(this.entity.type === 'series') {
@@ -385,7 +391,27 @@ export default {
       };
       this.reviews = this.reviews.filter(r => r.id !== review.id);
     },
-  }
+  },
+  watch: {
+    $route: {
+      deep: true,
+      handler: function (to, from) {
+        if(to.query.tab === from.query.tab) return;
+        if(!to.query.tab || to.query.tab === 'overview') {
+          this.$refs.tabs.select(0);
+        }
+        else if(to.query.tab === 'reviews') {
+          this.$refs.tabs.select(1);
+        }
+        else if(to.query.tab === 'progress' || to.query.tab === 'comics') {
+          this.$refs.tabs.select(2);
+        }
+        else if(to.query.tab === 'characters' || to.query.tab === 'series'){
+          this.$refs.tabs.select(3);
+        }
+      },
+    }
+  },
 }
 </script>
 

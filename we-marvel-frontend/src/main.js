@@ -25,6 +25,7 @@ import PopularMarvelEntities from "@/components/PopularMarvelEntities";
 import Reports from "@/components/Reports";
 import {getIdTokenResult, onIdTokenChanged} from "firebase/auth";
 import {auth} from "@/firebaseServices/firebaseConfig";
+import Reviews from "@/components/Reviews";
 
 registerLicense(process.env.VUE_APP_SYNCFUSION_KEY)
 
@@ -108,7 +109,7 @@ const routes = [
                 component: Profile
             },
             {
-                path: '/users',
+                path: '/profile',
                 name: 'users',
                 component: Users
             },
@@ -126,6 +127,11 @@ const routes = [
                 path: '/series',
                 name: 'series',
                 component: Series,
+            },
+            {
+                path: '/reviews',
+                name: 'reviews',
+                component: Reviews,
             },
             {
                 path: '/:entity(character|comic|series)/:entityId',

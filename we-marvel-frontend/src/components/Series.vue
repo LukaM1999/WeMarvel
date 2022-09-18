@@ -73,7 +73,6 @@ export default {
     }
   },
   async mounted() {
-    console.log(this.seriesProp);
     this.series = this.seriesProp;
     if(!this.series) {
       await this.getSeries();
