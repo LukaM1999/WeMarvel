@@ -7,4 +7,4 @@
 - make friends and message them,
 - and more...
 
-### Check it out [here](https://www.wemarvel-f6594.web.app "Visit the WeMarvel web forum")!
+### Check it out [here](https://we-marvel.com "Visit the WeMarvel web forum")!
